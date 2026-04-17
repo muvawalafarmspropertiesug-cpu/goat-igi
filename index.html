@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Goat IGI Register</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f7f6f2;--surface:#ffffff;--surface2:#f2f1ed;
+  --border:#e4e2db;--border2:#d0cfc8;
+  --text:#1a1916;--text2:#6b6a65;--text3:#a09f9a;
+  --blue:#1a5fa8;--blue-light:#dbeafe;--blue-dark:#0f3d6e;
+  --green:#0a6640;--green-light:#d1fae5;
+  --red:#b91c1c;--red-light:#fee2e2;
+  --amber:#92400e;--amber-light:#fef3c7;
+  --teal:#0f6e56;--teal-light:#ccfbf1;
+  --purple:#4c1d95;--purple-light:#ede9fe;
+  --radius:10px;--radius-sm:6px;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+.app-header{background:var(--blue-dark);color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;}
+.app-header h1{font-size:16px;font-weight:700;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-date{font-size:11px;opacity:0.7;}
+.admin-btn{padding:5px 12px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:background 0.2s;}
+.admin-btn:hover{background:rgba(255,255,255,0.2);}
+.admin-btn.active{background:#e9c46a;color:#1a1916;border-color:#e9c46a;}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-tab{padding:12px 16px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2.5px solid transparent;white-space:nowrap;transition:color 0.15s;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600;}
+.container{max-width:960px;margin:0 auto;padding:20px 16px;}
+.panel{display:none;}.panel.active{display:block;}
+.dash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.stat-card .label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;}
+.stat-card .val{font-size:26px;font-weight:700;line-height:1;}
+.stat-card .sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.stat-green .val{color:var(--green);}
+.stat-red .val{color:var(--red);}
+.stat-amber .val{color:var(--amber);}
+.stat-blue .val{color:var(--blue);}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.chart-card h3{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;}
+.chart-wrap{position:relative;height:200px;}
+.group-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:20px;}
+.group-pill{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;}
+.group-pill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.group-pill-name{font-size:13px;font-weight:700;}
+.group-pill-count{font-size:11px;color:var(--text2);}
+.group-pill-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.group-pill-fill{height:100%;border-radius:3px;transition:width 0.5s;}
+.reg-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.reg-controls input,.reg-controls select{font-size:13px;padding:7px 11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);}
+.reg-controls input{flex:1;min-width:120px;}
+.group-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+.group-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;background:none;border:none;cursor:pointer;text-align:left;}
+.group-toggle:hover{background:var(--surface2);}
+.toggle-arrow{font-size:12px;color:var(--text3);transition:transform 0.2s;margin-left:auto;}
+.group-block.open .toggle-arrow{transform:rotate(180deg);}
+.group-name{font-size:14px;font-weight:700;min-width:50px;}
+.group-info{font-size:12px;color:var(--text2);}
+.toggle-prog{height:4px;background:var(--surface2);border-radius:3px;overflow:hidden;width:80px;flex-shrink:0;}
+.toggle-prog-fill{height:100%;border-radius:3px;}
+.group-body{display:none;}
+.group-block.open .group-body{display:block;}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.3px;white-space:nowrap;background:var(--surface2);}
+td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.empty-slot td{color:var(--text3);font-style:italic;}
+tr:hover td{background:var(--surface2);}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.b-m{background:var(--blue-light);color:#1e3a8a;}
+.b-f{background:#fce7f3;color:#831843;}
+.b-unk{background:var(--surface2);color:var(--text2);}
+.b-boer{background:var(--green-light);color:#064e3b;}
+.b-savana{background:var(--amber-light);color:#78350f;}
+.b-alive{background:var(--green-light);color:#064e3b;}
+.b-dead{background:var(--red-light);color:#7f1d1d;}
+.b-concern{background:var(--amber-light);color:#78350f;}
+.b-norec{background:var(--surface2);color:var(--text3);}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;flex-shrink:0;}
+.d-alive{background:#10b981;}.d-dead{background:#ef4444;}.d-concern{background:#f59e0b;}.d-none{background:var(--border2);}
+.form-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+.form-section h3{font-size:14px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.3px;}
+.fg input,.fg select,.fg textarea{font-size:13px;padding:8px 11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:border-color 0.15s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue);}
+.fg textarea{resize:vertical;min-height:64px;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all 0.15s;}
+.btn:hover{background:var(--surface2);}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-primary:hover{background:var(--blue-dark);}
+.btn-danger{background:var(--red-light);color:var(--red);border-color:#fca5a5;}
+.btn-danger:hover{background:#fca5a5;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.cal-layout{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;}
+.cal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;min-width:270px;}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.cal-nav{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:16px;color:var(--text2);padding:3px 10px;transition:background 0.15s;}
+.cal-nav:hover{background:var(--surface2);}
+.cal-month-label{font-size:14px;font-weight:700;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-dn{text-align:center;font-size:11px;color:var(--text2);padding:4px 0;font-weight:600;}
+.cal-d{text-align:center;font-size:12px;padding:6px 2px;border-radius:var(--radius-sm);cursor:pointer;transition:background 0.1s;}
+.cal-d:hover{background:var(--surface2);}
+.cal-d.today{background:var(--blue-light);color:#1e40af;font-weight:700;}
+.cal-d.selected{background:var(--blue);color:#fff;font-weight:700;}
+.cal-d.has-record{position:relative;}
+.cal-d.has-record::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;background:#10b981;border-radius:50%;}
+.cal-d.other-month{color:var(--text3);}
+.cal-detail{flex:1;min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.cal-detail h3{font-size:13px;font-weight:700;margin-bottom:10px;}
+.admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;}
+.admin-overlay.show{display:flex;}
+.admin-modal{background:var(--surface);border-radius:var(--radius);padding:28px;width:90%;max-width:360px;}
+.admin-modal h2{font-size:16px;font-weight:700;margin-bottom:6px;}
+.admin-modal p{font-size:13px;color:var(--text2);margin-bottom:18px;}
+.admin-bar{background:#fffbeb;border:1px solid #f59e0b;border-radius:var(--radius-sm);padding:8px 14px;margin-bottom:14px;font-size:12px;color:#92400e;font-weight:600;display:none;}
+.admin-bar.show{display:block;}
+.action-btns{display:flex;gap:4px;white-space:nowrap;}
+.recent-entry{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.recent-entry:last-child{border-bottom:none;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1916;color:#fff;padding:10px 20px;border-radius:var(--radius);font-size:13px;opacity:0;transition:opacity 0.25s;pointer-events:none;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;}
+.empty-msg{text-align:center;padding:24px;color:var(--text3);font-size:13px;}
+@media(max-width:600px){
+  .dash-stats{grid-template-columns:repeat(2,1fr);}
+  .charts-grid{grid-template-columns:1fr;}
+  .app-header h1 span.hide-sm{display:none;}
+  .container{padding:12px 10px;}
+}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <h1>🐐 <span>Goat IGI Register</span><span class="hide-sm" style="font-weight:400;opacity:0.6;font-size:13px;margin-left:4px;">· IGI Project</span></h1>
+  <div class="header-right">
+    <span class="header-date" id="headerDate"></span>
+    <button class="admin-btn" id="adminToggleBtn" onclick="openAdminLogin()">Admin</button>
+  </div>
+</header>
+<nav class="nav">
+  <button class="nav-tab active" onclick="showPanel('dashboard',this)">Dashboard</button>
+  <button class="nav-tab" onclick="showPanel('register',this)">Register</button>
+  <button class="nav-tab" onclick="showPanel('record',this)">Record kid</button>
+  <button class="nav-tab" onclick="showPanel('calendar',this)">Calendar</button>
+</nav>
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-modal">
+    <h2>Admin login</h2>
+    <p>Enter the admin password to unlock editing.</p>
+    <div class="fg" style="margin-bottom:14px;">
+      <label>Password</label>
+      <input type="password" id="adminPwInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkAdmin()"/>
+    </div>
+    <div style="color:#b91c1c;font-size:12px;margin-bottom:10px;min-height:16px;" id="adminErr"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="checkAdmin()">Login</button>
+      <button class="btn" onclick="closeAdminLogin()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="container">
+<div class="panel active" id="panel-dashboard">
+  <div class="dash-stats" id="dashStats"></div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Kids per group</h3><div class="chart-wrap"><canvas id="chartBar"></canvas></div></div>
+    <div class="chart-card"><h3>Breed breakdown</h3><div class="chart-wrap"><canvas id="chartBreed"></canvas></div></div>
+    <div class="chart-card"><h3>Kid status</h3><div class="chart-wrap"><canvas id="chartStatus"></canvas></div></div>
+    <div class="chart-card"><h3>Births by month</h3><div class="chart-wrap"><canvas id="chartMonth"></canvas></div></div>
+  </div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text);">Group progress</div>
+  <div class="group-summary-grid" id="groupSummaryGrid"></div>
+</div>
+<div class="panel" id="panel-register">
+  <div class="admin-bar" id="adminBar">Admin mode active — you can edit and delete records below.</div>
+  <div class="reg-controls">
+    <input id="search" placeholder="Search by tag..." oninput="renderRegister()"/>
+    <select id="fGroup" onchange="renderRegister()"><option value="">All groups</option></select>
+    <select id="fShow" onchange="renderRegister()">
+      <option value="all">All slots</option>
+      <option value="recorded">Recorded only</option>
+      <option value="empty">Empty only</option>
+    </select>
+  </div>
+  <div id="regOutput"></div>
+</div>
+<div class="panel" id="panel-record">
+  <div class="form-section">
+    <h3>Record a new kid</h3>
+    <div class="form-grid">
+      <div class="fg"><label>Mother tag</label><select id="f-parent"><option value="">Select mother...</option></select></div>
+      <div class="fg"><label>Kid tag</label><input id="f-kid" placeholder="e.g. CIK020"/></div>
+      <div class="fg"><label>Date of birth</label><input type="date" id="f-date"/></div>
+      <div class="fg"><label>Sex of kid</label>
+        <select id="f-sex"><option value="Unknown">Unknown</option><option value="Male">Male</option><option value="Female">Female</option></select>
+      </div>
+      <div class="fg"><label>Breed</label>
+        <select id="f-breed"><option value="Unknown">Unknown</option><option value="Boer">Boer</option><option value="Savana">Savana</option></select>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select id="f-status"><option value="Alive">Alive</option><option value="Died">Died</option><option value="Concern">Concern</option></select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:14px;"><label>Notes</label><textarea id="f-notes" placeholder="e.g. Yellow tag, weak at birth, missing green tag..."></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addRecord()">Save record</button>
+      <button class="btn" onclick="clearForm()">Clear</button>
+    </div>
+  </div>
+  <div class="form-section">
+    <h3>Recent entries this session</h3>
+    <div id="recentList"><p style="color:var(--text3);font-size:13px;">No new entries yet.</p></div>
+  </div>
+</div>
+<div class="panel" id="panel-calendar">
+  <div class="cal-layout">
+    <div>
+      <div class="cal-box">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)">&#8249;</button>
+          <span class="cal-month-label" id="calLabel"></span>
+          <button class="cal-nav" onclick="changeMonth(1)">&#8250;</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <p style="font-size:12px;color:var(--text2);margin:10px 0 6px;">Selected: <strong id="calSelDisplay">—</strong></p>
+      <button class="btn btn-primary" style="width:100%;" onclick="useCalDate()">Use this date for new record →</button>
+    </div>
+    <div class="cal-detail">
+      <h3 id="calDetailTitle">Kids born on selected date</h3>
+      <div id="calDayRecords"><p style="color:var(--text3);font-size:13px;">Select a date to view records.</p></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="admin-overlay" id="editOverlay">
+  <div class="admin-modal" style="max-width:480px;">
+    <h2 style="margin-bottom:14px;">Edit record</h2>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="fg"><label>Mother tag</label><input id="edit-parent" readonly style="background:var(--surface2);"/></div>
+      <div class="fg"><label>Kid tag</label><input id="edit-kid"/></div>
+      <div class="fg"><label>Date</label><input type="date" id="edit-date"/></div>
+      <div class="fg"><label>Sex</label><select id="edit-sex"><option>Unknown</option><option>Male</option><option>Female</option></select></div>
+      <div class="fg"><label>Breed</label><select id="edit-breed"><option>Unknown</option><option>Boer</option><option>Savana</option></select></div>
+      <div class="fg"><label>Status</label><select id="edit-status"><option>Alive</option><option>Died</option><option>Concern</option></select></div>
+    </div>
+    <div class="fg" style="margin-bottom:14px;"><label>Notes</label><textarea id="edit-notes" style="min-height:54px;"></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveEdit()">Save changes</button>
+      <button class="btn btn-danger" onclick="deleteFromEdit()">Delete record</button>
+      <button class="btn" onclick="closeEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const GROUPS={
+  CIK:{max:15,color:"#185FA5"},OFO:{max:5,color:"#0F6E56"},
+  JKT:{max:20,color:"#993556"},JRM:{max:15,color:"#534AB7"},
+  RKG:{max:15,color:"#BA7517"},"S&J":{max:15,color:"#3B6D11"},
+  OL:{max:15,color:"#993C1D"},MNR:{max:15,color:"#0a6640"},
+  BLO:{max:5,color:"#A32D2D"}
+};
+let RECORDS=[
+ {id:1,parent:"CIK002",sex:"Female",breed:"Savana",kid:"CIK016",date:"17/01/2026",status:"Alive",notes:"Yellow tag"},
+ {id:2,parent:"CIK004",sex:"Female",breed:"Boer",kid:"CIK019",date:"17/01/2026",status:"Alive",notes:"Yellow tag"},
+ {id:3,parent:"CIK007",sex:"Female",breed:"Savana",kid:"CIK017",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:4,parent:"CIK009",sex:"Male",breed:"Savana",kid:"CIK018",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:5,parent:"OFO001",sex:"Female",breed:"Boer",kid:"OFO007",date:"17/01/2026",status:"Alive",notes:"Yellow tag"},
+ {id:6,parent:"OFO004",sex:"Female",breed:"Unknown",kid:"",date:"",status:"Alive",notes:""},
+ {id:7,parent:"OFO005",sex:"Female",breed:"Unknown",kid:"OFO006",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:8,parent:"JKT001",sex:"Female",breed:"Boer",kid:"JKT001",date:"10/04/2026",status:"Alive",notes:"Yellow female kid"},
+ {id:9,parent:"JKT002",sex:"Male",breed:"Boer",kid:"",date:"14/04/2026",status:"Alive",notes:""},
+ {id:10,parent:"JKT004",sex:"Male",breed:"Boer",kid:"JKT023",date:"20/01/2026",status:"Died",notes:"Died 23/01/2026 - replaced JKT023"},
+ {id:11,parent:"JKT016",sex:"Female",breed:"Boer",kid:"",date:"13/04/2026",status:"Alive",notes:""},
+ {id:12,parent:"JKT020",sex:"Female",breed:"Boer",kid:"JKT021",date:"20/01/2026",status:"Alive",notes:"Yellow tag"},
+ {id:13,parent:"JRM001",sex:"Female",breed:"Boer",kid:"",date:"14/04/2026",status:"Alive",notes:""},
+ {id:14,parent:"JRM002",sex:"Female",breed:"Savana",kid:"JRM020",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:15,parent:"JRM003",sex:"Female",breed:"Boer",kid:"JRM017",date:"20/01/2026",status:"Alive",notes:"Yellow tag"},
+ {id:16,parent:"JRM005",sex:"Female",breed:"Savana",kid:"JRM018",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:17,parent:"JRM008",sex:"Female",breed:"Savana",kid:"JRM019",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:18,parent:"JRM013",sex:"Female",breed:"Boer",kid:"JRM016",date:"17/01/2026",status:"Alive",notes:"Yellow tag"},
+ {id:19,parent:"RKG001",sex:"Male",breed:"Boer",kid:"RKG016",date:"15/01/2026",status:"Alive",notes:"Yellow tag"},
+ {id:20,parent:"RKG002",sex:"Male",breed:"Boer",kid:"RKG020",date:"20/01/2026",status:"Alive",notes:"Missing green tag"},
+ {id:21,parent:"RKG003",sex:"Male",breed:"Savana",kid:"RKG018",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:22,parent:"RKG004",sex:"Male",breed:"Savana",kid:"RKG019",date:"",status:"Alive",notes:"Yellow tag"},
+ {id:23,parent:"RKG011",sex:"Male",breed:"Boer",kid:"",date:"13/04/2026",status:"Alive",notes:""},
+ {id:24,parent:"RKG015",sex:"Female",breed:"Unknown",kid:"RKG017",date:"",status:"Alive",notes:"Kid died - replaced RKG017"},
+ {id:25,parent:"S&J002",sex:"Male",breed:"Unknown",kid:"",date:"",status:"Alive",notes:""},
+ {id:26,parent:"S&J010",sex:"Male",breed:"Unknown",kid:"",date:"",status:"Alive",notes:""},
+ {id:27,parent:"S&J014",sex:"Female",breed:"Boer",kid:"",date:"",status:"Alive",notes:""},
+ {id:28,parent:"S&J015",sex:"Male",breed:"Unknown",kid:"",date:"",status:"Alive",notes:""},
+ {id:29,parent:"OL008",sex:"Unknown",breed:"Savana",kid:"OL016",date:"",status:"Alive",notes:"Kid died 2 days - replaced OL016"},
+ {id:30,parent:"OL013",sex:"Female",breed:"Savana",kid:"OL013",date:"17/01/2026",status:"Alive",notes:"Kid died 08/04/2026 - replaced"},
+ {id:31,parent:"OL014",sex:"Male",breed:"Boer",kid:"",date:"13/04/2026",status:"Alive",notes:""},
+ {id:32,parent:"MNR005",sex:"Male",breed:"Boer",kid:"",date:"13/04/2026",status:"Alive",notes:""},
+ {id:33,parent:"BLO001",sex:"Male",breed:"Boer",kid:"",date:"15/04/2026",status:"Concern",notes:"Stillbirth - assessing mother"}
+];
+let nextId=100,newRecords=[],isAdmin=false,editingId=null;
+const ADMIN_PASSWORD="GoatAdmin2026";
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),calSelected=null;
+let charts={};
+function pad(n){return String(n).padStart(3,"0");}
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2600);}
+function buildLookup(){const m={};RECORDS.forEach(r=>{const k=r.parent.toUpperCase().replace(/\s/g,"");if(!m[k])m[k]=[];m[k].push(r);});return m;}
+function sexB(s){const c=s==="Male"?"b-m":s==="Female"?"b-f":"b-unk";return`<span class="badge ${c}">${s}</span>`;}
+function breedB(b){const c=b==="Boer"?"b-boer":b==="Savana"?"b-savana":"b-unk";return`<span class="badge ${c}">${b}</span>`;}
+function statB(s){const c=s==="Died"?"b-dead":s==="Concern"?"b-concern":s==="Alive"?"b-alive":"b-norec";return`<span class="badge ${c}">${s}</span>`;}
+function dotC(s){return s==="Died"?"d-dead":s==="Concern"?"d-concern":s==="Alive"?"d-alive":"d-none";}
+function parseDate(str){if(!str)return null;const p=str.split("/");return p.length===3?new Date(+p[2],+p[1]-1,+p[0]):null;}
+function showPanel(id,btn){
+  document.querySelectorAll(".nav-tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("panel-"+id).classList.add("active");
+  btn.classList.add("active");
+  if(id==="dashboard")renderDashboard();
+  if(id==="calendar")renderCal();
+  if(id==="register")renderRegister();
+}
+function openAdminLogin(){if(isAdmin){logoutAdmin();return;}document.getElementById("adminOverlay").classList.add("show");document.getElementById("adminPwInput").focus();}
+function closeAdminLogin(){document.getElementById("adminOverlay").classList.remove("show");document.getElementById("adminErr").textContent="";}
+function checkAdmin(){
+  const pw=document.getElementById("adminPwInput").value;
+  if(pw===ADMIN_PASSWORD){
+    isAdmin=true;
+    document.getElementById("adminToggleBtn").textContent="Logout admin";
+    document.getElementById("adminToggleBtn").classList.add("active");
+    document.getElementById("adminBar").classList.add("show");
+    closeAdminLogin();toast("Admin mode unlocked.");renderRegister();
+  }else{document.getElementById("adminErr").textContent="Incorrect password. Try again.";}
+}
+function logoutAdmin(){
+  isAdmin=false;
+  document.getElementById("adminToggleBtn").textContent="Admin";
+  document.getElementById("adminToggleBtn").classList.remove("active");
+  document.getElementById("adminBar").classList.remove("show");
+  toast("Logged out of admin mode.");renderRegister();
+}
+function openEdit(id){
+  const r=RECORDS.find(x=>x.id===id);if(!r)return;editingId=id;
+  document.getElementById("edit-parent").value=r.parent;
+  document.getElementById("edit-kid").value=r.kid;
+  document.getElementById("edit-sex").value=r.sex;
+  document.getElementById("edit-breed").value=r.breed;
+  document.getElementById("edit-status").value=r.status;
+  document.getElementById("edit-notes").value=r.notes;
+  if(r.date){const p=r.date.split("/");document.getElementById("edit-date").value=`${p[2]}-${p[1]}-${p[0]}`;}
+  else document.getElementById("edit-date").value="";
+  document.getElementById("editOverlay").classList.add("show");
+}
+function closeEdit(){document.getElementById("editOverlay").classList.remove("show");editingId=null;}
+function saveEdit(){
+  const r=RECORDS.find(x=>x.id===editingId);if(!r)return;
+  r.kid=document.getElementById("edit-kid").value.trim();
+  r.sex=document.getElementById("edit-sex").value;
+  r.breed=document.getElementById("edit-breed").value;
+  r.status=document.getElementById("edit-status").value;
+  r.notes=document.getElementById("edit-notes").value.trim();
+  const rd=document.getElementById("edit-date").value;
+  if(rd){const[y,m,d]=rd.split("-");r.date=`${d}/${m}/${y}`;}else r.date="";
+  closeEdit();renderRegister();renderDashboard();toast("Record updated.");
+}
+function deleteFromEdit(){
+  if(!confirm("Delete this record? This cannot be undone."))return;
+  RECORDS=RECORDS.filter(x=>x.id!==editingId);
+  closeEdit();renderRegister();renderDashboard();toast("Record deleted.");
+}
+function deleteRecord(id){
+  if(!confirm("Delete this record?"))return;
+  RECORDS=RECORDS.filter(x=>x.id!==id);
+  renderRegister();renderDashboard();toast("Record deleted.");
+}
+function renderDashboard(){
+  const total=Object.values(GROUPS).reduce((a,v)=>a+v.max,0);
+  const alive=RECORDS.filter(r=>r.status==="Alive").length;
+  const died=RECORDS.filter(r=>r.status==="Died").length;
+  const concern=RECORDS.filter(r=>r.status==="Concern").length;
+  const lookup=buildLookup();
+  let totalRecorded=0;
+  Object.keys(GROUPS).forEach(p=>{for(let i=1;i<=GROUPS[p].max;i++){const k=(p+pad(i)).toUpperCase().replace(/\s/g,"");if(lookup[k])totalRecorded++;}});
+  document.getElementById("dashStats").innerHTML=`
+    <div class="stat-card stat-blue"><div class="label">Mother stock</div><div class="val">${total}</div><div class="sub">across ${Object.keys(GROUPS).length} groups</div></div>
+    <div class="stat-card"><div class="label">Recorded kids</div><div class="val">${RECORDS.length}</div><div class="sub">${totalRecorded} mothers kidded</div></div>
+    <div class="stat-card stat-green"><div class="label">Alive</div><div class="val">${alive}</div><div class="sub">${Math.round(alive/RECORDS.length*100)||0}% of records</div></div>
+    <div class="stat-card stat-red"><div class="label">Deaths</div><div class="val">${died}</div><div class="sub">${concern} under concern</div></div>`;
+  const gGrid=document.getElementById("groupSummaryGrid");
+  gGrid.innerHTML=Object.entries(GROUPS).map(([p,cfg])=>{
+    let rec=0;for(let i=1;i<=cfg.max;i++){const k=(p+pad(i)).toUpperCase().replace(/\s/g,"");if(lookup[k])rec++;}
+    const pct=Math.round(rec/cfg.max*100);
+    return`<div class="group-pill"><div class="group-pill-header"><span class="group-pill-name">${p}</span><span class="group-pill-count">${rec}/${cfg.max} (${pct}%)</span></div><div class="group-pill-bar"><div class="group-pill-fill" style="width:${pct}%;background:${cfg.color};"></div></div></div>`;
+  }).join("");
+  buildCharts();
+}
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function buildCharts(){
+  destroyChart("bar");
+  const gLabels=Object.keys(GROUPS);
+  const lookup=buildLookup();
+  const gCounts=gLabels.map(p=>{let c=0;for(let i=1;i<=GROUPS[p].max;i++){const k=(p+pad(i)).toUpperCase().replace(/\s/g,"");if(lookup[k])c++;}return c;});
+  charts.bar=new Chart(document.getElementById("chartBar"),{type:"bar",data:{labels:gLabels,datasets:[{data:gCounts,backgroundColor:gLabels.map(p=>GROUPS[p].color),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:"#f0ede8"}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});
+  destroyChart("breed");
+  const breeds={Boer:0,Savana:0,Unknown:0};
+  RECORDS.forEach(r=>{if(breeds[r.breed]!==undefined)breeds[r.breed]++;else breeds.Unknown++;});
+  charts.breed=new Chart(document.getElementById("chartBreed"),{type:"doughnut",data:{labels:Object.keys(breeds),datasets:[{data:Object.values(breeds),backgroundColor:["#d1fae5","#fef3c7","#f3f4f6"],borderColor:["#10b981","#f59e0b","#d1d5db"],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},padding:10}}}}});
+  destroyChart("status");
+  const statuses={Alive:0,Died:0,Concern:0};
+  RECORDS.forEach(r=>{if(statuses[r.status]!==undefined)statuses[r.status]++;});
+  charts.status=new Chart(document.getElementById("chartStatus"),{type:"doughnut",data:{labels:["Alive","Died","Concern"],datasets:[{data:[statuses.Alive,statuses.Died,statuses.Concern],backgroundColor:["#d1fae5","#fee2e2","#fef3c7"],borderColor:["#10b981","#ef4444","#f59e0b"],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},padding:10}}}}});
+  destroyChart("month");
+  const monthCounts=new Array(12).fill(0);
+  RECORDS.forEach(r=>{const d=parseDate(r.date);if(d)monthCounts[d.getMonth()]++;});
+  charts.month=new Chart(document.getElementById("chartMonth"),{type:"bar",data:{labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],datasets:[{label:"Kids born",data:monthCounts,backgroundColor:"#bfdbfe",borderColor:"#3b82f6",borderWidth:2,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:"#f0ede8"}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});
+}
+function renderRegister(){
+  document.getElementById("adminBar").classList.toggle("show",isAdmin);
+  const lookup=buildLookup();
+  const q=(document.getElementById("search").value||"").toLowerCase();
+  const fG=document.getElementById("fGroup").value;
+  const fSh=document.getElementById("fShow").value;
+  const groups=fG?[fG]:Object.keys(GROUPS);
+  let html="";
+  groups.forEach(prefix=>{
+    const cfg=GROUPS[prefix];
+    let rows="";let recorded=0;
+    for(let i=1;i<=cfg.max;i++){
+      const tag=prefix+pad(i);const key=tag.toUpperCase().replace(/\s/g,"");const recs=lookup[key]||[];
+      if(!recs.length){
+        if(fSh==="recorded")continue;
+        if(q&&!tag.toLowerCase().includes(q))continue;
+        rows+=`<tr class="empty-slot"><td>${tag}</td><td colspan="${isAdmin?6:5}"><span class="badge b-norec">No record</span></td></tr>`;
+      }else{
+        recorded+=recs.length;
+        recs.forEach(r=>{
+          if(fSh==="empty")return;
+          if(q&&!r.parent.toLowerCase().includes(q)&&!(r.kid||"").toLowerCase().includes(q))return;
+          const ac=isAdmin?`<td><div class="action-btns"><button class="btn btn-sm" onclick="openEdit(${r.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteRecord(${r.id})">Del</button></div></td>`:"";
+          rows+=`<tr><td style="font-weight:600;"><span class="dot ${dotC(r.status)}"></span>${r.parent}</td><td>${sexB(r.sex)}</td><td>${breedB(r.breed)}</td><td style="color:var(--text2);">${r.kid||"—"}</td><td style="font-size:11px;color:var(--text2);white-space:nowrap;">${r.date||"—"}</td><td>${statB(r.status)}</td>${ac}</tr>`;
+        });
+      }
+    }
+    if(!rows)return;
+    const pct=Math.round((recorded/cfg.max)*100);
+    const isOpen=!!(fG||q);
+    html+=`<div class="group-block${isOpen?" open":""}" id="gb-${prefix}"><button class="group-toggle" onclick="toggleGroup('${prefix}')"><span class="group-name">${prefix}</span><span class="group-info">${cfg.max} stock · ${recorded} recorded · ${pct}%</span><div class="toggle-prog"><div class="toggle-prog-fill" style="width:${pct}%;background:${cfg.color};"></div></div><span class="toggle-arrow">▼</span></button><div class="group-body"><div class="tbl-wrap"><table><thead><tr><th>Tag</th><th>Sex</th><th>Breed</th><th>Kid tag</th><th>Date</th><th>Status</th>${isAdmin?"<th>Actions</th>":""}</tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
+  });
+  document.getElementById("regOutput").innerHTML=html||`<div class="empty-msg">No matching records found.</div>`;
+}
+function toggleGroup(prefix){const el=document.getElementById("gb-"+prefix);if(el)el.classList.toggle("open");}
+function populateParentSelect(){
+  const sel=document.getElementById("f-parent");
+  Object.keys(GROUPS).forEach(prefix=>{
+    const grp=document.createElement("optgroup");grp.label=prefix;
+    for(let i=1;i<=GROUPS[prefix].max;i++){const o=document.createElement("option");const t=prefix+pad(i);o.value=t;o.textContent=t;grp.appendChild(o);}
+    sel.appendChild(grp);
+  });
+}
+function addRecord(){
+  const parent=document.getElementById("f-parent").value;
+  const kid=document.getElementById("f-kid").value.trim();
+  const rawDate=document.getElementById("f-date").value;
+  const sex=document.getElementById("f-sex").value;
+  const breed=document.getElementById("f-breed").value;
+  const status=document.getElementById("f-status").value;
+  const notes=document.getElementById("f-notes").value.trim();
+  if(!parent){toast("Please select a mother tag.");return;}
+  let displayDate="";
+  if(rawDate){const[y,m,d]=rawDate.split("-");displayDate=`${d}/${m}/${y}`;}
+  const rec={id:nextId++,parent,sex,breed,kid,date:displayDate,status,notes};
+  RECORDS.push(rec);newRecords.unshift(rec);
+  renderRecent();renderRegister();renderDashboard();clearForm();toast("Record saved.");
+}
+function clearForm(){
+  ["f-parent","f-kid","f-notes"].forEach(id=>{document.getElementById(id).value="";});
+  document.getElementById("f-date").value=new Date().toISOString().split("T")[0];
+  document.getElementById("f-sex").value="Unknown";
+  document.getElementById("f-breed").value="Unknown";
+  document.getElementById("f-status").value="Alive";
+}
+function renderRecent(){
+  const el=document.getElementById("recentList");
+  if(!newRecords.length){el.innerHTML=`<p style="color:var(--text3);font-size:13px;">No new entries yet.</p>`;return;}
+  el.innerHTML=newRecords.map((r,i)=>`<div class="recent-entry"><div><strong>${r.parent}</strong>${r.kid?` → <span style="color:var(--blue);">${r.kid}</span>`:""} <span style="color:var(--text3);font-size:12px;">${r.date||"no date"}</span></div><button class="btn btn-sm btn-danger" onclick="removeRecent(${i})">Remove</button></div>`).join("");
+}
+function removeRecent(i){const rec=newRecords[i];RECORDS=RECORDS.filter(r=>r.id!==rec.id);newRecords.splice(i,1);renderRecent();renderRegister();renderDashboard();toast("Entry removed.");}
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS=["Su","Mo","Tu","We","Th","Fr","Sa"];
+function changeMonth(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+function renderCal(){
+  document.getElementById("calLabel").textContent=MONTHS[calMonth]+" "+calYear;
+  const today=new Date();
+  const first=new Date(calYear,calMonth,1).getDay();
+  const dim=new Date(calYear,calMonth+1,0).getDate();
+  const prev=new Date(calYear,calMonth,0).getDate();
+  const daysWithRec=new Set();
+  RECORDS.forEach(r=>{const d=parseDate(r.date);if(d&&d.getFullYear()===calYear&&d.getMonth()===calMonth)daysWithRec.add(d.getDate());});
+  let h=DAYS.map(d=>`<div class="cal-dn">${d}</div>`).join("");
+  for(let i=0;i<first;i++)h+=`<div class="cal-d other-month">${prev-first+1+i}</div>`;
+  for(let d=1;d<=dim;d++){
+    const isToday=today.getDate()===d&&today.getMonth()===calMonth&&today.getFullYear()===calYear;
+    const isSel=calSelected&&calSelected.d===d&&calSelected.m===calMonth&&calSelected.y===calYear;
+    const hasRec=daysWithRec.has(d);
+    h+=`<div class="cal-d${isToday?" today":""}${isSel?" selected":""}${hasRec?" has-record":""}" onclick="selectDay(${d})">${d}</div>`;
+  }
+  const rem=(7-((first+dim)%7))%7;
+  for(let i=1;i<=rem;i++)h+=`<div class="cal-d other-month">${i}</div>`;
+  document.getElementById("calGrid").innerHTML=h;
+  renderCalDay();
+}
+function selectDay(d){
+  calSelected={d,m:calMonth,y:calYear};
+  const dd=String(d).padStart(2,"0"),mm=String(calMonth+1).padStart(2,"0");
+  document.getElementById("calSelDisplay").textContent=`${dd}/${mm}/${calYear}`;
+  renderCal();
+}
+function renderCalDay(){
+  const el=document.getElementById("calDayRecords");
+  if(!calSelected){el.innerHTML=`<p style="color:var(--text3);font-size:13px;">Select a date.</p>`;return;}
+  const{d,m,y}=calSelected;
+  const dd=String(d).padStart(2,"0"),mm=String(m+1).padStart(2,"0");
+  const ds=`${dd}/${mm}/${y}`;
+  document.getElementById("calDetailTitle").textContent=`Kids born — ${ds}`;
+  const recs=RECORDS.filter(r=>r.date===ds);
+  if(!recs.length){el.innerHTML=`<p style="color:var(--text3);font-size:13px;font-style:italic;">No records on this date.</p>`;return;}
+  el.innerHTML=recs.map(r=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-weight:600;font-size:13px;">${r.parent}${r.kid?` → <span style="color:var(--blue);">${r.kid}</span>`:""}</div><div style="font-size:11px;color:var(--text2);margin-top:2px;">${r.breed} · ${r.sex} · ${statB(r.status)}${r.notes?" · "+r.notes:""}</div></div>`).join("");
+}
+function useCalDate(){
+  if(!calSelected){toast("Select a date first.");return;}
+  const{d,m,y}=calSelected;
+  const dd=String(d).padStart(2,"0"),mm=String(m+1).padStart(2,"0");
+  document.getElementById("f-date").value=`${y}-${mm}-${dd}`;
+  document.querySelectorAll(".nav-tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("panel-record").classList.add("active");
+  document.querySelector('.nav-tab[onclick*="record"]').classList.add("active");
+  toast("Date applied to new record form.");
+}
+document.getElementById("headerDate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+document.getElementById("f-date").value=new Date().toISOString().split("T")[0];
+const gSel=document.getElementById("fGroup");
+Object.keys(GROUPS).forEach(p=>{const o=document.createElement("option");o.value=p;o.textContent=`${p} (${GROUPS[p].max} stock)`;gSel.appendChild(o);});
+populateParentSelect();
+renderDashboard();
+</script>
+</body>
+</html>
