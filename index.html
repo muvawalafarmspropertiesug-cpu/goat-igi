@@ -534,7 +534,9 @@ tr:hover td{background:var(--surface2);}
   <div id="clientsListView">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:7px;">
       <div><h2 style="font-size:14px;font-weight:700;color:var(--brand);">Client registry</h2><p style="font-size:11px;color:var(--text2);">Invest in Wealth — KYC profiles</p></div>
-      <button class="btn btn-primary" onclick="openClientForm()">+ Enroll new client</button>
+      <button class="btn btn-accent" onclick="openInvite()" style="background:var(--accent);color:#fff;border-color:var(--accent)">&#128231; Send invite</button>
+        <button class="btn btn-primary" onclick="openClientForm()">+ Enroll new client</button>
+        <button class="btn" onclick="downloadAgreementTemplate()">&#8681; Agreement</button>
     </div>
     <div class="clients-grid" id="clientsGrid"></div>
     <div id="noClients" style="display:none;" class="empty-msg">No clients enrolled yet.</div>
@@ -970,7 +972,29 @@ function exportPDF(id){
     <div class="sig-box"><br><br><br>Authorised — Muvawala Farms<br>${c.approvedBy||'Alexander Ssimbwa'}<br>Date: ${c.approvedDate?new Date(c.approvedDate).toLocaleDateString('en-GB'):'___________'}</div>
   </div>
   <div style="text-align:center;margin-top:14px;font-size:9px;color:#999;border-top:1px solid #eee;padding-top:7px;">Muvawala Goat Farms &amp; Properties · muvawalafarmspropertiesug@gmail.com · +256 709 066 457 · Nakasongola District, Uganda</div>
-  </body></html>`.replace(/\$\{kycScore\}/g,kycScore));
+  
+<!-- SEND INVITE MODAL -->
+<div class="overlay" id="ov-invite" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;">
+  <div style="background:var(--surface);border-radius:var(--r);padding:18px;width:100%;max-width:400px;margin:auto;">
+    <h2 style="font-size:14px;font-weight:700;margin-bottom:3px;color:var(--brand)">&#128231; Send registration invite</h2>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">Client gets a link to self-register online.</p>
+    <div class="fg" style="margin-bottom:7px"><label>Client email *</label><input id="inv-em" type="email" placeholder="client@email.com"/></div>
+    <div class="fg" style="margin-bottom:8px"><label>Client name (optional)</label><input id="inv-nm" placeholder="Full name"/></div>
+    <div id="inv-box" style="display:none;margin-bottom:8px">
+      <p style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--text2)">Registration link (share this):</p>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:8px;font-size:10px;font-family:monospace;word-break:break-all;color:var(--brand);margin-bottom:7px" id="inv-link"></div>
+      <div class="brow">
+        <button class="btn btn-p btn-s" onclick="sendInvEmail()">&#128231; Open email app</button>
+        <button class="btn btn-s" onclick="cpLink()">&#128203; Copy link</button>
+      </div>
+    </div>
+    <div class="brow" style="margin-top:8px">
+      <button class="btn btn-g" onclick="genLink()">Generate link</button>
+      <button class="btn" onclick="document.getElementById('ov-invite').style.display='none'">Close</button>
+    </div>
+  </div>
+</div>
+</body></html>`.replace(/\$\{kycScore\}/g,kycScore));
   win.document.close();setTimeout(()=>win.print(),500);
 }
 function pr(label,val){return`<div class="row"><span class="lbl">${label}</span><span class="val">${val||'--'}</span></div>`;}
