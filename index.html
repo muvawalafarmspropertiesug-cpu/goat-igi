@@ -614,25 +614,52 @@ tr:hover td{background:var(--su2);}
   <!-- ADMIN VIEW -->
   <div id="vet-admin" style="display:none">
     <div class="commission-summary" id="vetCommSummary"></div>
+
+    <!-- SMART IMPORT -->
     <div class="admin-import-box">
-      <h3>&#128196; Import / update product list</h3>
-      <p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Paste raw price list from supplier below. Format per line:<br><code style="background:#fff3cd;padding:2px 5px;border-radius:3px;font-size:10px">ProductName | Category | Unit | BasePrice | StockStatus | Description</code><br>Example: <code style="font-size:10px">Newcastle Vaccine | Vaccines | 100-dose vial | 45000 | In stock | Protects against Newcastle disease</code></p>
-      <textarea id="vetImportTxt" class="ita" placeholder="Paste supplier price list here..." style="min-height:100px"></textarea>
+      <h3>&#128196; Smart import &mdash; Paste supplier price list</h3>
+      <p style="font-size:11px;color:var(--tx2);margin-bottom:7px;line-height:1.6">
+        Paste raw text, spreadsheet data, or notes from your supplier. One product per line.<br>
+        <strong>Format (pipe-separated):</strong> <code style="background:#fff3cd;padding:2px 5px;border-radius:3px;font-size:10px">Product Name | Category | Unit | Base Price (UGX) | Muvawala Commission % | Stock | Description</code><br>
+        <strong>Example:</strong> <code style="font-size:10px;background:#e8f5e9;padding:2px 5px;border-radius:3px">Newcastle Vaccine | Vaccines | 100-dose vial | 45000 | 15 | In stock | Protects against Newcastle disease</code><br>
+        <em style="font-size:10px;color:var(--tx3)">Tip: Copy a table from Excel/Google Sheets and paste it here. Tab-separated columns also work.</em>
+      </p>
+      <div style="margin-bottom:7px">
+        <label style="font-size:10px;font-weight:700;color:var(--tx2);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Supplier name (for all imported products)</label>
+        <input id="vetSupplierName" placeholder="e.g. VetPharma Uganda" style="width:100%;font-size:12px;padding:7px 9px;border-radius:var(--rs);border:1px solid var(--bo2)"/>
+      </div>
+      <textarea id="vetImportTxt" class="ita" placeholder="Paste supplier data here..." style="min-height:110px"></textarea>
       <div class="brow" style="margin-top:7px">
-        <button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="parseVetImport()">Parse &amp; preview</button>
+        <button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="parseVetImport()">&#128269; Parse &amp; preview</button>
         <button class="btn" onclick="document.getElementById('vetImportTxt').value=''">Clear</button>
       </div>
       <div id="vetImportPreview" style="display:none;margin-top:9px"></div>
     </div>
+
+    <!-- MARKUP SETTINGS -->
     <div class="fs">
-      <h3>&#128200; Markup settings per supplier</h3>
-      <p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Set the % markup to add on top of the supplier base price. This becomes your margin.</p>
+      <h3>&#128200; Commission settings per supplier</h3>
+      <p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Default % markup Muvawala adds on top of supplier base price. Can also be set per-product during import.</p>
       <div id="markupSettings"></div>
-      <div class="brow" style="margin-top:9px">
-        <button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="saveMarkups()">Save markup settings</button>
+      <div class="brow" style="margin-top:8px">
+        <button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="saveMarkups()">Save commission settings</button>
       </div>
     </div>
-    <div class="fs"><h3>&#128221; All orders</h3><div id="allOrdersOut"></div></div>
+
+    <!-- ALL ORDERS -->
+    <div class="fs">
+      <h3>&#128221; All orders &mdash; Order management pipeline</h3>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px" id="orderStatusFilter">
+        <button class="vcat on" onclick="filterOrders('all',this)">All</button>
+        <button class="vcat" onclick="filterOrders('Pending Payment',this)">Pending Payment</button>
+        <button class="vcat" onclick="filterOrders('Payment Received',this)">Payment Received</button>
+        <button class="vcat" onclick="filterOrders('Sent to Supplier',this)">Sent to Supplier</button>
+        <button class="vcat" onclick="filterOrders('Invoice Received',this)">Invoice Received</button>
+        <button class="vcat" onclick="filterOrders('Supplier Paid',this)">Supplier Paid</button>
+        <button class="vcat" onclick="filterOrders('Delivered',this)">Delivered</button>
+      </div>
+      <div id="allOrdersOut"></div>
+    </div>
   </div>
 </div>
 
@@ -1133,16 +1160,14 @@ chkSelfReg();
 </body>
 </html>
 <script>
-// ===================================================================
-// VET SHOP - Complete module
-// ===================================================================
+// VET SHOP MODULE
 var VPRODS = JSON.parse(localStorage.getItem('vet_prods') || '[]');
 var VORDERS = JSON.parse(localStorage.getItem('vet_orders') || '[]');
 var VREVIEWS = JSON.parse(localStorage.getItem('vet_reviews') || '{}');
 var VMARKUPS = JSON.parse(localStorage.getItem('vet_markups') || '{}');
 var VCART = [];
-var vetViewTab = 'shop';
 var vetCatFilter = 'All';
+var vetOrderFilter = 'all';
 var currentProdId = null;
 var currentOrderId = null;
 var selectedStars = 0;
@@ -1156,29 +1181,46 @@ function svVet(){
   localStorage.setItem('vet_markups', JSON.stringify(VMARKUPS));
 }
 
-// Load demo products if empty
 function loadDemoProds(){
   if(VPRODS.length) return;
-  var demos = [
-    {id:1,name:'Newcastle Disease Vaccine',supplier:'VetPharma Uganda',category:'Vaccines',unit:'100-dose vial',basePrice:45000,stock:'In stock',description:'Protects poultry and livestock against Newcastle disease. Store at 2-8 degrees C.',icon:'&#128138;'},
-    {id:2,name:'Foot & Mouth Disease Vaccine',supplier:'VetPharma Uganda',category:'Vaccines',unit:'50ml vial',basePrice:85000,stock:'In stock',description:'FMD vaccine for cattle and goats. Provides 6-month protection.',icon:'&#128138;'},
-    {id:3,name:'PPR Vaccine (Goat Plague)',supplier:'VetPharma Uganda',category:'Vaccines',unit:'10-dose vial',basePrice:32000,stock:'In stock',description:'Essential vaccine for goats against Peste des Petits Ruminants.',icon:'&#128138;'},
-    {id:4,name:'Oxytetracycline 20%',supplier:'AgroVet Imports',category:'Antibiotics',unit:'100ml bottle',basePrice:28000,stock:'In stock',description:'Broad-spectrum antibiotic for respiratory and systemic infections.',icon:'&#128138;'},
-    {id:5,name:'Ivermectin 1%',supplier:'AgroVet Imports',category:'Dewormers',unit:'500ml bottle',basePrice:55000,stock:'In stock',description:'Controls internal and external parasites including worms and ticks.',icon:'&#128138;'},
-    {id:6,name:'Albendazole Suspension',supplier:'AgroVet Imports',category:'Dewormers',unit:'1 litre',basePrice:38000,stock:'Low stock',description:'Effective against roundworms, tapeworms and liver flukes.',icon:'&#128138;'},
-    {id:7,name:'Calcium Borogluconate 40%',supplier:'FarmChem Ltd',category:'Supplements',unit:'500ml bottle',basePrice:22000,stock:'In stock',description:'Treats milk fever and hypocalcaemia in goats.',icon:'&#128138;'},
-    {id:8,name:'Vitamin B-Complex Injection',supplier:'FarmChem Ltd',category:'Supplements',unit:'100ml vial',basePrice:18000,stock:'In stock',description:'Supports growth, immunity and recovery from stress.',icon:'&#128138;'},
-    {id:9,name:'Wound Spray (Oxytetracycline)',supplier:'VetPharma Uganda',category:'First Aid',unit:'250ml aerosol',basePrice:24000,stock:'In stock',description:'Antibiotic wound spray for cuts, abrasions and fly strike.',icon:'&#128138;'},
-    {id:10,name:'Teat Dip Concentrate',supplier:'FarmChem Ltd',category:'First Aid',unit:'1 litre',basePrice:16000,stock:'In stock',description:'Reduces mastitis and udder infections post-milking.',icon:'&#128138;'},
-  ];
   VMARKUPS = {'VetPharma Uganda':15,'AgroVet Imports':12,'FarmChem Ltd':10};
-  VPRODS = demos.map(function(p){return Object.assign({},p);});
+  VPRODS = [
+    {id:1,name:'Newcastle Disease Vaccine',supplier:'VetPharma Uganda',category:'Vaccines',unit:'100-dose vial',basePrice:45000,commission:15,stock:'In stock',description:'Protects poultry and livestock against Newcastle disease. Store at 2-8 C.'},
+    {id:2,name:'Foot and Mouth Disease Vaccine',supplier:'VetPharma Uganda',category:'Vaccines',unit:'50ml vial',basePrice:85000,commission:15,stock:'In stock',description:'FMD vaccine for cattle and goats. Provides 6-month protection.'},
+    {id:3,name:'PPR Vaccine (Goat Plague)',supplier:'VetPharma Uganda',category:'Vaccines',unit:'10-dose vial',basePrice:32000,commission:15,stock:'In stock',description:'Essential vaccine for goats against Peste des Petits Ruminants.'},
+    {id:4,name:'Oxytetracycline 20%',supplier:'AgroVet Imports',category:'Antibiotics',unit:'100ml bottle',basePrice:28000,commission:12,stock:'In stock',description:'Broad-spectrum antibiotic for respiratory and systemic infections.'},
+    {id:5,name:'Ivermectin 1%',supplier:'AgroVet Imports',category:'Dewormers',unit:'500ml bottle',basePrice:55000,commission:12,stock:'In stock',description:'Controls internal and external parasites including worms and ticks.'},
+    {id:6,name:'Albendazole Suspension',supplier:'AgroVet Imports',category:'Dewormers',unit:'1 litre',basePrice:38000,commission:12,stock:'Low stock',description:'Effective against roundworms, tapeworms and liver flukes.'},
+    {id:7,name:'Calcium Borogluconate 40%',supplier:'FarmChem Ltd',category:'Supplements',unit:'500ml bottle',basePrice:22000,commission:10,stock:'In stock',description:'Treats milk fever and hypocalcaemia in goats.'},
+    {id:8,name:'Vitamin B-Complex Injection',supplier:'FarmChem Ltd',category:'Supplements',unit:'100ml vial',basePrice:18000,commission:10,stock:'In stock',description:'Supports growth, immunity and recovery from stress.'},
+    {id:9,name:'Wound Spray (Oxytetracycline)',supplier:'VetPharma Uganda',category:'First Aid',unit:'250ml aerosol',basePrice:24000,commission:15,stock:'In stock',description:'Antibiotic wound spray for cuts, abrasions and fly strike.'},
+    {id:10,name:'Teat Dip Concentrate',supplier:'FarmChem Ltd',category:'First Aid',unit:'1 litre',basePrice:16000,commission:10,stock:'In stock',description:'Reduces mastitis and udder infections post-milking.'}
+  ];
   svVet();
 }
 
-function getMarkup(supplier){return parseFloat(VMARKUPS[supplier]||15);}
-function finalPrice(p){var m=getMarkup(p.supplier);return Math.round(p.basePrice*(1+m/100));}
-function formatUGX(n){return 'UGX '+Number(n).toLocaleString();}
+function getCommission(p){ return parseFloat(p.commission || VMARKUPS[p.supplier] || 15); }
+function clientPrice(p){ var c2=getCommission(p); return Math.round(p.basePrice*(1+c2/100)); }
+function muvawalaMarginAmt(p,qty){ return Math.round(p.basePrice*getCommission(p)/100)*(qty||1); }
+function formatUGX(n){ return 'UGX '+Number(n).toLocaleString(); }
+
+// ORDER STATUS COLORS
+var STATUS_COLORS = {
+  'Pending Payment':'#1e3a8a','Payment Received':'#92400e',
+  'Sent to Supplier':'#0c4a6e','Invoice Received':'#3730a3',
+  'Supplier Paid':'#065f46','Delivered':'#064e3b','Cancelled':'#7f1d1d'
+};
+var STATUS_BG = {
+  'Pending Payment':'#dbeafe','Payment Received':'#fef3c7',
+  'Sent to Supplier':'#e0f2fe','Invoice Received':'#ede9fe',
+  'Supplier Paid':'#d1fae5','Delivered':'#bbf7d0','Cancelled':'#fee2e2'
+};
+
+function orderBadge(status){
+  var bg=STATUS_BG[status]||'#f3f4f6';
+  var co=STATUS_COLORS[status]||'#374151';
+  return '<span style="background:'+bg+';color:'+co+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">'+status+'</span>';
+}
 
 function renderVet(){
   loadDemoProds();
@@ -1187,49 +1229,48 @@ function renderVet(){
 }
 
 function showVetView(view, btn){
-  vetViewTab = view;
   ['vet-shop','vet-cart','vet-orders','vet-admin'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.style.display='none';
+    var el=document.getElementById(id); if(el)el.style.display='none';
   });
-  var target = document.getElementById('vet-'+view);
-  if(target) target.style.display='block';
-  // update tab buttons
+  var target=document.getElementById('vet-'+view);
+  if(target)target.style.display='block';
   document.querySelectorAll('.vtab').forEach(function(b){b.classList.remove('on');});
-  if(btn) btn.classList.add('on');
-  if(view==='shop') renderVetShop();
-  else if(view==='orders') renderVetOrders();
-  else if(view==='cart') renderCart();
-  else if(view==='admin') renderVetAdmin();
+  if(btn)btn.classList.add('on');
+  if(view==='shop')renderVetShop();
+  else if(view==='orders')renderVetOrders();
+  else if(view==='cart')renderCart();
+  else if(view==='admin')renderVetAdmin();
 }
 
-// -- SHOP -------------------------------------------------------------
+// SHOP
 function renderVetShop(){
-  var cats = ['All'];
+  var cats=['All'];
   VPRODS.forEach(function(p){if(cats.indexOf(p.category)===-1)cats.push(p.category);});
-  document.getElementById('vetCats').innerHTML = cats.map(function(cat){
+  document.getElementById('vetCats').innerHTML=cats.map(function(cat){
     return '<button class="vcat'+(vetCatFilter===cat?' on':'')+'" onclick="filterCat(\''+cat+'\')">'+cat+'</button>';
   }).join('');
-  var filtered = vetCatFilter==='All' ? VPRODS : VPRODS.filter(function(p){return p.category===vetCatFilter;});
-  var grid = document.getElementById('vetGrid');
-  var empty = document.getElementById('vetEmpty');
+  var filtered=vetCatFilter==='All'?VPRODS:VPRODS.filter(function(p){return p.category===vetCatFilter;});
+  var grid=document.getElementById('vetGrid');
+  var empty=document.getElementById('vetEmpty');
   if(!filtered.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  grid.innerHTML = filtered.map(function(p){
-    var fp = finalPrice(p);
-    var stockCls = p.stock==='In stock'?'in':p.stock==='Low stock'?'low':'out';
-    var reviews = VREVIEWS[p.id]||[];
-    var avgRating = reviews.length ? Math.round(reviews.reduce(function(a,r){return a+r.stars;},0)/reviews.length) : 0;
-    var stars = avgRating ? '&#9733;'.repeat(avgRating)+'&#9734;'.repeat(5-avgRating) : '';
+  grid.innerHTML=filtered.map(function(p){
+    var fp=clientPrice(p);
+    var stockCls=p.stock==='In stock'?'in':p.stock==='Low stock'?'low':'out';
+    var reviews=VREVIEWS[p.id]||[];
+    var avg=reviews.length?Math.round(reviews.reduce(function(a,r){return a+r.stars;},0)/reviews.length):0;
+    var stars=avg?'&#9733;'.repeat(avg)+'&#9734;'.repeat(5-avg):'';
     return '<div class="vpc">'+
-      '<div class="vpc-img">'+(p.icon||'&#128138;')+'</div>'+
+      '<div class="vpc-img">&#128138;</div>'+
       '<div class="vpc-body">'+
         '<div class="vpc-cat">'+p.category+'</div>'+
         '<div class="vpc-name">'+p.name+'</div>'+
         '<div class="vpc-supplier">'+p.supplier+'</div>'+
-        (stars?'<div class="stars" style="font-size:11px;margin-bottom:4px">'+stars+' <span style="font-size:9px;color:var(--tx3)">('+reviews.length+')</span></div>':'')+
-        '<div class="vpc-price"><div><div class="vpc-amt">'+formatUGX(fp)+'</div><div class="vpc-unit">per '+p.unit+'</div></div></div>'+
-        '<div class="vpc-stock '+stockCls+'">&#9679; '+p.stock+'</div>'+
-        '<div class="vpc-desc">'+p.description+'</div>'+
+        (stars?'<div style="color:#f59e0b;font-size:11px;margin-bottom:4px">'+stars+' <span style="font-size:9px;color:var(--tx3)">('+reviews.length+')</span></div>':'')+
+        '<div style="margin-bottom:6px"><div style="font-size:16px;font-weight:700;color:#0a6640">'+formatUGX(fp)+'</div>'+
+        '<div style="font-size:10px;color:var(--tx3)">per '+p.unit+'</div></div>'+
+        '<div style="font-size:10px;font-weight:600;color:'+(p.stock==='In stock'?'#0a6640':p.stock==='Low stock'?'#f59e0b':'#ef4444')+'">&#9679; '+p.stock+'</div>'+
+        '<div style="font-size:10px;color:var(--tx2);line-height:1.5;margin:5px 0">'+p.description+'</div>'+
         (p.stock!=='Out of stock'?
           '<button class="vbtn" onclick="openProduct('+p.id+')">Add to cart</button>':
           '<button class="vbtn" disabled>Out of stock</button>')+
@@ -1240,30 +1281,26 @@ function renderVetShop(){
 function filterCat(cat){vetCatFilter=cat;renderVetShop();}
 
 function openProduct(id){
-  var p = VPRODS.find(function(x){return x.id===id;});
-  if(!p)return;
-  currentProdId = id;
-  selectedStars = 0;
-  document.getElementById('vprodName').textContent = p.name;
-  document.getElementById('vprodCat').textContent = p.category+' . '+p.supplier;
-  document.getElementById('vprodQty').value = 1;
-  var fp = finalPrice(p);
-  document.getElementById('vprodBody').innerHTML =
+  var p=VPRODS.find(function(x){return x.id===id;});if(!p)return;
+  currentProdId=id; selectedStars=0;
+  document.getElementById('vprodName').textContent=p.name;
+  document.getElementById('vprodCat').textContent=p.category+' - '+p.supplier;
+  document.getElementById('vprodQty').value=1;
+  var fp=clientPrice(p);
+  document.getElementById('vprodBody').innerHTML=
     '<div style="background:#f0fdf4;border-radius:var(--rs);padding:10px;margin-bottom:10px">'+
-    '<div style="font-size:11px;color:var(--tx2);margin-bottom:3px">Price per '+p.unit+'</div>'+
+    '<div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Price per '+p.unit+'</div>'+
     '<div style="font-size:22px;font-weight:700;color:#0a6640">'+formatUGX(fp)+'</div>'+
-    '<div class="vpc-stock '+(p.stock==='In stock'?'in':p.stock==='Low stock'?'low':'out')+'" style="margin-top:3px">&#9679; '+p.stock+'</div></div>'+
+    '<div style="font-size:10px;font-weight:600;color:'+(p.stock==='In stock'?'#0a6640':'#f59e0b')+'">&#9679; '+p.stock+'</div></div>'+
     '<div style="font-size:12px;color:var(--tx2);margin-bottom:10px;line-height:1.6">'+p.description+'</div>';
   updateProdTotal();
-  // reviews
-  var reviews = VREVIEWS[p.id]||[];
-  document.getElementById('vprodReviews').innerHTML = reviews.length ?
+  var reviews=VREVIEWS[p.id]||[];
+  document.getElementById('vprodReviews').innerHTML=reviews.length?
     reviews.slice(-5).reverse().map(function(r){
-      return '<div class="comm-item"><div class="comm-meta">'+r.name+' . '+r.date+'</div>'+
-        '<div class="stars" style="font-size:13px">'+'&#9733;'.repeat(r.stars)+'&#9734;'.repeat(5-r.stars)+'</div>'+
+      return '<div class="comm-item"><div class="comm-meta">'+r.name+' - '+r.date+'</div>'+
+        '<div style="color:#f59e0b">'+'&#9733;'.repeat(r.stars)+'&#9734;'.repeat(5-r.stars)+'</div>'+
         '<div style="font-size:12px;margin-top:2px">'+r.comment+'</div></div>';
-    }).join('') : '<p style="font-size:11px;color:var(--tx3);font-style:italic">No reviews yet. Be the first to leave feedback!</p>';
-  // reset stars UI
+    }).join(''):'<p style="font-size:11px;color:var(--tx3);font-style:italic">No reviews yet.</p>';
   document.getElementById('starPicker').querySelectorAll('span').forEach(function(s,i){s.style.color=i<selectedStars?'#f59e0b':'#d1d5db';});
   document.getElementById('vprodComment').value='';
   document.getElementById('ov-vprod').classList.add('sh');
@@ -1271,23 +1308,20 @@ function openProduct(id){
 
 function adjQty(d){
   var inp=document.getElementById('vprodQty');
-  var v=parseInt(inp.value)||1;
-  v=Math.max(1,Math.min(99,v+d));
-  inp.value=v;updateProdTotal();
+  inp.value=Math.max(1,Math.min(99,(parseInt(inp.value)||1)+d));
+  updateProdTotal();
 }
 function updateProdTotal(){
   var p=VPRODS.find(function(x){return x.id===currentProdId;});if(!p)return;
   var q=parseInt(document.getElementById('vprodQty').value)||1;
-  document.getElementById('vprodTotal').textContent='Total: '+formatUGX(finalPrice(p)*q);
+  document.getElementById('vprodTotal').textContent='Total: '+formatUGX(clientPrice(p)*q);
 }
 function addToCart(){
   var p=VPRODS.find(function(x){return x.id===currentProdId;});if(!p)return;
   var q=parseInt(document.getElementById('vprodQty').value)||1;
-  var existing=VCART.find(function(x){return x.prodId===p.id;});
-  if(existing){existing.qty+=q;}else{VCART.push({prodId:p.id,name:p.name,unit:p.unit,qty:q,price:finalPrice(p),supplier:p.supplier});}
-  closeOv('ov-vprod');
-  updateCartBadge();
-  tst('Added to cart!','ok');
+  var ex=VCART.find(function(x){return x.prodId===p.id;});
+  if(ex){ex.qty+=q;}else{VCART.push({prodId:p.id,name:p.name,unit:p.unit,qty:q,unitPrice:clientPrice(p),basePrice:p.basePrice,commission:getCommission(p),supplier:p.supplier});}
+  closeOv('ov-vprod');updateCartBadge();tst('Added to cart!','ok');
 }
 function updateCartBadge(){
   var n=VCART.reduce(function(a,x){return a+x.qty;},0);
@@ -1295,23 +1329,32 @@ function updateCartBadge(){
 }
 function clearCart(){VCART=[];renderCart();updateCartBadge();}
 
-// -- CART -------------------------------------------------------------
+// CART
 function renderCart(){
   var el=document.getElementById('cartItems');
   var totEl=document.getElementById('cartTotal');
-  if(!VCART.length){el.innerHTML='<div class="emp">Your cart is empty.</div>';totEl.style.display='none';return;}
+  if(!VCART.length){el.innerHTML='<div class="emp">Your cart is empty.</div>';if(totEl)totEl.style.display='none';return;}
   var total=0;
   el.innerHTML='<table style="width:100%;font-size:12px;border-collapse:collapse">'+
-    '<thead><tr><th style="text-align:left;padding:4px 6px;background:var(--su2);font-size:10px">Product</th><th style="padding:4px 6px;background:var(--su2);font-size:10px;text-align:center">Qty</th><th style="padding:4px 6px;background:var(--su2);font-size:10px;text-align:right">Subtotal</th><th style="padding:4px 6px;background:var(--su2)"></th></tr></thead><tbody>'+
+    '<thead><tr>'+
+    '<th style="text-align:left;padding:4px 6px;background:var(--su2);font-size:10px">Product</th>'+
+    '<th style="padding:4px 6px;background:var(--su2);font-size:10px;text-align:center">Qty</th>'+
+    '<th style="padding:4px 6px;background:var(--su2);font-size:10px;text-align:right">Subtotal</th>'+
+    '<th style="padding:4px 6px;background:var(--su2)"></th></tr></thead><tbody>'+
     VCART.map(function(item,i){
-      var sub=item.price*item.qty;total+=sub;
-      return '<tr><td style="padding:6px;border-bottom:1px solid var(--bo)"><div style="font-weight:600">'+item.name+'</div><div style="font-size:10px;color:var(--tx2)">'+item.supplier+'</div><div style="font-size:10px;color:var(--tx3)">'+formatUGX(item.price)+' / '+item.unit+'</div></td>'+
-        '<td style="padding:6px;border-bottom:1px solid var(--bo);text-align:center"><input type="number" value="'+item.qty+'" min="1" max="99" onchange="updateCartQty('+i+',this.value)" style="width:48px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--bo2);border-radius:4px"/></td>'+
+      var sub=item.unitPrice*item.qty;total+=sub;
+      return '<tr><td style="padding:6px;border-bottom:1px solid var(--bo)">'+
+        '<div style="font-weight:600">'+item.name+'</div>'+
+        '<div style="font-size:10px;color:var(--tx2)">'+item.supplier+' - '+formatUGX(item.unitPrice)+' / '+item.unit+'</div></td>'+
+        '<td style="padding:6px;border-bottom:1px solid var(--bo);text-align:center">'+
+        '<input type="number" value="'+item.qty+'" min="1" max="99" onchange="updateCartQty('+i+',this.value)" style="width:48px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--bo2);border-radius:4px"/></td>'+
         '<td style="padding:6px;border-bottom:1px solid var(--bo);text-align:right;font-weight:700;color:#0a6640">'+formatUGX(sub)+'</td>'+
         '<td style="padding:6px;border-bottom:1px solid var(--bo)"><button onclick="removeCartItem('+i+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px">&#10005;</button></td></tr>';
     }).join('')+'</tbody></table>';
-  document.getElementById('cartTotalAmt').textContent=formatUGX(total);
-  totEl.style.display='block';
+  if(totEl){
+    document.getElementById('cartTotalAmt').textContent=formatUGX(total);
+    totEl.style.display='block';
+  }
 }
 function updateCartQty(i,v){VCART[i].qty=Math.max(1,parseInt(v)||1);renderCart();updateCartBadge();}
 function removeCartItem(i){VCART.splice(i,1);renderCart();updateCartBadge();}
@@ -1321,38 +1364,32 @@ function placeOrder(){
   var addr=document.getElementById('cartAddr').value.trim();
   var phone=document.getElementById('cartPhone').value.trim();
   if(!addr){tst('Enter delivery address.');return;}
-  var total=VCART.reduce(function(a,x){return a+x.price*x.qty;},0);
-  var markup=VCART.reduce(function(a,x){
-    var p=VPRODS.find(function(y){return y.id===x.prodId;});
-    if(!p)return a;
-    var m=getMarkup(p.supplier);
-    return a+Math.round(x.basePrice||x.price*(1-m/(100+m)))*x.qty*m/100;
-  },0);
-  // Calculate commissions properly
-  var commissions={};
+  var total=VCART.reduce(function(a,x){return a+x.unitPrice*x.qty;},0);
+  var totalBase=VCART.reduce(function(a,x){return a+x.basePrice*x.qty;},0);
+  var totalMargin=total-totalBase;
+  var bySupplier={};
   VCART.forEach(function(item){
-    var p=VPRODS.find(function(y){return y.id===item.prodId;});
-    if(!p)return;
-    var m=getMarkup(p.supplier);
-    var base=p.basePrice*item.qty;
-    var margin=Math.round(base*m/100);
-    if(!commissions[p.supplier])commissions[p.supplier]={baseTotal:0,margin:0};
-    commissions[p.supplier].baseTotal+=base;
-    commissions[p.supplier].margin+=margin;
+    if(!bySupplier[item.supplier])bySupplier[item.supplier]={items:[],baseTotal:0,clientTotal:0,margin:0};
+    bySupplier[item.supplier].items.push(item);
+    bySupplier[item.supplier].baseTotal+=item.basePrice*item.qty;
+    bySupplier[item.supplier].clientTotal+=item.unitPrice*item.qty;
+    bySupplier[item.supplier].margin+=(item.unitPrice-item.basePrice)*item.qty;
   });
+  var clientName=CLI.length?CLI[0].fullName:'Client';
+  var clientEmail=CLI.length?CLI[0].email:'';
   var order={
     id:vordnid++,
+    ref:'ORD-'+String(vordnid-1).padStart(4,'0'),
     date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
     timestamp:Date.now(),
-    clientName:CLI.length?CLI[0].fullName:'Client',
-    items:VCART.slice(),
-    address:addr,phone:phone,
+    clientName:clientName,clientEmail:clientEmail,
+    items:VCART.slice(),address:addr,phone:phone,
     notes:document.getElementById('cartNotes').value.trim(),
-    total:total,
-    commissions:commissions,
-    muvawalaMargin:Object.values(commissions).reduce(function(a,c){return a+c.margin;},0),
-    status:'New',
-    comments:[]
+    total:total,totalBase:totalBase,totalMargin:totalMargin,
+    bySupplier:bySupplier,
+    status:'Pending Payment',
+    comments:[],supplierInvoice:null,
+    paymentRef:'',supplierRef:''
   };
   VORDERS.unshift(order);svVet();
   VCART=[];updateCartBadge();
@@ -1360,72 +1397,122 @@ function placeOrder(){
   document.getElementById('cartPhone').value='';
   document.getElementById('cartNotes').value='';
   renderCart();
-  tst('Order placed! Reference: ORD-'+String(order.id).padStart(4,'0'),'ok');
-  // notify via email if admin email known
-  var sub='New Vet Shop Order - ORD-'+String(order.id).padStart(4,'0');
-  var body='New order placed on Muvawala Goat Farms Vet Shop.\n\nOrder: ORD-'+String(order.id).padStart(4,'0')+'\nDate: '+order.date+'\nTotal: '+formatUGX(order.total)+'\nDelivery: '+order.address+'\nPhone: '+order.phone+'\n\nItems:\n'+order.items.map(function(x){return '- '+x.name+' x'+x.qty+' = '+formatUGX(x.price*x.qty);}).join('\n')+'\n\nPlease process this order.\n\nMuvawala Goat Farms';
+  tst('Order placed! Ref: '+order.ref,'ok');
+  // Email Muvawala
+  var sub='New Vet Shop Order - '+order.ref+' - '+clientName;
+  var itemLines=order.items.map(function(x){return '- '+x.name+' x'+x.qty+' = '+formatUGX(x.unitPrice*x.qty);}).join('\n');
+  var body='New order received on Muvawala Vet Shop.\n\nOrder: '+order.ref+'\nClient: '+clientName+'\nDate: '+order.date+'\nDelivery address: '+addr+'\nPhone: '+phone+'\n\nITEMS:\n'+itemLines+'\n\nTOTAL DUE FROM CLIENT: '+formatUGX(total)+'\nMuvawala margin: '+formatUGX(totalMargin)+'\n\nNext step: Confirm payment receipt and forward to supplier.\n\nMuvawala Goat Farms Portal';
   window.open('mailto:muvawalafarmspropertiesug@gmail.com?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body));
   showVetView('orders');
 }
 
-// -- ORDERS ------------------------------------------------------------
+// ORDERS (CLIENT VIEW)
 function renderVetOrders(){
   var el=document.getElementById('ordersOut');
   var em=document.getElementById('ordersEmpty');
-  if(!VORDERS.length){el.innerHTML='';em.style.display='block';return;}
-  em.style.display='none';
-  el.innerHTML=VORDERS.map(function(o){
-    var stCls='ost-'+o.status.toLowerCase().replace(/\s/g,'-');
+  var myOrders=VORDERS;
+  if(!myOrders.length){if(el)el.innerHTML='';if(em)em.style.display='block';return;}
+  if(em)em.style.display='none';
+  if(el)el.innerHTML=myOrders.map(function(o){
     return '<div class="ordcard">'+
-      '<div class="ordcard-hdr"><div><div class="ordid">ORD-'+String(o.id).padStart(4,'0')+'</div><div style="font-size:10px;color:var(--tx2)">'+o.date+' . '+o.items.length+' item(s)</div></div>'+
-      '<span class="ordst '+stCls+'">'+o.status+'</span></div>'+
-      o.items.map(function(x){return '<div class="ordline"><span>'+x.name+' &times; '+x.qty+'</span><span>'+formatUGX(x.price*x.qty)+'</span></div>';}).join('')+
+      '<div class="ordcard-hdr"><div><div class="ordid">'+o.ref+'</div>'+
+      '<div style="font-size:10px;color:var(--tx2)">'+o.date+' - '+o.items.length+' item(s)</div></div>'+
+      orderBadge(o.status)+'</div>'+
+      o.items.map(function(x){return '<div class="ordline"><span>'+x.name+' x'+x.qty+'</span><span>'+formatUGX(x.unitPrice*x.qty)+'</span></div>';}).join('')+
       '<div style="display:flex;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid var(--bo)">'+
       '<span style="font-size:11px;font-weight:700">Total: '+formatUGX(o.total)+'</span>'+
-      '<button class="btn btn-s btn-p" onclick="openOrderDetail('+o.id+')">View details</button></div>'+
+      '<button class="btn btn-s btn-p" onclick="openOrderDetail('+o.id+')">View / Comment</button></div>'+
+      (o.supplierInvoice?'<div style="margin-top:6px;padding:5px 8px;background:var(--gl);border-radius:var(--rs);font-size:10px;color:var(--gn)">&#9989; Supplier invoice uploaded</div>':'')+
       '</div>';
   }).join('');
 }
 
-// -- ORDER DETAIL ------------------------------------------------------
+// ORDER DETAIL
 function openOrderDetail(id){
   currentOrderId=id;
   var o=VORDERS.find(function(x){return x.id===id;});if(!o)return;
-  document.getElementById('ordModalTitle').textContent='Order ORD-'+String(o.id).padStart(4,'0');
-  document.getElementById('ordModalSub').textContent=o.date+' . '+o.status;
-  var stCls='ost-'+o.status.toLowerCase().replace(/\s/g,'-');
-  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-    '<span class="ordst '+stCls+'">'+o.status+'</span>'+
-    '<span style="font-size:11px;color:var(--tx2)">'+o.date+'</span></div>';
+  document.getElementById('ordModalTitle').textContent='Order - '+o.ref;
+  document.getElementById('ordModalSub').textContent=o.date+' - '+o.clientName;
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">'+
+    orderBadge(o.status)+'<span style="font-size:11px;color:var(--tx2)">'+o.date+'</span></div>';
   html+='<div style="background:var(--su2);border-radius:var(--rs);padding:9px;margin-bottom:9px">'+
     '<div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:5px">ORDER ITEMS</div>'+
-    o.items.map(function(x){return '<div class="ordline"><span>'+x.name+' &times;'+x.qty+' ('+x.unit+')</span><span style="font-weight:700">'+formatUGX(x.price*x.qty)+'</span></div>';}).join('')+
-    '<div style="display:flex;justify-content:space-between;margin-top:7px;padding-top:5px;border-top:2px solid var(--bo2);font-size:13px;font-weight:700"><span>TOTAL</span><span style="color:#0a6640">'+formatUGX(o.total)+'</span></div></div>';
-  html+='<div style="font-size:11px;color:var(--tx2);margin-bottom:5px"><strong>Delivery:</strong> '+o.address+'</div>';
-  html+='<div style="font-size:11px;color:var(--tx2);margin-bottom:'+(o.notes?'5':'9')+'px"><strong>Phone:</strong> '+o.phone+'</div>';
-  if(o.notes)html+='<div style="font-size:11px;color:var(--tx2);margin-bottom:9px;background:var(--al);padding:6px;border-radius:var(--rs)"><strong>Notes:</strong> '+o.notes+'</div>';
+    o.items.map(function(x){return '<div class="ordline"><span>'+x.name+' x'+x.qty+' ('+x.unit+')</span><span style="font-weight:700">'+formatUGX(x.unitPrice*x.qty)+'</span></div>';}).join('')+
+    '<div style="display:flex;justify-content:space-between;margin-top:7px;padding-top:5px;border-top:2px solid var(--bo2);font-size:13px;font-weight:700">'+
+    '<span>TOTAL</span><span style="color:#0a6640">'+formatUGX(o.total)+'</span></div></div>';
+  html+='<div style="font-size:11px;margin-bottom:4px"><strong>Delivery:</strong> '+o.address+'</div>';
+  html+='<div style="font-size:11px;margin-bottom:'+(o.notes?'4':'9')+'px"><strong>Phone:</strong> '+o.phone+'</div>';
+  if(o.notes)html+='<div style="font-size:11px;margin-bottom:9px;background:var(--al);padding:6px;border-radius:var(--rs)"><strong>Notes:</strong> '+o.notes+'</div>';
+  if(o.paymentRef)html+='<div style="font-size:11px;margin-bottom:5px;color:var(--gn)"><strong>Payment ref:</strong> '+o.paymentRef+'</div>';
+  if(o.supplierRef)html+='<div style="font-size:11px;margin-bottom:5px"><strong>Supplier order ref:</strong> '+o.supplierRef+'</div>';
+  if(o.supplierInvoice)html+='<div style="margin-bottom:9px;padding:8px;background:var(--gl);border-radius:var(--rs);font-size:11px;color:var(--gn)">&#9989; Supplier invoice on file</div>';
+
+  // Admin section
   if(isA){
-    html+='<div style="background:#f0fdf4;border-radius:var(--rs);padding:9px;margin-bottom:9px">';
-    html+='<div style="font-size:10px;font-weight:700;color:#0a6640;margin-bottom:5px">COMMISSION BREAKDOWN</div>';
-    Object.entries(o.commissions||{}).forEach(function(e){
-      html+='<div class="ordline"><span>'+e[0]+' (supplier)</span><span>'+formatUGX(e[1].baseTotal)+'</span></div>';
-      html+='<div class="ordline" style="color:#0a6640"><span>&nbsp;&nbsp;Muvawala margin</span><span style="font-weight:700">'+formatUGX(e[1].margin)+'</span></div>';
+    html+='<div style="background:#fffbeb;border:1px solid var(--ac);border-radius:var(--rs);padding:9px;margin-bottom:9px">';
+    html+='<div style="font-size:10px;font-weight:700;color:var(--ab);margin-bottom:7px">ADMIN - COMMISSION BREAKDOWN</div>';
+    Object.keys(o.bySupplier||{}).forEach(function(sup){
+      var s=o.bySupplier[sup];
+      html+='<div style="font-size:11px;margin-bottom:3px"><strong>'+sup+'</strong></div>';
+      html+='<div style="display:flex;justify-content:space-between;font-size:11px"><span>Supplier cost:</span><span>'+formatUGX(s.baseTotal)+'</span></div>';
+      html+='<div style="display:flex;justify-content:space-between;font-size:11px;color:#0a6640"><span>Muvawala margin:</span><span><strong>'+formatUGX(s.margin)+'</strong></span></div>';
     });
-    html+='<div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px solid #6ee7b7;font-size:12px;font-weight:700;color:#0a6640"><span>Total Muvawala margin</span><span>'+formatUGX(o.muvawalaMargin)+'</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#0a6640;margin-top:6px;border-top:1px solid #fcd34d;padding-top:5px"><span>Total margin:</span><span>'+formatUGX(o.totalMargin)+'</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--rd);margin-top:3px"><span>Pay supplier:</span><span>'+formatUGX(o.totalBase)+'</span></div>';
     html+='</div>';
   }
+
+  // Comments
   if(o.comments&&o.comments.length){
     html+='<div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:5px">COMMENTS</div>';
-    html+=o.comments.map(function(cm){return '<div class="comm-item"><div class="comm-meta">'+(cm.isAdmin?'<span style="color:var(--br);font-weight:700">Admin</span> . ':'')+(cm.name||'Client')+' . '+cm.date+'</div><div style="font-size:12px">'+cm.text+'</div></div>';}).join('');
+    html+=o.comments.map(function(cm){
+      return '<div class="comm-item"><div class="comm-meta">'+(cm.isAdmin?'<span style="color:var(--br);font-weight:700">Muvawala</span> - ':'')+(cm.name||'Client')+' - '+cm.date+'</div><div style="font-size:12px">'+cm.text+'</div></div>';
+    }).join('');
   }
   document.getElementById('ordModalBody').innerHTML=html;
+
+  // Admin action buttons
   var adminBtns=document.getElementById('ordAdminBtns');
   if(isA){
     adminBtns.style.display='flex';
-    var statuses=['New','Confirmed','Dispatched','Delivered','Cancelled'];
-    adminBtns.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--tx2);width:100%;margin-bottom:4px">UPDATE STATUS:</div>'+
-      statuses.map(function(s){return '<button class="btn btn-s'+(o.status===s?' btn-p':'')+ '" onclick="updateOrderStatus(\''+s+'\')" style="'+(o.status===s?'background:#0a6640;color:#fff;border-color:#0a6640;':'')+'">'+(s==='New'?'&#128228;':s==='Confirmed'?'&#9989;':s==='Dispatched'?'&#128666;':s==='Delivered'?'&#127968;':'&#10060;')+' '+s+'</button>';}).join('');
-  }else adminBtns.style.display='none';
+    adminBtns.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--tx2);width:100%;margin-bottom:5px">UPDATE STATUS:</div>';
+    var steps=[
+      {s:'Pending Payment',icon:'&#128228;',hint:'Waiting for client payment'},
+      {s:'Payment Received',icon:'&#9989;',hint:'Mark when client pays Muvawala'},
+      {s:'Sent to Supplier',icon:'&#128232;',hint:'Forward order to supplier via email'},
+      {s:'Invoice Received',icon:'&#128196;',hint:'Supplier sent invoice - upload it'},
+      {s:'Supplier Paid',icon:'&#128181;',hint:'Muvawala paid supplier (minus commission)'},
+      {s:'Delivered',icon:'&#127968;',hint:'Client received their order'},
+      {s:'Cancelled',icon:'&#10060;',hint:'Cancel this order'}
+    ];
+    steps.forEach(function(step){
+      var active=o.status===step.s;
+      adminBtns.innerHTML+='<button class="btn btn-s" title="'+step.hint+'" onclick="updateOrderStatus(\''+step.s+'\')" style="'+(active?'background:#0a6640;color:#fff;border-color:#0a6640;':'')+'">'+(active?'<strong>'+step.icon+' '+step.s+'</strong>':step.icon+' '+step.s)+'</button>';
+    });
+
+    // Contextual action buttons
+    var extras='<div style="width:100%;margin-top:8px;border-top:1px solid var(--bo);padding-top:8px;display:flex;gap:6px;flex-wrap:wrap">';
+    if(o.status==='Payment Received'){
+      var o2=VORDERS.find(function(x){return x.id===currentOrderId;});
+      var suppliers=Object.keys(o2&&o2.bySupplier||{});
+      suppliers.forEach(function(sup){
+        extras+='<button class="btn btn-s btn-p" onclick="emailSupplier('+id+',\''+sup+'\')">&#128232; Forward to '+sup+'</button>';
+      });
+    }
+    if(o.status==='Sent to Supplier'||o.status==='Invoice Received'){
+      extras+='<button class="btn btn-s btn-a" onclick="uploadInvoice('+id+')">&#128196; Upload supplier invoice</button>';
+    }
+    if(o.status==='Invoice Received'){
+      extras+='<button class="btn btn-s btn-g" onclick="markSupplierPaid('+id+')">&#128181; Mark supplier paid</button>';
+    }
+    extras+='</div>';
+    adminBtns.innerHTML+=extras;
+
+    // Payment ref field
+    adminBtns.innerHTML+='<div style="width:100%;margin-top:7px"><input id="payRefInput" placeholder="Payment reference (e.g. MTN ref, bank slip)" value="'+(o.paymentRef||'')+'" style="width:100%;font-size:11px;padding:6px 8px;border:1px solid var(--bo2);border-radius:var(--rs)"/><button class="btn btn-s" style="margin-top:4px" onclick="savePayRef('+id+')">Save payment ref</button></div>';
+  }else{
+    adminBtns.style.display='none';
+  }
   document.getElementById('ordCommentTxt').value='';
   document.getElementById('ov-order').classList.add('sh');
 }
@@ -1434,146 +1521,227 @@ function updateOrderStatus(status){
   var o=VORDERS.find(function(x){return x.id===currentOrderId;});if(!o)return;
   o.status=status;
   o.comments=o.comments||[];
-  o.comments.push({name:'Admin',isAdmin:true,date:new Date().toLocaleDateString('en-GB'),text:'Status updated to: '+status});
+  o.comments.push({name:'Muvawala Admin',isAdmin:true,date:new Date().toLocaleDateString('en-GB'),text:'Status updated to: '+status});
   svVet();openOrderDetail(currentOrderId);
-  tst('Status updated to '+status,'ok');
-  if(o.clientEmail){var sub='Your Vet Shop Order - ORD-'+String(o.id).padStart(4,'0')+' '+status;var body='Your order status has been updated to: '+status+'\n\nOrder: ORD-'+String(o.id).padStart(4,'0')+'\n\nMuvawala Goat Farms';window.open('mailto:'+o.clientEmail+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body));}
+  renderVetOrders();if(isA)renderVetAdmin();tst('Status: '+status,'ok');
+}
+
+function savePayRef(id){
+  var o=VORDERS.find(function(x){return x.id===id;});if(!o)return;
+  o.paymentRef=document.getElementById('payRefInput').value.trim();
+  svVet();tst('Payment reference saved','ok');openOrderDetail(id);
+}
+
+function emailSupplier(id,supplier){
+  var o=VORDERS.find(function(x){return x.id===id;});if(!o)return;
+  var sup=o.bySupplier&&o.bySupplier[supplier];if(!sup)return;
+  var items=sup.items||o.items.filter(function(x){return x.supplier===supplier;});
+  var sub='Purchase Order - '+o.ref+' - Muvawala Goat Farms';
+  var body='Dear '+supplier+',\n\nPlease prepare the following order:\n\nORDER REFERENCE: '+o.ref+'\nDate: '+o.date+'\nDelivery to: '+o.address+'\n\nITEMS:\n'+items.map(function(x){return '- '+x.name+' x'+x.qty+' ('+x.unit+') @ '+formatUGX(x.basePrice)+' = '+formatUGX(x.basePrice*x.qty);}).join('\n')+'\n\nSUPPLIER TOTAL: '+formatUGX(sup.baseTotal)+'\n\nPlease send your invoice to muvawalafarmspropertiesug@gmail.com once ready.\n\nThank you,\nMuvawala Goat Farms\nmuvawalafarmspropertiesug@gmail.com | +256 709 066 457';
+  window.open('mailto:?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body));
+  updateOrderStatus('Sent to Supplier');
+  tst('Order forwarded to '+supplier,'ok');
+}
+
+function uploadInvoice(id){
+  var input=document.createElement('input');
+  input.type='file';
+  input.accept='image/*,.pdf';
+  input.onchange=function(){
+    if(!input.files||!input.files[0])return;
+    var file=input.files[0];
+    if(file.type.indexOf('image')===0){
+      compImg(file,function(dt){
+        var o=VORDERS.find(function(x){return x.id===id;});if(!o)return;
+        o.supplierInvoice=dt;
+        if(o.status==='Sent to Supplier')o.status='Invoice Received';
+        svVet();openOrderDetail(id);renderVetOrders();if(isA)renderVetAdmin();
+        tst('Invoice uploaded','ok');
+      });
+    }else{
+      var r=new FileReader();
+      r.onload=function(e){
+        var o=VORDERS.find(function(x){return x.id===id;});if(!o)return;
+        o.supplierInvoice=e.target.result;
+        if(o.status==='Sent to Supplier')o.status='Invoice Received';
+        svVet();openOrderDetail(id);renderVetOrders();if(isA)renderVetAdmin();
+        tst('Invoice uploaded','ok');
+      };
+      r.readAsDataURL(file);
+    }
+  };
+  input.click();
+}
+
+function markSupplierPaid(id){
+  var o=VORDERS.find(function(x){return x.id===id;});if(!o)return;
+  var confirm_msg='Confirm: Pay supplier '+formatUGX(o.totalBase)+'\nMuvawala keeps: '+formatUGX(o.totalMargin)+'\nTotal from client: '+formatUGX(o.total);
+  if(!confirm(confirm_msg))return;
+  o.status='Supplier Paid';
+  o.comments=o.comments||[];
+  o.comments.push({name:'Muvawala Admin',isAdmin:true,date:new Date().toLocaleDateString('en-GB'),text:'Supplier paid '+formatUGX(o.totalBase)+'. Muvawala commission retained: '+formatUGX(o.totalMargin)});
+  svVet();openOrderDetail(id);renderVetOrders();if(isA)renderVetAdmin();tst('Supplier marked as paid','ok');
 }
 
 function postOrderComment(){
   var txt=document.getElementById('ordCommentTxt').value.trim();if(!txt){tst('Enter a comment first.');return;}
   var o=VORDERS.find(function(x){return x.id===currentOrderId;});if(!o)return;
   o.comments=o.comments||[];
-  o.comments.push({name:isA?'Admin':(CLI.length?CLI[0].fullName:'Client'),isAdmin:isA,date:new Date().toLocaleDateString('en-GB'),text:txt});
-  svVet();openOrderDetail(currentOrderId);
-  tst('Comment posted','ok');
+  o.comments.push({name:isA?'Muvawala Admin':(CLI.length?CLI[0].fullName:'Client'),isAdmin:isA,date:new Date().toLocaleDateString('en-GB'),text:txt});
+  svVet();openOrderDetail(currentOrderId);tst('Comment posted','ok');
 }
 
-// -- REVIEWS -----------------------------------------------------------
+// REVIEWS
 function setStars(n){
   selectedStars=n;
   document.getElementById('starPicker').querySelectorAll('span').forEach(function(s,i){s.style.color=i<n?'#f59e0b':'#d1d5db';});
 }
 function submitReview(){
   if(!selectedStars){tst('Select a star rating first.');return;}
-  var comment=document.getElementById('vprodComment').value.trim();
-  if(!comment){tst('Write a comment.');return;}
+  var comment=document.getElementById('vprodComment').value.trim();if(!comment){tst('Write a comment.');return;}
   if(!VREVIEWS[currentProdId])VREVIEWS[currentProdId]=[];
   VREVIEWS[currentProdId].push({name:CLI.length?CLI[0].fullName:'Farmer',stars:selectedStars,comment:comment,date:new Date().toLocaleDateString('en-GB')});
-  svVet();
-  tst('Review posted!','ok');
-  openProduct(currentProdId);
+  svVet();tst('Review posted!','ok');openProduct(currentProdId);
 }
 
-// -- ADMIN - PRODUCT IMPORT --------------------------------------------
+// SMART IMPORT - handles pipe, tab, comma separated
 function parseVetImport(){
   var txt=document.getElementById('vetImportTxt').value.trim();if(!txt){tst('Paste a price list first.');return;}
+  var supplier=document.getElementById('vetSupplierName').value.trim()||'Supplier';
   var lines=txt.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>3;});
   var parsed=[];
   lines.forEach(function(line){
-    // Try pipe-separated format
-    var parts=line.split('|').map(function(p){return p.trim();});
-    if(parts.length>=4){
-      var price=parseInt((parts[3]||'').replace(/[^0-9]/g,''));
-      if(price>0){
-        parsed.push({
-          name:parts[0],
-          category:parts[1]||'General',
-          unit:parts[2]||'unit',
-          basePrice:price,
-          stock:parts[4]||'In stock',
-          description:parts[5]||'',
-          supplier:'Imported Supplier',
-          icon:'&#128138;'
-        });
-      }
-    }
+    // Detect separator: pipe, tab, or multiple spaces
+    var parts;
+    if(line.indexOf('|')>-1){parts=line.split('|').map(function(p){return p.trim();});}
+    else if(line.indexOf('\t')>-1){parts=line.split('\t').map(function(p){return p.trim();});}
+    else if(line.indexOf(',')>-1 && line.indexOf(',')<line.indexOf(' ')){parts=line.split(',').map(function(p){return p.trim();});}
+    else{return;} // skip unrecognised lines
+    if(parts.length<4)return;
+    var price=parseInt((parts[3]||'').replace(/[^0-9]/g,''));
+    if(!price||price<100)return; // skip header rows or invalid
+    var commission=parseFloat((parts[4]||'').replace(/[^0-9.]/g,''))||parseFloat(VMARKUPS[supplier]||15);
+    parsed.push({
+      name:parts[0],category:parts[1]||'General',unit:parts[2]||'unit',
+      basePrice:price,commission:commission,
+      stock:parts[5]||'In stock',description:parts[6]||'',
+      supplier:supplier
+    });
   });
-  if(!parsed.length){tst('No valid products found. Use format: Name | Category | Unit | Price | Stock | Description');return;}
+  if(!parsed.length){tst('No valid products found. Use: Name | Category | Unit | Price | Commission% | Stock | Description');return;}
+  window._vetParsed=parsed;
   var prev=document.getElementById('vetImportPreview');
   prev.style.display='block';
-  window._vetParsed = parsed;
-  prev.innerHTML='<div class="alert alert-a" style="margin-bottom:8px">Found '+parsed.length+' products. Review and confirm:</div>'+
+  prev.innerHTML='<div class="alert alert-a" style="margin-bottom:8px">Found <strong>'+parsed.length+'</strong> products from <strong>'+supplier+'</strong>. Review below:</div>'+
     '<div style="overflow-x:auto"><table style="width:100%;font-size:11px;border-collapse:collapse">'+
-    '<thead><tr><th style="background:var(--br);color:#fff;padding:4px 7px;text-align:left">Name</th><th style="background:var(--br);color:#fff;padding:4px 7px">Category</th><th style="background:var(--br);color:#fff;padding:4px 7px">Unit</th><th style="background:var(--br);color:#fff;padding:4px 7px;text-align:right">Base Price</th><th style="background:var(--br);color:#fff;padding:4px 7px">Stock</th></tr></thead><tbody>'+
-    parsed.map(function(p){return '<tr><td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.name+'</td><td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.category+'</td><td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.unit+'</td><td style="padding:4px 7px;border-bottom:1px solid var(--bo);text-align:right">'+formatUGX(p.basePrice)+'</td><td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.stock+'</td></tr>';}).join('')+
-    '</tbody></table></div>'+
+    '<thead><tr>'+
+    '<th style="background:var(--br);color:#fff;padding:4px 7px;text-align:left">Product</th>'+
+    '<th style="background:var(--br);color:#fff;padding:4px 7px">Category</th>'+
+    '<th style="background:var(--br);color:#fff;padding:4px 7px">Unit</th>'+
+    '<th style="background:var(--br);color:#fff;padding:4px 7px;text-align:right">Base Price</th>'+
+    '<th style="background:var(--br);color:#fff;padding:4px 7px;text-align:right">Commission%</th>'+
+    '<th style="background:var(--br);color:#fff;padding:4px 7px;text-align:right">Client Price</th>'+
+    '<th style="background:var(--br);color:#fff;padding:4px 7px">Stock</th></tr></thead><tbody>'+
+    parsed.map(function(p){
+      var cp=Math.round(p.basePrice*(1+p.commission/100));
+      return '<tr><td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.name+'</td>'+
+        '<td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.category+'</td>'+
+        '<td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.unit+'</td>'+
+        '<td style="padding:4px 7px;border-bottom:1px solid var(--bo);text-align:right">'+formatUGX(p.basePrice)+'</td>'+
+        '<td style="padding:4px 7px;border-bottom:1px solid var(--bo);text-align:right;color:#0a6640;font-weight:700">'+p.commission+'%</td>'+
+        '<td style="padding:4px 7px;border-bottom:1px solid var(--bo);text-align:right;font-weight:700">'+formatUGX(cp)+'</td>'+
+        '<td style="padding:4px 7px;border-bottom:1px solid var(--bo)">'+p.stock+'</td></tr>';
+    }).join('')+'</tbody></table></div>'+
     '<div class="brow" style="margin-top:8px">'+
-    '<button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="confirmVetImport()">&#10003; Add '+parsed.length+' products</button>'+
+    '<button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="confirmVetImport()">&#10003; Add '+parsed.length+' products to shop</button>'+
     '<button class="btn btn-d" onclick="replaceVetImport()">Replace all products</button>'+
     '<button class="btn" onclick="document.getElementById(\'vetImportPreview\').style.display=\'none\'">Cancel</button></div>';
 }
 
 function confirmVetImport(){
-  var prods = window._vetParsed;
-  if(!prods)return;
+  var prods=window._vetParsed;if(!prods)return;
   prods.forEach(function(p){
     var ex=VPRODS.find(function(x){return x.name.toLowerCase()===p.name.toLowerCase();});
-    if(ex){Object.assign(ex,p);}
-    else{p.id=vnid++;VPRODS.push(p);}
+    if(ex){Object.assign(ex,p);}else{p.id=vnid++;VPRODS.push(p);}
   });
   svVet();document.getElementById('vetImportPreview').style.display='none';document.getElementById('vetImportTxt').value='';
-  tst('Products updated!','ok');renderVetShop();renderVetAdmin();
+  tst('Products updated! Showing in shop now.','ok');renderVetShop();renderVetAdmin();
 }
 function replaceVetImport(){
-  var prods = window._vetParsed;
-  if(!prods||!confirm('This will replace ALL existing products. Continue?'))return;
-  VPRODS=prods.map(function(p,i){return Object.assign({id:i+1,icon:'&#128138;'},p);});
+  var prods=window._vetParsed;if(!prods||!confirm('Replace ALL existing products?'))return;
+  VPRODS=prods.map(function(p,i){return Object.assign({id:i+1},p);});
   vnid=VPRODS.length+1;svVet();
   document.getElementById('vetImportPreview').style.display='none';document.getElementById('vetImportTxt').value='';
   tst('Product list replaced!','ok');renderVetShop();renderVetAdmin();
 }
 
-// -- ADMIN - MARKUP & COMMISSION ----------------------------------------
-function renderVetAdmin(){
-  // Commission summary
-  var totalOrders=VORDERS.length;
-  var totalRevenue=VORDERS.reduce(function(a,o){return a+o.total;},0);
-  var totalMargin=VORDERS.reduce(function(a,o){return a+(o.muvawalaMargin||0);},0);
-  var pending=VORDERS.filter(function(o){return o.status==='New'||o.status==='Confirmed';}).length;
-  document.getElementById('vetCommSummary').innerHTML=
-    '<h3>&#128200; Commission & orders summary</h3>'+
-    '<div class="comm-grid">'+
-    '<div class="comm-item2"><div class="comm-val">'+totalOrders+'</div><div class="comm-lbl">Total orders</div></div>'+
-    '<div class="comm-item2"><div class="comm-val">'+pending+'</div><div class="comm-lbl">Pending</div></div>'+
-    '<div class="comm-item2"><div class="comm-val" style="font-size:13px">'+formatUGX(totalRevenue)+'</div><div class="comm-lbl">Total revenue</div></div>'+
-    '<div class="comm-item2"><div class="comm-val" style="font-size:13px">'+formatUGX(totalMargin)+'</div><div class="comm-lbl">Muvawala margin</div></div>'+
-    '</div>';
-  // Markup settings
-  var suppSet={};VPRODS.forEach(function(p){suppSet[p.supplier]=1;});var suppliers=Object.keys(suppSet);if(!suppliers.length)suppliers=['VetPharma Uganda','AgroVet Imports','FarmChem Ltd'];
-  document.getElementById('markupSettings').innerHTML=suppliers.map(function(s){
-    var m=VMARKUPS[s]||15;
-    return '<div class="markup-row"><span style="flex:1;font-weight:600">'+s+'</span><input type="number" id="mk-'+s.replace(/\s/g,'_')+'" value="'+m+'" min="0" max="100" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid var(--bo2);border-radius:var(--rs);text-align:center"/> <span style="font-size:11px;color:var(--tx2)">% markup on base price</span></div>';
-  }).join('');
-  // All orders
-  var ordOut=document.getElementById('allOrdersOut');
-  if(!VORDERS.length){ordOut.innerHTML='<p style="color:var(--tx3);font-size:12px">No orders yet.</p>';return;}
-  ordOut.innerHTML=VORDERS.map(function(o){
-    var stCls='ost-'+o.status.toLowerCase().replace(/\s/g,'-');
+// ORDER FILTER
+function filterOrders(status,btn){
+  vetOrderFilter=status;
+  document.querySelectorAll('#orderStatusFilter .vcat').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderAllOrders();
+}
+function renderAllOrders(){
+  var ordOut=document.getElementById('allOrdersOut');if(!ordOut)return;
+  var list=vetOrderFilter==='all'?VORDERS:VORDERS.filter(function(o){return o.status===vetOrderFilter;});
+  if(!list.length){ordOut.innerHTML='<p style="color:var(--tx3);font-size:12px">No orders in this status.</p>';return;}
+  ordOut.innerHTML=list.map(function(o){
     return '<div class="ordcard">'+
-      '<div class="ordcard-hdr"><div><div class="ordid">ORD-'+String(o.id).padStart(4,'0')+' - '+o.clientName+'</div>'+
-      '<div style="font-size:10px;color:var(--tx2)">'+o.date+' . '+o.items.length+' item(s) . '+formatUGX(o.total)+'</div></div>'+
-      '<span class="ordst '+stCls+'">'+o.status+'</span></div>'+
+      '<div class="ordcard-hdr">'+
+        '<div><div class="ordid">'+o.ref+' - '+o.clientName+'</div>'+
+        '<div style="font-size:10px;color:var(--tx2)">'+o.date+' - '+o.items.length+' item(s) - '+formatUGX(o.total)+'</div></div>'+
+        orderBadge(o.status)+'</div>'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">'+
-      '<span style="font-size:11px;color:#0a6640;font-weight:600">Margin: '+formatUGX(o.muvawalaMargin||0)+'</span>'+
-      '<button class="btn btn-s btn-p" onclick="openOrderDetail('+o.id+')">Manage</button></div>'+
+        '<div style="font-size:11px"><span style="color:#0a6640;font-weight:600">Margin: '+formatUGX(o.totalMargin)+'</span>'+
+        (o.supplierInvoice?' <span style="color:var(--gn);font-size:10px">&#9989; Invoice uploaded</span>':'')+
+        '</div>'+
+        '<button class="btn btn-s btn-p" onclick="openOrderDetail('+o.id+')">Manage</button></div>'+
       '</div>';
   }).join('');
 }
 
-function saveMarkups(){
-  var suppSet={};VPRODS.forEach(function(p){suppSet[p.supplier]=1;});var suppliers=Object.keys(suppSet);if(!suppliers.length)suppliers=['VetPharma Uganda','AgroVet Imports','FarmChem Ltd'];
-  suppliers.forEach(function(s){
-    var el=document.getElementById('mk-'+s.replace(/\s/g,'_'));
-    if(el)VMARKUPS[s]=parseFloat(el.value)||15;
-  });
-  svVet();tst('Markup settings saved','ok');renderVetShop();
+// ADMIN RENDER
+function renderVetAdmin(){
+  var totalOrders=VORDERS.length;
+  var totalRevenue=VORDERS.filter(function(o){return o.status!=='Cancelled';}).reduce(function(a,o){return a+o.total;},0);
+  var totalMargin=VORDERS.filter(function(o){return o.status!=='Cancelled';}).reduce(function(a,o){return a+(o.totalMargin||0);},0);
+  var pendingPayment=VORDERS.filter(function(o){return o.status==='Pending Payment';}).length;
+  var awaitingInvoice=VORDERS.filter(function(o){return o.status==='Sent to Supplier';}).length;
+  document.getElementById('vetCommSummary').innerHTML=
+    '<h3>&#128200; Commission and order summary</h3>'+
+    '<div class="comm-grid">'+
+    '<div class="comm-item2"><div class="comm-val">'+totalOrders+'</div><div class="comm-lbl">Total orders</div></div>'+
+    '<div class="comm-item2"><div class="comm-val">'+pendingPayment+'</div><div class="comm-lbl">Pending payment</div></div>'+
+    '<div class="comm-item2"><div class="comm-val">'+awaitingInvoice+'</div><div class="comm-lbl">Awaiting invoice</div></div>'+
+    '<div class="comm-item2"><div class="comm-val" style="font-size:13px">'+formatUGX(totalRevenue)+'</div><div class="comm-lbl">Total revenue</div></div>'+
+    '<div class="comm-item2"><div class="comm-val" style="font-size:13px;color:#e9c46a">'+formatUGX(totalMargin)+'</div><div class="comm-lbl">Muvawala margin</div></div>'+
+    '</div>';
+  // Markup settings
+  var suppSet={};VPRODS.forEach(function(p){suppSet[p.supplier]=1;});
+  var suppliers=Object.keys(suppSet);
+  if(!suppliers.length)suppliers=['VetPharma Uganda','AgroVet Imports','FarmChem Ltd'];
+  document.getElementById('markupSettings').innerHTML=suppliers.map(function(s){
+    var m=VMARKUPS[s]||15;
+    return '<div class="markup-row"><span style="flex:1;font-weight:600">'+s+'</span>'+
+      '<input type="number" id="mk-'+s.replace(/[^a-zA-Z0-9]/g,'_')+'" value="'+m+'" min="0" max="100" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid var(--bo2);border-radius:var(--rs);text-align:center"/>'+
+      '<span style="font-size:11px;color:var(--tx2);margin-left:5px">% on base price</span></div>';
+  }).join('');
+  renderAllOrders();
 }
 
-// Hook into showP for vet tab
-var _origShowP = showP;
-showP = function(id, btn){
-  _origShowP(id, btn);
-  if(id==='vet') renderVet();
-};
+function saveMarkups(){
+  var suppSet={};VPRODS.forEach(function(p){suppSet[p.supplier]=1;});
+  var suppliers=Object.keys(suppSet);
+  if(!suppliers.length)suppliers=['VetPharma Uganda','AgroVet Imports','FarmChem Ltd'];
+  suppliers.forEach(function(s){
+    var el=document.getElementById('mk-'+s.replace(/[^a-zA-Z0-9]/g,'_'));
+    if(el)VMARKUPS[s]=parseFloat(el.value)||15;
+  });
+  svVet();tst('Commission settings saved','ok');renderVetShop();
+}
+
+// Hook showP
+var _origShowP=showP;
+showP=function(id,btn){_origShowP(id,btn);if(id==='vet')renderVet();};
 </script>
