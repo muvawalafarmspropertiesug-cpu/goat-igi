@@ -401,32 +401,33 @@ tr:hover td{background:var(--surface2);}
     <div id="cf-step-6" class="cf-step" style="display:none;">
       <div class="kyc-sec-title">SECTION F — Document Uploads</div>
       <p style="font-size:11px;color:var(--text2);margin-bottom:10px;">Upload each document independently. JPG, PNG or PDF. Max 2MB each.</p>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:9px">&#128247; Camera button captures directly on phone. &#128193; File button uploads from gallery. Images are auto-compressed.</p>
       <div class="doc-upload-grid" id="docUploadGrid">
-        <div class="doc-item" id="du-photo" onclick="trigUp('photo')">
+        <div class="doc-item" id="du-photo">
           <input type="file" id="up-photo" accept="image/*" onchange="handleUp('photo',this)"/>
           <div class="doc-icon">&#128247;</div><div class="doc-lbl">Passport photo</div>
         </div>
-        <div class="doc-item" id="du-nidF" onclick="trigUp('nidF')">
+        <div class="doc-item" id="du-nidF">
           <input type="file" id="up-nidF" accept="image/*,.pdf" onchange="handleUp('nidF',this)"/>
           <div class="doc-icon">&#128196;</div><div class="doc-lbl">National ID — Front</div>
         </div>
-        <div class="doc-item" id="du-nidB" onclick="trigUp('nidB')">
+        <div class="doc-item" id="du-nidB">
           <input type="file" id="up-nidB" accept="image/*,.pdf" onchange="handleUp('nidB',this)"/>
           <div class="doc-icon">&#128196;</div><div class="doc-lbl">National ID — Back</div>
         </div>
-        <div class="doc-item" id="du-contract" onclick="trigUp('contract')">
+        <div class="doc-item" id="du-contract">
           <input type="file" id="up-contract" accept="image/*,.pdf" onchange="handleUp('contract',this)"/>
           <div class="doc-icon">&#128221;</div><div class="doc-lbl">Signed contract</div>
         </div>
-        <div class="doc-item" id="du-invoice" onclick="trigUp('invoice')">
+        <div class="doc-item" id="du-invoice">
           <input type="file" id="up-invoice" accept="image/*,.pdf" onchange="handleUp('invoice',this)"/>
           <div class="doc-icon">&#128181;</div><div class="doc-lbl">Invoice copy</div>
         </div>
-        <div class="doc-item" id="du-passport" onclick="trigUp('passport')">
+        <div class="doc-item" id="du-passport">
           <input type="file" id="up-passport" accept="image/*,.pdf" onchange="handleUp('passport',this)"/>
           <div class="doc-icon">&#128213;</div><div class="doc-lbl">Passport (optional)</div>
         </div>
-        <div class="doc-item" id="du-extra" onclick="trigUp('extra')">
+        <div class="doc-item" id="du-extra">
           <input type="file" id="up-extra" accept="image/*,.pdf" onchange="handleUp('extra',this)"/>
           <div class="doc-icon">&#128196;</div><div class="doc-lbl">Other document</div>
         </div>
@@ -909,8 +910,8 @@ function goStep(n){
 }
 
 function trigUp(k){document.getElementById('up-'+k).click();}
-function handleUp(k,input){if(!input.files||!input.files[0])return;const file=input.files[0];if(file.size>2*1024*1024){toast('File too large (max 2MB).');return;}const reader=new FileReader();reader.onload=e=>{pendDocs[k]=e.target.result;const el=document.getElementById('du-'+k);if(el)el.classList.add('uploaded');toast('Uploaded: '+file.name.slice(0,18));};reader.readAsDataURL(file);}
-
+function compImg(file,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var cvs=document.createElement('canvas');var w=img.width,h=img.height,mx=1400;if(w>mx||h>mx){if(w>h){h=Math.round(h*mx/w);w=mx;}else{w=Math.round(w*mx/h);h=mx;}}cvs.width=w;cvs.height=h;cvs.getContext('2d').drawImage(img,0,0,w,h);var q=0.82,dt=cvs.toDataURL('image/jpeg',q);while(dt.length>1800000*1.37&&q>0.2){q-=0.1;dt=cvs.toDataURL('image/jpeg',q);}cb(dt);};img.src=e.target.result;};r.readAsDataURL(file);}
+function handleUp(k,input){if(!input.files||!input.files[0])return;var file=input.files[0];if(file.type.indexOf('image')===0){compImg(file,function(dt){pendDocs[k]=dt;var el=document.getElementById('du-'+k);if(el)el.classList.add('uploaded');toast('Uploaded & compressed','ok');});}else if(file.size>2*1024*1024){toast('PDF too large. Please reduce size.','error');}else{var reader=new FileReader();reader.onload=function(e){pendDocs[k]=e.target.result;var el=document.getElementById('du-'+k);if(el)el.classList.add('uploaded');toast('Uploaded','ok');};reader.readAsDataURL(file);}}
 function saveClient(){
   const fullName=fv('cf-fullName');if(!fullName){toast('Full name is required.');goStep(1);return;}
   const tagGroup=fv('cf-tagGroup');if(!tagGroup){toast('Select a tag group.');goStep(2);return;}
