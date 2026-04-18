@@ -577,6 +577,7 @@ tr:hover td{background:var(--su2);}
     <button class="vtab on" onclick="showVetView('shop',this)">&#128138; Shop</button>
     <button class="vtab" onclick="showVetView('orders',this)">&#128221; My orders</button>
     <button class="vtab" onclick="showVetView('cart',this)">&#128722; Cart</button>
+    <button class="vtab" id="catalogTabBtn" onclick="showVetView('catalog',this)">&#128196; Product catalog</button>
   </div>
 
   <!-- SHOP VIEW -->
@@ -659,6 +660,68 @@ tr:hover td{background:var(--su2);}
         <button class="vcat" onclick="filterOrders('Delivered',this)">Delivered</button>
       </div>
       <div id="allOrdersOut"></div>
+    </div>
+  </div>
+
+  <!-- CATALOG PANEL -->
+  <div id="vet-catalog" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:7px">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#0a6640">&#128196; Product catalog</div>
+        <div style="font-size:11px;color:var(--tx2)">Import from text or PDF, then edit directly in the table</div>
+      </div>
+      <div class="brow" id="catalogAdminBtns" style="display:none">
+        <button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="showImportPanel()">&#128196; Import / Update</button>
+        <button class="btn btn-p" onclick="saveCatalogEdits()">&#10003; Save all edits</button>
+        <button class="btn" onclick="addBlankProduct()">+ Add product</button>
+      </div>
+    </div>
+
+    <!-- IMPORT PANEL (collapsible) -->
+    <div id="importPanel" style="display:none;background:#fffbeb;border:1px solid var(--ac);border-radius:var(--r);padding:13px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 style="font-size:13px;font-weight:700;color:var(--ab);margin:0">&#128196; Smart import &mdash; feed product catalog</h3>
+        <button class="btn btn-s" onclick="hideImportPanel()">&#10005; Close</button>
+      </div>
+      <p style="font-size:11px;color:var(--tx2);margin-bottom:9px;line-height:1.6">
+        Upload a PDF price list from your supplier, or paste raw text / spreadsheet data below.<br>
+        <strong>Text format (pipe or tab separated):</strong><br>
+        <code style="background:#fff;padding:3px 7px;border-radius:3px;font-size:10px;display:inline-block;margin-top:3px">Product Name | Category | Unit | Base Price (UGX) | Commission % | Stock | Description</code>
+      </p>
+      <!-- PDF UPLOAD -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+        <div style="background:var(--su2);border:2px dashed var(--bo2);border-radius:var(--rs);padding:10px 14px;text-align:center;cursor:pointer;flex:1;min-width:180px" onclick="document.getElementById('pdfUpload').click()">
+          <input type="file" id="pdfUpload" accept=".pdf,image/*,.txt,.csv" style="display:none" onchange="handleCatalogFile(this)"/>
+          <div style="font-size:20px;margin-bottom:3px">&#128196;</div>
+          <div style="font-size:12px;font-weight:600;color:var(--tx2)">Upload PDF / Image / CSV</div>
+          <div style="font-size:10px;color:var(--tx3)">Click to select file</div>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);flex-shrink:0">OR</div>
+        <div style="flex:2;min-width:200px">
+          <div class="fg" style="margin-bottom:5px">
+            <label>Supplier name</label>
+            <input id="vetSupplierName" placeholder="e.g. VetPharma Uganda" style="font-size:12px;padding:7px 9px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%"/>
+          </div>
+        </div>
+      </div>
+      <textarea id="vetImportTxt" class="ita" placeholder="Paste supplier price list here...&#10;&#10;Example:&#10;Newcastle Vaccine | Vaccines | 100-dose vial | 45000 | 15 | In stock | Protects against Newcastle disease&#10;PPR Vaccine | Vaccines | 10-dose vial | 32000 | 15 | In stock | For goats against Peste des Petits Ruminants" style="min-height:130px"></textarea>
+      <div id="pdfStatus" style="display:none;margin-bottom:7px;padding:7px 10px;background:var(--gl);border-radius:var(--rs);font-size:11px;color:var(--gn)"></div>
+      <div class="brow" style="margin-top:8px">
+        <button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640" onclick="parseVetImport()">&#128269; Parse &amp; preview</button>
+        <button class="btn" onclick="document.getElementById('vetImportTxt').value=''">Clear text</button>
+      </div>
+      <div id="vetImportPreview" style="display:none;margin-top:10px"></div>
+    </div>
+
+    <!-- EDITABLE CATALOG TABLE -->
+    <div class="fs">
+      <h3 style="display:flex;justify-content:space-between;align-items:center">
+        <span>Current product catalog <span id="catalogCount" style="font-size:11px;color:var(--tx2);font-weight:400"></span></span>
+        <input id="catalogSearch" placeholder="Search products..." style="font-size:11px;padding:5px 8px;border-radius:var(--rs);border:1px solid var(--bo2);width:180px" oninput="renderCatalogTable()"/>
+      </h3>
+      <div id="catalogTableWrap" style="overflow-x:auto">
+        <div id="catalogTable"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1225,11 +1288,12 @@ function orderBadge(status){
 function renderVet(){
   loadDemoProds();
   document.getElementById('vetAdminBtn').style.display = isA ? '' : 'none';
+  var catBtn=document.getElementById('catalogTabBtn'); if(catBtn)catBtn.style.display='';
   showVetView('shop');
 }
 
 function showVetView(view, btn){
-  ['vet-shop','vet-cart','vet-orders','vet-admin'].forEach(function(id){
+  ['vet-shop','vet-cart','vet-orders','vet-admin','vet-catalog'].forEach(function(id){
     var el=document.getElementById(id); if(el)el.style.display='none';
   });
   var target=document.getElementById('vet-'+view);
@@ -1240,6 +1304,7 @@ function showVetView(view, btn){
   else if(view==='orders')renderVetOrders();
   else if(view==='cart')renderCart();
   else if(view==='admin')renderVetAdmin();
+  else if(view==='catalog')renderCatalog();
 }
 
 // SHOP
@@ -1739,6 +1804,177 @@ function saveMarkups(){
     if(el)VMARKUPS[s]=parseFloat(el.value)||15;
   });
   svVet();tst('Commission settings saved','ok');renderVetShop();
+}
+
+
+// CATALOG FUNCTIONS
+function showVetViewOrig(view,btn){
+  ['vet-shop','vet-cart','vet-orders','vet-admin','vet-catalog'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  var target=document.getElementById('vet-'+view);
+  if(target)target.style.display='block';
+  document.querySelectorAll('.vtab').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(view==='shop')renderVetShop();
+  else if(view==='orders')renderVetOrders();
+  else if(view==='cart')renderCart();
+  else if(view==='admin'){renderVetAdmin();}
+  else if(view==='catalog')renderCatalog();
+}
+
+function renderCatalog(){
+  // Show/hide admin buttons
+  var adminBtns=document.getElementById('catalogAdminBtns');
+  if(adminBtns)adminBtns.style.display=isA?'flex':'none';
+  renderCatalogTable();
+}
+
+function showImportPanel(){
+  var p=document.getElementById('importPanel');
+  if(p)p.style.display=p.style.display==='none'?'block':'none';
+}
+function hideImportPanel(){
+  var p=document.getElementById('importPanel');if(p)p.style.display='none';
+}
+
+function handleCatalogFile(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var status=document.getElementById('pdfStatus');
+  var txt=document.getElementById('vetImportTxt');
+  if(file.name.toLowerCase().endsWith('.pdf')){
+    status.style.display='block';
+    status.textContent='PDF uploaded. For best results, also paste the text content of the PDF into the text area below, as automatic PDF text extraction requires a server. The file name has been noted: '+file.name;
+    // Try to read as text (works for text-based PDFs in some browsers)
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var text=e.target.result;
+        // Filter to printable ASCII lines
+        var lines=text.split('\n').filter(function(l){
+          return l.replace(/[^\x20-\x7E]/g,'').trim().length>10;
+        }).map(function(l){return l.replace(/[^\x20-\x7E\t|,]/g,'').trim();}).filter(function(l){return l.length>5;});
+        if(lines.length>3){
+          txt.value=lines.join('\n');
+          status.textContent='Extracted '+lines.length+' lines from PDF. Review below and click Parse & preview.';
+        }
+      }catch(err){
+        status.textContent='Could not auto-extract text. Please copy and paste the price list text directly.';
+      }
+    };
+    reader.readAsBinaryString(file);
+  }else if(file.name.toLowerCase().endsWith('.csv')||file.name.toLowerCase().endsWith('.txt')){
+    var reader2=new FileReader();
+    reader2.onload=function(e){
+      txt.value=e.target.result;
+      status.style.display='block';
+      status.textContent='File loaded ('+file.name+'). Click Parse & preview to import.';
+    };
+    reader2.readAsText(file);
+  }else if(file.type.indexOf('image')===0){
+    status.style.display='block';
+    status.textContent='Image uploaded ('+file.name+'). Please manually type or paste the price list data from the image into the text area.';
+  }
+}
+
+function renderCatalogTable(){
+  var q=(document.getElementById('catalogSearch')||{}).value||'';
+  var ql=q.toLowerCase();
+  var list=q?VPRODS.filter(function(p){return (p.name+p.category+p.supplier).toLowerCase().indexOf(ql)>-1;}):VPRODS;
+  var countEl=document.getElementById('catalogCount');
+  if(countEl)countEl.textContent='('+list.length+' products)';
+  var wrap=document.getElementById('catalogTable');
+  if(!wrap)return;
+  if(!list.length){wrap.innerHTML='<p class="emp">No products yet. Use Import to add products.</p>';return;}
+  if(!isA){
+    // Read-only view for non-admin
+    wrap.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'+
+      '<thead><tr>'+
+      '<th style="text-align:left;padding:5px 7px;background:var(--su2);border-bottom:1px solid var(--bo)">Product</th>'+
+      '<th style="padding:5px 7px;background:var(--su2);border-bottom:1px solid var(--bo)">Category</th>'+
+      '<th style="padding:5px 7px;background:var(--su2);border-bottom:1px solid var(--bo)">Unit</th>'+
+      '<th style="padding:5px 7px;background:var(--su2);border-bottom:1px solid var(--bo);text-align:right">Price</th>'+
+      '<th style="padding:5px 7px;background:var(--su2);border-bottom:1px solid var(--bo)">Stock</th>'+
+      '</tr></thead><tbody>'+
+      list.map(function(p){
+        var fp=clientPrice(p);
+        return '<tr><td style="padding:5px 7px;border-bottom:1px solid var(--bo)"><strong>'+p.name+'</strong><div style="font-size:10px;color:var(--tx3)">'+p.supplier+'</div></td>'+
+          '<td style="padding:5px 7px;border-bottom:1px solid var(--bo)">'+p.category+'</td>'+
+          '<td style="padding:5px 7px;border-bottom:1px solid var(--bo)">'+p.unit+'</td>'+
+          '<td style="padding:5px 7px;border-bottom:1px solid var(--bo);text-align:right;font-weight:700;color:#0a6640">'+formatUGX(fp)+'</td>'+
+          '<td style="padding:5px 7px;border-bottom:1px solid var(--bo);color:'+(p.stock==='In stock'?'#0a6640':p.stock==='Low stock'?'#f59e0b':'#ef4444')+'">'+p.stock+'</td>'+
+          '</tr>';
+      }).join('')+'</tbody></table>';
+    return;
+  }
+  // Admin: fully editable inline table
+  wrap.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px" id="editableCatalog">'+
+    '<thead><tr>'+
+    '<th style="text-align:left;padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">#</th>'+
+    '<th style="text-align:left;padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">Product name</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">Category</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">Supplier</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">Unit</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px;text-align:right">Base price</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px;text-align:right">Comm%</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px;text-align:right">Client price</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">Stock</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">Description</th>'+
+    '<th style="padding:5px 7px;background:#0a6640;color:#fff;font-size:10px">Del</th>'+
+    '</tr></thead><tbody>'+
+    list.map(function(p,idx){
+      var fp=clientPrice(p);
+      var cats=['Vaccines','Antibiotics','Dewormers','Supplements','First Aid','General'];
+      var stocks=['In stock','Low stock','Out of stock'];
+      var catOpts=cats.map(function(x){return '<option'+(p.category===x?' selected':'')+'>'+x+'</option>';}).join('');
+      var stockOpts=stocks.map(function(x){return '<option'+(p.stock===x?' selected':'')+'>'+x+'</option>';}).join('');
+      return '<tr id="crow-'+p.id+'" style="border-bottom:1px solid var(--bo)">'+
+        '<td style="padding:4px 5px;color:var(--tx3);font-size:10px">'+p.id+'</td>'+
+        '<td style="padding:3px 4px"><input data-fld="name" data-id="'+p.id+'" value="'+escHtml(p.name)+'" onchange="updateProdField('+p.id+',\'name\',this.value)" style="width:100%;font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px;min-width:120px"/></td>'+
+        '<td style="padding:3px 4px"><select data-id="'+p.id+'" onchange="updateProdField('+p.id+',\'category\',this.value)" style="font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px">'+catOpts+'</select></td>'+
+        '<td style="padding:3px 4px"><input data-id="'+p.id+'" value="'+escHtml(p.supplier)+'" onchange="updateProdField('+p.id+',\'supplier\',this.value)" style="width:100%;font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px;min-width:100px"/></td>'+
+        '<td style="padding:3px 4px"><input data-id="'+p.id+'" value="'+escHtml(p.unit)+'" onchange="updateProdField('+p.id+',\'unit\',this.value)" style="width:90px;font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px"/></td>'+
+        '<td style="padding:3px 4px"><input type="number" data-id="'+p.id+'" value="'+p.basePrice+'" onchange="updateProdField('+p.id+',\'basePrice\',parseInt(this.value)||0);refreshPriceCell('+p.id+')" style="width:80px;font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px;text-align:right"/></td>'+
+        '<td style="padding:3px 4px"><input type="number" data-id="'+p.id+'" value="'+(p.commission||15)+'" onchange="updateProdField('+p.id+',\'commission\',parseFloat(this.value)||0);refreshPriceCell('+p.id+')" style="width:50px;font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px;text-align:right"/></td>'+
+        '<td style="padding:4px 5px;text-align:right;font-weight:700;color:#0a6640" id="cprice-'+p.id+'">'+formatUGX(fp)+'</td>'+
+        '<td style="padding:3px 4px"><select data-id="'+p.id+'" onchange="updateProdField('+p.id+',\'stock\',this.value)" style="font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px">'+stockOpts+'</select></td>'+
+        '<td style="padding:3px 4px"><input data-id="'+p.id+'" value="'+escHtml(p.description||'')+'" onchange="updateProdField('+p.id+',\'description\',this.value)" style="width:100%;font-size:11px;padding:3px 5px;border:1px solid var(--bo2);border-radius:3px;min-width:150px"/></td>'+
+        '<td style="padding:3px 4px;text-align:center"><button onclick="deleteProd('+p.id+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px">&#128465;</button></td>'+
+        '</tr>';
+    }).join('')+'</tbody></table>'+
+    '<div style="margin-top:9px;padding:8px 10px;background:#e8f5e9;border-radius:var(--rs);font-size:11px;color:#0a6640">&#128161; Changes are saved immediately as you type. Click <strong>Save all edits</strong> to confirm and update the shop.</div>';
+}
+
+function escHtml(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function updateProdField(id,field,value){
+  var p=VPRODS.find(function(x){return x.id===id;});
+  if(p)p[field]=value;
+}
+function refreshPriceCell(id){
+  var p=VPRODS.find(function(x){return x.id===id;});
+  if(!p)return;
+  var el=document.getElementById('cprice-'+id);
+  if(el)el.textContent=formatUGX(clientPrice(p));
+}
+function saveCatalogEdits(){
+  svVet();
+  tst('Catalog saved and shop updated!','ok');
+  renderVetShop();
+}
+function addBlankProduct(){
+  var p={id:vnid++,name:'New Product',supplier:document.getElementById('vetSupplierName').value.trim()||'Supplier',category:'General',unit:'unit',basePrice:10000,commission:15,stock:'In stock',description:''};
+  VPRODS.push(p);
+  svVet();
+  renderCatalogTable();
+  tst('New product row added. Edit the fields below.','ok');
+}
+function deleteProd(id){
+  if(!confirm('Remove this product from the catalog?'))return;
+  VPRODS=VPRODS.filter(function(x){return x.id!==id;});
+  svVet();renderCatalogTable();renderVetShop();tst('Product removed.');
 }
 
 // Hook showP
