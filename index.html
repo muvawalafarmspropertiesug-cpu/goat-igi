@@ -700,7 +700,7 @@ function parseImport(){
   const lines=text.split('\n').map(l=>l.replace(/^[\s\-•*]+/,'').trim()).filter(l=>l.length>2);
   const results=[];const lookup=bL();
   lines.forEach(line=>{
-    const tm=line.match(/^([A-Z&][A-Z&J]*\s*\d{3})/i);if(!tm)return;
+    const tm=line.match(/^([A-Z][A-Z&J]*[\s&]*\d{3})/i);if(!tm)return;
     const parent=tm[1].replace(/\s+/g,'').toUpperCase();const rest=line.slice(tm[0].length).replace(/^[\s\-:]+/,'');const lc=rest.toLowerCase();
     const sexM=lc.match(/\b(male|female)\b/);const sex=sexM?(sexM[1]==='male'?'Male':'Female'):'Unknown';
     const brM=lc.match(/\b(boer|savana|savannah|savanah)\b/);const breed=brM?(brM[1].startsWith('boer')?'Boer':'Savana'):'Unknown';
@@ -973,24 +973,33 @@ function exportPDF(id){
   </div>
   <div style="text-align:center;margin-top:14px;font-size:9px;color:#999;border-top:1px solid #eee;padding-top:7px;">Muvawala Goat Farms &amp; Properties · muvawalafarmspropertiesug@gmail.com · +256 709 066 457 · Nakasongola District, Uganda</div>
   
-<!-- SEND INVITE MODAL -->
-<div class="overlay" id="ov-invite" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;">
-  <div style="background:var(--surface);border-radius:var(--r);padding:18px;width:100%;max-width:400px;margin:auto;">
-    <h2 style="font-size:14px;font-weight:700;margin-bottom:3px;color:var(--brand)">&#128231; Send registration invite</h2>
-    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">Client gets a link to self-register online.</p>
-    <div class="fg" style="margin-bottom:7px"><label>Client email *</label><input id="inv-em" type="email" placeholder="client@email.com"/></div>
-    <div class="fg" style="margin-bottom:8px"><label>Client name (optional)</label><input id="inv-nm" placeholder="Full name"/></div>
-    <div id="inv-box" style="display:none;margin-bottom:8px">
-      <p style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--text2)">Registration link (share this):</p>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:8px;font-size:10px;font-family:monospace;word-break:break-all;color:var(--brand);margin-bottom:7px" id="inv-link"></div>
-      <div class="brow">
-        <button class="btn btn-p btn-s" onclick="sendInvEmail()">&#128231; Open email app</button>
-        <button class="btn btn-s" onclick="cpLink()">&#128203; Copy link</button>
+
+
+
+
+<div id="ov-invite" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;overflow-y:auto;padding:20px;">
+  <div style="background:#ffffff;border-radius:12px;padding:22px;max-width:440px;margin:40px auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+    <h2 style="font-size:16px;font-weight:700;color:#3d1a0a;margin-bottom:4px">&#128231; Send registration invite</h2>
+    <p style="font-size:12px;color:#6b5a4e;margin-bottom:14px">Enter the client details to generate a self-registration link.</p>
+    <div style="margin-bottom:10px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b5a4e;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px">Client email *</label>
+      <input id="inv-em" type="email" placeholder="e.g. client@gmail.com" style="width:100%;font-size:13px;padding:9px 11px;border-radius:8px;border:1.5px solid #d4c4b4;outline:none;font-family:inherit"/>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b5a4e;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px">Client name (optional)</label>
+      <input id="inv-nm" placeholder="e.g. James Kato" style="width:100%;font-size:13px;padding:9px 11px;border-radius:8px;border:1.5px solid #d4c4b4;outline:none;font-family:inherit"/>
+    </div>
+    <div id="inv-box" style="display:none;margin-bottom:14px;background:#f5f0eb;border-radius:8px;padding:12px">
+      <p style="font-size:11px;font-weight:700;color:#3d1a0a;margin-bottom:6px">&#128279; Registration link (share this with the client):</p>
+      <div id="inv-link" style="font-size:10px;font-family:monospace;word-break:break-all;color:#3d1a0a;background:#ffffff;border:1px solid #e8ddd4;border-radius:6px;padding:8px;margin-bottom:10px;line-height:1.5"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="sendInvEmail()" style="flex:1;padding:9px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:#3d1a0a;color:#ffffff;border:none;min-width:140px">&#128231; Open email app</button>
+        <button onclick="cpLink()" style="flex:1;padding:9px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:#ffffff;border:1.5px solid #3d1a0a;color:#3d1a0a;min-width:100px">&#128203; Copy link</button>
       </div>
     </div>
-    <div class="brow" style="margin-top:8px">
-      <button class="btn btn-g" onclick="genLink()">Generate link</button>
-      <button class="btn" onclick="document.getElementById('ov-invite').style.display='none'">Close</button>
+    <div style="display:flex;gap:8px">
+      <button onclick="genLink()" style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#0a6640;color:#ffffff;border:none">Generate link</button>
+      <button onclick="document.getElementById('ov-invite').style.display='none'" style="padding:9px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#ffffff;border:1.5px solid #d4c4b4;color:#1a0f08">Close</button>
     </div>
   </div>
 </div>
@@ -1005,6 +1014,13 @@ document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
 const gSel=document.getElementById('fGrp');Object.keys(GROUPS).forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=`${p} (${GROUPS[p].max})`;gSel.appendChild(o);});
 const cfGrp=document.getElementById('cf-tagGroup');Object.keys(GROUPS).forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=`${p} — ${GROUPS[p].max} stock`;cfGrp.appendChild(o);});
 popParent();renderDash();
+
+function openInvite(){document.getElementById('inv-em').value='';document.getElementById('inv-nm').value='';document.getElementById('inv-box').style.display='none';document.getElementById('ov-invite').style.display='flex';}
+function genLink(){var em=document.getElementById('inv-em').value.trim();if(!em){toast('Enter client email.');return;}var nm=document.getElementById('inv-nm').value.trim();var base=window.location.href.split('?')[0];var url=base+'?reg=1&em='+encodeURIComponent(em)+(nm?'&nm='+encodeURIComponent(nm):'');document.getElementById('inv-link').textContent=url;document.getElementById('inv-box').style.display='block';}
+function sendInvEmail(){var em=document.getElementById('inv-em').value.trim();var nm=document.getElementById('inv-nm').value.trim()||'Valued Client';var lk=document.getElementById('inv-link').textContent;var sub='Muvawala Goat Farms - Client Registration Link';var body='Dear '+nm+',\n\nPlease use the link below to complete your registration:\n\n'+lk+'\n\nFarm visits: every last Saturday of the month\nFarm: Nakasongola District, Uganda\n\nContact: muvawalafarmspropertiesug@gmail.com | +256 709 066 457\n\nMuvawala Goat Farms & Properties';window.open('mailto:'+em+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body));toast('Email app opened','ok');}
+function cpLink(){var txt=document.getElementById('inv-link').textContent;if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast('Link copied!','ok');}).catch(function(){toast('Copy manually from the box');});}else{toast('Copy the link manually');}}
+function downloadAgreementTemplate(){var today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});var h='<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Muvawala Agreement</title><style>body{font-family:Arial,sans-serif;font-size:12px;max-width:750px;margin:0 auto;padding:22px;}h1{font-size:18px;text-align:center;}.line{border-bottom:1px solid #000;display:inline-block;min-width:180px;}.logo{text-align:center;font-weight:700;font-size:14px;letter-spacing:2px;margin-bottom:14px;}.h{font-weight:700;margin-top:11px;}.sig{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;}.sb{border-top:1px solid #000;padding-top:4px;font-size:11px;}@media print{body{padding:14px;}}</style></head><body><div class="logo">MUVAWALA FARMS</div><h1>GOAT INVESTMENT AND MANAGEMENT AGREEMENT</h1><p style="text-align:center;font-size:10px;margin-bottom:14px">Invest in Wealth Goat Project</p><p>This Agreement made this <span class="line">'+today+'</span> between <strong>Muvawala Farms</strong>, Nakasongola District, Uganda, AND <span class="line">[Client Full Name]</span>, Nat. ID: <span class="line"></span>, of <span class="line">[Address]</span>.</p><div class="h">1. INVESTMENT STRUCTURE</div><p>No. of goats: <span class="line"></span> &nbsp; Duration: 18 months &nbsp; Farm: Nakasongola District</p><div class="h">2. PAYMENT TERMS</div><p>Initial Investment (UGX): <span class="line"></span></p><p>Management Fee: UGX <span class="line"></span> per goat/month, paid 3 months in advance.</p><div class="h">3. CLIENT VISITS</div><p>Client must visit the farm every last Saturday of each month.</p><div class="h">4. SALE OF GOATS</div><p>Prior written consent required. Commission: <span class="line"></span>% on any sale.</p><div class="h">5. RISK AND LIABILITY</div><p>Muvawala not liable for disease, natural disasters, or theft despite precautions.</p><div class="h">SECTION A - CLIENT INFORMATION</div><p>Full Name: <span class="line"></span> &nbsp; Nat. ID: <span class="line"></span></p><p>DOB: <span class="line"></span> &nbsp; Gender: <span class="line"></span></p><p>Phone: <span class="line"></span> &nbsp; Email: <span class="line"></span></p><p>Address: <span class="line"></span></p><div class="h">SECTION C - ACKNOWLEDGEMENTS</div><p>&#9744; Goats housed in Nakasongola &nbsp; &#9744; Pay management fee 3 months in advance</p><p>&#9744; Visit farm every last Saturday &nbsp; &#9744; Sale requires written consent</p><p>&#9744; No liability force majeure &nbsp; &#9744; Commission: ____% on sales</p><p>&#9744; Commit to 18-month contract term</p><div class="h">SECTION D - NEXT OF KIN</div><p>Name: <span class="line"></span> &nbsp; Relationship: <span class="line"></span> &nbsp; Phone: <span class="line"></span></p><div class="h">SECTION E - CLIENT DECLARATION</div><p>I hereby declare the information is true and complete. I have read and understood the terms of the Invest in Wealth Goat Project.</p><div class="sig"><div class="sb"><br><br><br>Client Signature and Date</div><div class="sb"><br><br><br>For Muvawala Farms - Alexander Ssimbwa</div></div><p style="text-align:center;margin-top:14px;font-size:9px;color:#999">Muvawala Goat Farms and Properties - muvawalafarmspropertiesug@gmail.com - +256 709 066 457 - Nakasongola District Uganda</p></body></html>';var blob=new Blob([h],{type:'text/html'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Muvawala_Agreement_Template.html';a.click();toast('Agreement downloaded','ok');}
+
 </script>
 </body>
 </html>
