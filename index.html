@@ -570,7 +570,8 @@ tr:hover td{background:var(--su2);}
     <div><h2>&#128138; Your Vet Shop</h2><p>Quality vaccines &amp; vet drugs at negotiated farm prices</p></div>
     <div style="display:flex;gap:7px;flex-wrap:wrap">
       <button class="btn" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);font-size:11px" onclick="showVetView('cart')">&#128722; View cart <span id="cartCountHdr" style="background:#ef4444;border-radius:50%;padding:1px 5px;font-size:10px;margin-left:3px">0</span></button>
-      <button class="btn" id="vetAdminBtn" style="display:none;background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);font-size:11px" onclick="showVetView('admin')">&#9881; Manage products</button>
+      <button class="btn" id="vetImportBtn" style="display:none;background:#fff;color:#0a6640;border-color:#fff;font-size:11px;font-weight:700" onclick="openSmartImport()">&#128196; Smart import</button>
+        <button class="btn" id="vetAdminBtn" style="display:none;background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);font-size:11px" onclick="showVetView('admin')">&#9881; Manage products</button>
     </div>
   </div>
   <div class="vtabs">
@@ -1220,6 +1221,56 @@ chkSelfReg();
     <button class="btn" onclick="closeOv('ov-order')">Close</button>
   </div>
 </div></div>
+
+<!-- SMART IMPORT MODAL -->
+<div class="ov" id="ov-smartimport">
+  <div class="mo" style="max-width:680px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2 style="color:#0a6640">&#128196; Smart import -- Update product catalog</h2>
+      <button class="btn" onclick="closeOv('ov-smartimport')" style="flex-shrink:0">&#10005;</button>
+    </div>
+    <p class="mosb">Paste supplier price list or upload a file. Auto-detects products and updates the shop.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
+      <div class="fg">
+        <label>Supplier name</label>
+        <input id="si-supplier" placeholder="e.g. VetPharma Uganda" style="font-size:12px;padding:7px 9px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%"/>
+      </div>
+      <div class="fg">
+        <label>Default commission % (Muvawala margin)</label>
+        <input id="si-commission" type="number" value="15" style="font-size:12px;padding:7px 9px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%"/>
+      </div>
+    </div>
+    <div id="si-dropzone" onclick="document.getElementById('si-file').click()" style="border:2px dashed #0a6640;border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;background:#f0fdf4;margin-bottom:9px">
+      <input type="file" id="si-file" accept=".pdf,.txt,.csv,image/*" style="display:none" onchange="handleSIFile(this)"/>
+      <div style="font-size:26px;margin-bottom:4px">&#128196;</div>
+      <div style="font-size:13px;font-weight:700;color:#0a6640">Click to upload PDF / CSV / TXT</div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:2px">Supplier price list file</div>
+    </div>
+    <div id="si-filestatus" style="display:none;padding:7px 10px;background:var(--gl);border-radius:var(--rs);font-size:11px;color:var(--gn);margin-bottom:8px"></div>
+    <div class="fg" style="margin-bottom:7px">
+      <label>Or paste raw price list text here</label>
+      <textarea id="si-text" style="width:100%;font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);min-height:130px;font-family:monospace;resize:vertical" placeholder="Paste supplier data here. Any format works:
+
+Name | Category | Unit | Price | Commission% | Stock | Description
+
+OR tab-separated from Excel:
+Newcastle Vaccine    Vaccines    100-dose vial    45000    15    In stock
+
+OR plain text:
+PPR Vaccine - 10 dose - UGX 32,000 - vaccines - in stock"></textarea>
+    </div>
+    <div style="background:#fffbeb;border:1px solid var(--ac);border-radius:var(--rs);padding:8px 11px;font-size:10px;color:var(--ab);margin-bottom:9px;line-height:1.7">
+      <strong>Accepted formats:</strong> Pipe-separated (|), Tab-separated (from Excel/Sheets), or free text with prices.<br>
+      Commission % per product overrides the default above.
+    </div>
+    <div id="si-preview" style="display:none;margin-bottom:9px"></div>
+    <div class="brow">
+      <button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640;flex:1;padding:9px;font-size:13px;font-weight:700" onclick="runSmartImport()">&#128269; Parse &amp; preview</button>
+      <button class="btn" onclick="document.getElementById('si-text').value='';document.getElementById('si-preview').style.display='none'">Clear</button>
+      <button class="btn" onclick="closeOv('ov-smartimport')">Cancel</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 <script>
@@ -1288,6 +1339,7 @@ function orderBadge(status){
 function renderVet(){
   loadDemoProds();
   document.getElementById('vetAdminBtn').style.display = isA ? '' : 'none';
+  var ib=document.getElementById('vetImportBtn');if(ib)ib.style.display=isA?'':'none';
   var catBtn=document.getElementById('catalogTabBtn'); if(catBtn)catBtn.style.display='';
   showVetView('shop');
 }
@@ -1975,6 +2027,203 @@ function deleteProd(id){
   if(!confirm('Remove this product from the catalog?'))return;
   VPRODS=VPRODS.filter(function(x){return x.id!==id;});
   svVet();renderCatalogTable();renderVetShop();tst('Product removed.');
+}
+
+
+// SMART IMPORT MODAL
+function openSmartImport(){
+  document.getElementById('si-text').value='';
+  document.getElementById('si-preview').style.display='none';
+  document.getElementById('si-filestatus').style.display='none';
+  document.getElementById('si-supplier').value='';
+  document.getElementById('si-commission').value='15';
+  document.getElementById('ov-smartimport').classList.add('sh');
+}
+
+function handleSIFile(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var status=document.getElementById('si-filestatus');
+  var txt=document.getElementById('si-text');
+  status.style.display='block';
+  var name=file.name.toLowerCase();
+  if(name.endsWith('.csv')||name.endsWith('.txt')){
+    var r=new FileReader();
+    r.onload=function(e){
+      txt.value=e.target.result;
+      status.textContent='File loaded: '+file.name+' ('+Math.round(file.size/1024)+'KB). Click Parse & preview.';
+      status.style.background='var(--gl)';status.style.color='var(--gn)';
+    };
+    r.readAsText(file);
+  }else if(name.endsWith('.pdf')){
+    status.style.background='var(--al)';status.style.color='var(--ab)';
+    status.textContent='PDF detected: '+file.name+'. Auto-extraction attempted. If blank, please copy-paste the text from the PDF manually.';
+    var r2=new FileReader();
+    r2.onload=function(e){
+      try{
+        var raw=e.target.result||'';
+        var lines=[];
+        var i=0;
+        while(i<raw.length-4){
+          if(raw.charCodeAt(i)>31&&raw.charCodeAt(i)<127){
+            var word='';
+            while(i<raw.length&&raw.charCodeAt(i)>31&&raw.charCodeAt(i)<127){word+=raw[i];i++;}
+            if(word.length>3)lines.push(word);
+          }else i++;
+        }
+        var text=lines.join(' ').replace(/\s+/g,' ');
+        var priceLines=[];
+        var chunks=text.split(/(?=[A-Z][a-z])/);
+        chunks.forEach(function(ch){if(ch.match(/\d{4,}/)&&ch.length>8)priceLines.push(ch.trim());});
+        if(priceLines.length>2){
+          txt.value=priceLines.join('\n');
+          status.textContent='Extracted '+priceLines.length+' lines from PDF. Review and click Parse & preview.';
+          status.style.background='var(--gl)';status.style.color='var(--gn)';
+        }else{
+          status.textContent='Could not auto-extract from this PDF. Please open the PDF and copy-paste the price list text into the box below.';
+        }
+      }catch(err){
+        status.textContent='Please copy and paste the supplier price list text manually into the box below.';
+      }
+    };
+    r2.readAsBinaryString(file);
+  }else if(file.type.indexOf('image')===0){
+    status.style.background='var(--al)';status.style.color='var(--ab)';
+    status.textContent='Image uploaded ('+file.name+'). Please type or paste the product data from the image into the text area below.';
+  }
+}
+
+function runSmartImport(){
+  var raw=document.getElementById('si-text').value.trim();
+  if(!raw){tst('Paste or upload supplier data first.');return;}
+  var supplier=document.getElementById('si-supplier').value.trim()||'Supplier';
+  var defaultComm=parseFloat(document.getElementById('si-commission').value)||15;
+
+  var lines=raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>3;});
+  var parsed=[];
+
+  lines.forEach(function(line){
+    var p=null;
+    // Try pipe-separated
+    if(line.indexOf('|')>-1){
+      var parts=line.split('|').map(function(x){return x.trim();});
+      if(parts.length>=4){
+        var price=parseInt(parts[3].replace(/[^0-9]/g,''));
+        if(price>500){
+          p={name:parts[0],category:parts[1]||'General',unit:parts[2]||'unit',
+             basePrice:price,commission:parseFloat(parts[4])||defaultComm,
+             stock:parts[5]||'In stock',description:parts[6]||'',supplier:supplier};
+        }
+      }
+    }
+    // Try tab-separated
+    if(!p&&line.indexOf('\t')>-1){
+      var parts2=line.split('\t').map(function(x){return x.trim();});
+      if(parts2.length>=4){
+        var price2=parseInt(parts2[3].replace(/[^0-9]/g,''));
+        if(price2>500){
+          p={name:parts2[0],category:parts2[1]||'General',unit:parts2[2]||'unit',
+             basePrice:price2,commission:parseFloat(parts2[4])||defaultComm,
+             stock:parts2[5]||'In stock',description:parts2[6]||'',supplier:supplier};
+        }
+      }
+    }
+    // Try free-text parsing
+    if(!p){
+      var priceMx=line.match(/\b(\d{3,3}[,.]?\d{3}|\d{4,6})\b/);
+      if(priceMx){
+        var rawPrice=parseInt(priceMx[0].replace(/[,]/g,''));
+        if(rawPrice>500&&rawPrice<50000000){
+          var name2=line.replace(priceMx[0],'').replace(/[-|:,]+$/,'').replace(/^[-|:,]+/,'').trim();
+          if(name2.length>3){
+            var cat2='General';
+            var lc=line.toLowerCase();
+            if(lc.match(/\bvaccin/))cat2='Vaccines';
+            else if(lc.match(/\bantibio|tetracycl|penicill|amoxicil|sulph/))cat2='Antibiotics';
+            else if(lc.match(/\bdewormer|ivermect|albendaz|deworm/))cat2='Dewormers';
+            else if(lc.match(/\bvitamin|supplement|calcium|mineral|boost/))cat2='Supplements';
+            else if(lc.match(/\bspray|wound|teat|dip|disinfect|first aid/))cat2='First Aid';
+            var stock2='In stock';
+            if(lc.match(/out of stock|unavail|not available/))stock2='Out of stock';
+            else if(lc.match(/low stock|limited|few remaining/))stock2='Low stock';
+            var unitMx=line.match(/(\d+[\s-]?(?:dose|ml|mg|litre|liter|vial|bottle|kg|tab|sachet)s?)/i);
+            p={name:name2.slice(0,80),category:cat2,unit:unitMx?unitMx[0]:'unit',
+               basePrice:rawPrice,commission:defaultComm,
+               stock:stock2,description:'',supplier:supplier};
+          }
+        }
+      }
+    }
+    if(p&&p.name&&p.name.length>2)parsed.push(p);
+  });
+
+  if(!parsed.length){
+    tst('No valid products detected. Try pipe-separated format: Name | Category | Unit | Price');
+    return;
+  }
+
+  window._siParsed=parsed;
+  var prev=document.getElementById('si-preview');
+  prev.style.display='block';
+
+  var newCount=0,updateCount=0;
+  parsed.forEach(function(p){
+    var ex=VPRODS.find(function(x){return x.name.toLowerCase()===p.name.toLowerCase();});
+    if(ex)updateCount++;else newCount++;
+  });
+
+  prev.innerHTML=
+    '<div style="padding:8px 11px;background:var(--gl);border-radius:var(--rs);font-size:11px;color:var(--gn);margin-bottom:9px;font-weight:600">'+
+    '&#9989; Found <strong>'+parsed.length+'</strong> products from <strong>'+supplier+'</strong> &mdash; '+newCount+' new, '+updateCount+' updates</div>'+
+    '<div style="overflow-x:auto;max-height:260px;overflow-y:auto">'+
+    '<table style="width:100%;font-size:11px;border-collapse:collapse">'+
+    '<thead><tr>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px;text-align:left">Product</th>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px">Category</th>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px">Unit</th>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px;text-align:right">Base Price</th>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px;text-align:right">Comm%</th>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px;text-align:right">Client Price</th>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px">Stock</th>'+
+    '<th style="background:#0a6640;color:#fff;padding:4px 7px">Action</th>'+
+    '</tr></thead><tbody>'+
+    parsed.map(function(p){
+      var fp=Math.round(p.basePrice*(1+p.commission/100));
+      var ex=VPRODS.find(function(x){return x.name.toLowerCase()===p.name.toLowerCase();});
+      return '<tr style="border-bottom:1px solid var(--bo);background:'+(ex?'#fffbeb':'#f0fdf4')+'">'+
+        '<td style="padding:4px 7px;font-weight:600">'+p.name+'</td>'+
+        '<td style="padding:4px 7px">'+p.category+'</td>'+
+        '<td style="padding:4px 7px">'+p.unit+'</td>'+
+        '<td style="padding:4px 7px;text-align:right">'+formatUGX(p.basePrice)+'</td>'+
+        '<td style="padding:4px 7px;text-align:right;color:#0a6640;font-weight:700">'+p.commission+'%</td>'+
+        '<td style="padding:4px 7px;text-align:right;font-weight:700">'+formatUGX(fp)+'</td>'+
+        '<td style="padding:4px 7px">'+p.stock+'</td>'+
+        '<td style="padding:4px 7px"><span style="font-size:10px;padding:2px 6px;border-radius:10px;font-weight:700;background:'+(ex?'#fef3c7':'#d1fae5')+';color:'+(ex?'#92400e':'#064e3b')+'">'+(ex?'Update':'New')+'</span></td>'+
+        '</tr>';
+    }).join('')+'</tbody></table></div>'+
+    '<div class="brow" style="margin-top:10px">'+
+    '<button class="btn" style="background:#0a6640;color:#fff;border-color:#0a6640;flex:1;padding:9px;font-size:12px;font-weight:700" onclick="confirmSI(false)">&#10003; Add '+newCount+' new + update '+updateCount+'</button>'+
+    '<button class="btn btn-d" onclick="confirmSI(true)">&#8635; Replace entire catalog</button>'+
+    '</div>';
+}
+
+function confirmSI(replace){
+  var prods=window._siParsed;if(!prods)return;
+  if(replace){
+    if(!confirm('This will replace ALL existing products. Continue?'))return;
+    VPRODS=prods.map(function(p,i){return Object.assign({id:i+1},p);});
+    vnid=VPRODS.length+1;
+  }else{
+    prods.forEach(function(p){
+      var ex=VPRODS.find(function(x){return x.name.toLowerCase()===p.name.toLowerCase();});
+      if(ex){Object.assign(ex,p);}else{p.id=vnid++;VPRODS.push(p);}
+    });
+  }
+  svVet();
+  closeOv('ov-smartimport');
+  renderVetShop();
+  if(document.getElementById('vet-catalog').style.display!=='none')renderCatalogTable();
+  tst('Catalog updated! '+VPRODS.length+' products now in shop.','ok');
 }
 
 // Hook showP
