@@ -309,7 +309,7 @@ tr:hover td{background:var(--su2);}
   </div>
 </div></div>
 
-<div class="ov" id="ov-imp"><div class="mo mow"><h2>Confirm import</h2><p class="mosb">Green=new &middot; Yellow=update</p>
+<div class="ov" id="ov-imp"><div class="mo mow"><h2>Confirm import</h2><p class="mosb">Green = new &middot; Yellow = update &middot; <strong style="color:var(--br)">All cells are editable before importing. Remove rows with &#10005;</strong></p>
   <div style="overflow-x:auto;max-height:260px;overflow-y:auto;margin-bottom:9px"><table class="pt" id="ptbl"></table></div>
   <div id="psum" style="font-size:11px;color:var(--tx2);margin-bottom:8px"></div>
   <div class="brow"><button class="btn btn-a" onclick="doImp()">Import all</button><button class="btn" onclick="closeOv('ov-imp')">Cancel</button></div>
@@ -1013,8 +1013,25 @@ function parseImp(){
   });
   if(!res.length){tst('No valid records found. Make sure goat tags like JRM002 or S&J 015 are at the start of each line.');return;}
   pimport=res;
-  var html='<thead><tr><th>Parent</th><th>Sex</th><th>Breed</th><th>Kid</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody>';
-  res.forEach(function(r){html+='<tr class="'+(r._ex?'pu':'pn')+'"><td><strong>'+r.parent+'</strong></td><td>'+r.sex+'</td><td>'+r.breed+'</td><td>'+(r.kid||'--')+'</td><td>'+(r.date||'--')+'</td><td>'+r.status+'</td><td>'+(r._ex?'Update':'Add')+'</td></tr>';});
+  var html='<thead><tr>'+
+    '<th>Parent</th><th>Sex</th><th>Breed</th><th>Kid tag</th><th>Date (DD/MM/YYYY)</th><th>Status</th><th>Notes</th><th>Action</th><th></th>'+
+    '</tr></thead><tbody>';
+  res.forEach(function(r,idx){
+    var sexOpts=['Unknown','Male','Female'].map(function(s){return '<option'+(r.sex===s?' selected':'')+'>'+s+'</option>';}).join('');
+    var breedOpts=['Unknown','Boer','Savana'].map(function(b){return '<option'+(r.breed===b?' selected':'')+'>'+b+'</option>';}).join('');
+    var statusOpts=['Alive','Died','Concern'].map(function(s){return '<option'+(r.status===s?' selected':'')+'>'+s+'</option>';}).join('');
+    html+='<tr class="'+(r._ex?'pu':'pn')+'" id="prow-'+idx+'">'+
+      '<td style="padding:2px 4px"><input value="'+r.parent+'" onchange="pimport['+idx+'].parent=this.value.toUpperCase()" style="width:70px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;font-weight:700"/></td>'+
+      '<td style="padding:2px 4px"><select onchange="pimport['+idx+'].sex=this.value" style="font-size:10px;padding:2px 3px;border:1px solid #ccc;border-radius:3px">'+sexOpts+'</select></td>'+
+      '<td style="padding:2px 4px"><select onchange="pimport['+idx+'].breed=this.value" style="font-size:10px;padding:2px 3px;border:1px solid #ccc;border-radius:3px">'+breedOpts+'</select></td>'+
+      '<td style="padding:2px 4px"><input value="'+(r.kid||'')+'" onchange="pimport['+idx+'].kid=this.value.toUpperCase()" placeholder="e.g. CIK020" style="width:65px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px"/></td>'+
+      '<td style="padding:2px 4px"><input value="'+(r.date||'')+'" onchange="pimport['+idx+'].date=this.value" placeholder="DD/MM/YYYY" style="width:80px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px"/></td>'+
+      '<td style="padding:2px 4px"><select onchange="pimport['+idx+'].status=this.value" style="font-size:10px;padding:2px 3px;border:1px solid #ccc;border-radius:3px">'+statusOpts+'</select></td>'+
+      '<td style="padding:2px 4px"><input value="'+(r.notes||'')+'" onchange="pimport['+idx+'].notes=this.value" placeholder="Notes..." style="width:90px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px"/></td>'+
+      '<td style="padding:2px 4px"><span style="font-size:10px;padding:1px 5px;border-radius:10px;font-weight:700;background:'+(r._ex?'#fef3c7':'#d1fae5')+';color:'+(r._ex?'#92400e':'#064e3b')+'">'+(r._ex?'Update':'Add')+'</span></td>'+
+      '<td style="padding:2px 4px"><button onclick="removeImportRow('+idx+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;padding:1px 3px">&#10005;</button></td>'+
+      '</tr>';
+  });
   html+='</tbody>';document.getElementById('ptbl').innerHTML=html;
   var nc=res.filter(function(r){return !r._ex;}).length,uc=res.filter(function(r){return r._ex;}).length;
   document.getElementById('psum').innerHTML='<strong>'+res.length+' parsed</strong> - '+nc+' new, '+uc+' updates';
@@ -2224,6 +2241,38 @@ function confirmSI(replace){
   renderVetShop();
   if(document.getElementById('vet-catalog').style.display!=='none')renderCatalogTable();
   tst('Catalog updated! '+VPRODS.length+' products now in shop.','ok');
+}
+
+
+// Remove a row from the import preview
+function removeImportRow(idx){
+  pimport.splice(idx,1);
+  // Re-render the preview table
+  if(!pimport.length){closeOv('ov-imp');tst('All rows removed.');return;}
+  var nc=pimport.filter(function(r){return !r._ex;}).length;
+  var uc=pimport.filter(function(r){return r._ex;}).length;
+  document.getElementById('psum').innerHTML='<strong>'+pimport.length+' records</strong> -- '+nc+' new, '+uc+' updates <span style="font-size:10px;color:var(--tx2)">(edit any cell before importing)</span>';
+  // Re-render rows
+  var sexOpts2=function(r,i){return ['Unknown','Male','Female'].map(function(s){return '<option'+(r.sex===s?' selected':'')+'>'+s+'</option>';}).join('');};
+  var breedOpts2=function(r,i){return ['Unknown','Boer','Savana'].map(function(b){return '<option'+(r.breed===b?' selected':'')+'>'+b+'</option>';}).join('');};
+  var statusOpts2=function(r,i){return ['Alive','Died','Concern'].map(function(s){return '<option'+(r.status===s?' selected':'')+'>'+s+'</option>';}).join('');};
+  var tbl=document.getElementById('ptbl');
+  var tbody=tbl.querySelector('tbody');
+  if(tbody){
+    tbody.innerHTML=pimport.map(function(r,i){
+      return '<tr class="'+(r._ex?'pu':'pn')+'" id="prow-'+i+'">'+
+        '<td style="padding:2px 4px"><input value="'+r.parent+'" onchange="pimport['+i+'].parent=this.value.toUpperCase()" style="width:70px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;font-weight:700"/></td>'+
+        '<td style="padding:2px 4px"><select onchange="pimport['+i+'].sex=this.value" style="font-size:10px;padding:2px 3px;border:1px solid #ccc;border-radius:3px">'+sexOpts2(r,i)+'</select></td>'+
+        '<td style="padding:2px 4px"><select onchange="pimport['+i+'].breed=this.value" style="font-size:10px;padding:2px 3px;border:1px solid #ccc;border-radius:3px">'+breedOpts2(r,i)+'</select></td>'+
+        '<td style="padding:2px 4px"><input value="'+(r.kid||'')+'" onchange="pimport['+i+'].kid=this.value.toUpperCase()" placeholder="e.g. CIK020" style="width:65px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px"/></td>'+
+        '<td style="padding:2px 4px"><input value="'+(r.date||'')+'" onchange="pimport['+i+'].date=this.value" placeholder="DD/MM/YYYY" style="width:80px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px"/></td>'+
+        '<td style="padding:2px 4px"><select onchange="pimport['+i+'].status=this.value" style="font-size:10px;padding:2px 3px;border:1px solid #ccc;border-radius:3px">'+statusOpts2(r,i)+'</select></td>'+
+        '<td style="padding:2px 4px"><input value="'+(r.notes||'')+'" onchange="pimport['+i+'].notes=this.value" placeholder="Notes..." style="width:90px;font-size:10px;padding:2px 4px;border:1px solid #ccc;border-radius:3px"/></td>'+
+        '<td style="padding:2px 4px"><span style="font-size:10px;padding:1px 5px;border-radius:10px;font-weight:700;background:'+(r._ex?'#fef3c7':'#d1fae5')+';color:'+(r._ex?'#92400e':'#064e3b')+'">'+(r._ex?'Update':'Add')+'</span></td>'+
+        '<td style="padding:2px 4px"><button onclick="removeImportRow('+i+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;padding:1px 3px">&#10005;</button></td>'+
+        '</tr>';
+    }).join('');
+  }
 }
 
 // Hook showP
