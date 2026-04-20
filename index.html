@@ -976,18 +976,84 @@ function renderReg(){
     var cfg=GRP[px];var rows='',rec=0;
     for(var i=1;i<=cfg.max;i++){
       var tag=px+p3(i);var key=tag.toUpperCase().replace(/\s/g,'');var rs=lk[key]||[];
-      if(!rs.length){if(fs==='recorded')continue;if(q&&!tag.toLowerCase().includes(q))continue;rows+='<tr class="es"><td>'+tag+'</td><td colspan="'+(isA?6:5)+'"><span class="badge bn">No record</span></td></tr>';}
-      else{rec+=rs.length;rs.forEach(function(r){
-        if(fs==='empty')return;if(q&&!r.parent.toLowerCase().includes(q)&&!(r.kid||'').toLowerCase().includes(q))return;
-        var cc=(COM[r.id]||[]).length;
-        var ac='<td><div style="display:flex;gap:3px;flex-wrap:wrap">'+(isA?'<button class="ab2" onclick="openEdit('+r.id+')">Edit</button><button class="ab2 dng" onclick="dRec('+r.id+')">Del</button>':'')+'<button class="ab2 cmm" onclick="openCom('+r.id+',\''+r.parent+'\')">&#128172;'+(cc>0?' '+cc:'')+'</button></div></td>';
-        rows+='<tr><td style="font-weight:700"><span class="dot '+dC(r.status)+'"></span>'+r.parent+'</td><td>'+sxB(r.sex)+'</td><td>'+brB(r.breed)+'</td><td style="color:var(--tx2)">'+(r.kid||'--')+'</td><td style="font-size:10px;color:var(--tx2);white-space:nowrap">'+(r.date||'--')+'</td><td>'+stB(r.status)+'</td>'+ac+'</tr>';
-      });}
+      if(!rs.length){
+        if(fs==='recorded')continue;if(q&&!tag.toLowerCase().includes(q))continue;
+        rows+='<tr class="es"><td>'+tag+'</td><td colspan="'+(isA?6:5)+'"><span class="badge bn">No record</span></td></tr>';
+      }else{
+        rec+=rs.length;rs.forEach(function(r){
+          if(fs==='empty')return;
+          if(q&&!r.parent.toLowerCase().includes(q)&&!(r.kid||'').toLowerCase().includes(q))return;
+          var coms=COM[r.id]||[];var cc=coms.length;
+          var lastCom=coms.length?coms[coms.length-1]:null;
+
+          // ADMIN: inline editable cells; CLIENT: read-only
+          var sexOpts=['Unknown','Male','Female'].map(function(s){return '<option'+(r.sex===s?' selected':'')+'>'+s+'</option>';}).join('');
+          var breedOpts=['Unknown','Boer','Savana'].map(function(b){return '<option'+(r.breed===b?' selected':'')+'>'+b+'</option>';}).join('');
+          var statusOpts=['Alive','Died','Concern'].map(function(s){return '<option'+(r.status===s?' selected':'')+'>'+s+'</option>';}).join('');
+
+          var sexCell=isA?
+            '<select onchange="inlineUpdate('+r.id+',\'sex\',this.value)" style="font-size:10px;padding:2px 3px;border:1px solid var(--bo2);border-radius:3px;background:var(--su)">'+sexOpts+'</select>':
+            sxB(r.sex);
+          var breedCell=isA?
+            '<select onchange="inlineUpdate('+r.id+',\'breed\',this.value)" style="font-size:10px;padding:2px 3px;border:1px solid var(--bo2);border-radius:3px;background:var(--su)">'+breedOpts+'</select>':
+            brB(r.breed);
+          var kidCell=isA?
+            '<input value="'+(r.kid||'')+'" onchange="inlineUpdate('+r.id+',\'kid\',this.value.toUpperCase())" placeholder="--" style="width:62px;font-size:10px;padding:2px 4px;border:1px solid var(--bo2);border-radius:3px"/>':
+            '<span style="color:var(--tx2)">'+(r.kid||'--')+'</span>';
+          var dateCell=isA?
+            '<input value="'+(r.date||'')+'" onchange="inlineUpdate('+r.id+',\'date\',this.value)" placeholder="DD/MM/YYYY" style="width:80px;font-size:10px;padding:2px 4px;border:1px solid var(--bo2);border-radius:3px"/>':
+            '<span style="font-size:10px;color:var(--tx2);white-space:nowrap">'+(r.date||'--')+'</span>';
+          var statusCell=isA?
+            '<select onchange="inlineUpdate('+r.id+',\'status\',this.value)" style="font-size:10px;padding:2px 3px;border:1px solid var(--bo2);border-radius:3px;background:var(--su)">'+statusOpts+'</select>':
+            stB(r.status);
+
+          // Comment preview (latest comment shown inline)
+          var comPreview=lastCom?
+            '<div style="font-size:9px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px" title="'+lastCom.text+'">&#128172; '+lastCom.text+'</div>':'';
+
+          // Actions column: comment button + calendar log button
+          var ac='<td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">'+
+            (isA?'<button class="ab2 dng" onclick="dRec('+r.id+')" title="Delete">&#128465;</button>':'') +
+            '<button class="ab2 cmm" onclick="openCom('+r.id+',\''+r.parent+'\')" title="Add comment">&#128172;'+(cc>0?'<span style="background:#ef4444;color:#fff;border-radius:50%;width:13px;height:13px;font-size:8px;display:inline-flex;align-items:center;justify-content:center;margin-left:2px">'+cc+'</span>':'')+'</button>'+
+            '<button class="ab2" onclick="openComLog('+r.id+',\''+r.parent+'\')" title="View comment history &amp; calendar">&#128197;</button>'+
+            '</div>'+comPreview+'</td>';
+
+          // Notes cell (inline editable for admin)
+          var notesCell=isA?
+            '<input value="'+(r.notes||'')+'" onchange="inlineUpdate('+r.id+',\'notes\',this.value)" placeholder="Notes..." style="width:80px;font-size:10px;padding:2px 4px;border:1px solid var(--bo2);border-radius:3px"/>':
+            '<span style="font-size:10px;color:var(--tx3)">'+(r.notes||'')+'</span>';
+
+          rows+='<tr id="row-'+r.id+'">'+
+            '<td style="font-weight:700"><span class="dot '+dC(r.status)+'"></span>'+r.parent+'</td>'+
+            '<td>'+sexCell+'</td>'+
+            '<td>'+breedCell+'</td>'+
+            '<td>'+kidCell+'</td>'+
+            '<td>'+dateCell+'</td>'+
+            '<td>'+statusCell+'</td>'+
+            '<td>'+notesCell+'</td>'+
+            ac+
+            '</tr>';
+        });
+      }
     }
     if(!rows)return;var pc=Math.round(rec/cfg.max*100);var op=!!(fg||q);
-    html+='<div class="gb'+(op?' op':'')+'" id="gb-'+px+'"><button class="gt" onclick="tgG(\''+px+'\')"><span class="gn">'+px+'</span><span class="gi">'+cfg.max+' stock . '+rec+' recorded . '+pc+'%</span><div class="gpx"><div class="gpxf" style="width:'+pc+'%;background:'+cfg.col+'"></div></div><span class="ga">&#9660;</span></button><div class="gbdy"><div class="tw"><table><thead><tr><th>Tag</th><th>Sex</th><th>Breed</th><th>Kid tag</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+    html+='<div class="gb'+(op?' op':'')+'" id="gb-'+px+'"><button class="gt" onclick="tgG(\''+px+'\')"><span class="gn">'+px+'</span><span class="gi">'+cfg.max+' stock . '+rec+' recorded . '+pc+'%</span><div class="gpx"><div class="gpxf" style="width:'+pc+'%;background:'+cfg.col+'"></div></div><span class="ga">&#9660;</span></button><div class="gbdy"><div class="tw"><table><thead><tr><th>Tag</th><th>Sex</th><th>Breed</th><th>Kid tag</th><th>Date</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
   });
   document.getElementById('regout').innerHTML=html||'<div class="emp">No records found.</div>';
+}
+
+function inlineUpdate(id,field,value){
+  var r=REC.find(function(x){return x.id===id;});
+  if(!r)return;
+  r[field]=value;
+  sv();
+  // Update status dot without full re-render
+  var row=document.getElementById('row-'+id);
+  if(row&&field==='status'){
+    var dot=row.querySelector('.dot');
+    if(dot){dot.className='dot '+dC(value);}
+  }
+  tst('Saved','ok');
 }
 function tgG(p){var e=document.getElementById('gb-'+p);if(e)e.classList.toggle('op');}
 function dRec(id){if(!confirm('Delete?'))return;REC=REC.filter(function(x){return x.id!==id;});sv();renderReg();renderDash();tst('Deleted');}
@@ -1286,6 +1352,27 @@ PPR Vaccine - 10 dose - UGX 32,000 - vaccines - in stock"></textarea>
       <button class="btn" onclick="document.getElementById('si-text').value='';document.getElementById('si-preview').style.display='none'">Clear</button>
       <button class="btn" onclick="closeOv('ov-smartimport')">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- COMMENT LOG / CALENDAR MODAL -->
+<div class="ov" id="ov-comlog">
+  <div class="mo" style="max-width:520px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2>&#128197; Comment log</h2>
+      <button class="btn" onclick="closeOv('ov-comlog')" style="flex-shrink:0">&#10005;</button>
+    </div>
+    <p class="mosb" id="comlogsub"></p>
+    <!-- Quick add comment -->
+    <div style="background:var(--su2);border-radius:var(--rs);padding:10px;margin-bottom:11px">
+      <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:6px">Add new comment</div>
+      <input id="comlog-name" placeholder="Your name" style="width:100%;font-size:12px;padding:6px 8px;border-radius:var(--rs);border:1px solid var(--bo2);margin-bottom:5px"/>
+      <textarea id="comlog-text" placeholder="Write a comment or observation..." style="width:100%;font-size:12px;padding:6px 8px;border-radius:var(--rs);border:1px solid var(--bo2);min-height:52px;resize:vertical;font-family:inherit;margin-bottom:5px"></textarea>
+      <button class="btn btn-p btn-s" onclick="postComLog()">Post comment</button>
+    </div>
+    <!-- Timeline -->
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);margin-bottom:8px">Comment history &amp; timeline</div>
+    <div id="comlog-timeline" style="max-height:340px;overflow-y:auto"></div>
   </div>
 </div>
 </body>
@@ -2273,6 +2360,81 @@ function removeImportRow(idx){
         '</tr>';
     }).join('');
   }
+}
+
+
+// COMMENT LOG / CALENDAR
+var comlogId=null;
+function openComLog(id,tag){
+  comlogId=id;
+  document.getElementById('comlogsub').textContent='Record: '+tag;
+  document.getElementById('comlog-name').value='';
+  document.getElementById('comlog-text').value='';
+  renderComTimeline(id);
+  document.getElementById('ov-comlog').classList.add('sh');
+}
+function renderComTimeline(id){
+  var coms=COM[id]||[];
+  var el=document.getElementById('comlog-timeline');
+  if(!coms.length){
+    el.innerHTML='<div style="text-align:center;padding:18px;color:var(--tx3);font-style:italic">No comments yet. Be the first to log an observation.</div>';
+    return;
+  }
+  // Group by date for calendar view
+  var byDate={};
+  coms.forEach(function(cm){
+    var dt=cm.time||cm.date||'Unknown date';
+    if(!byDate[dt])byDate[dt]=[];
+    byDate[dt].push(cm);
+  });
+  var dates=Object.keys(byDate).sort(function(a,b){
+    // parse DD Mon YYYY or DD/MM/YYYY
+    return new Date(b) - new Date(a);
+  });
+  el.innerHTML=dates.map(function(dt){
+    var items=byDate[dt];
+    return '<div style="margin-bottom:12px">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+        '<div style="width:10px;height:10px;border-radius:50%;background:var(--br);flex-shrink:0"></div>'+
+        '<div style="font-size:11px;font-weight:700;color:var(--br)">'+dt+'</div>'+
+        '<div style="flex:1;height:1px;background:var(--bo)"></div>'+
+      '</div>'+
+      items.map(function(cm,i){
+        var globalIdx=coms.indexOf(cm);
+        return '<div style="margin-left:18px;padding:8px 10px;background:var(--su);border:1px solid var(--bo);border-radius:var(--rs);margin-bottom:5px;position:relative">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'+
+            '<div style="flex:1">'+
+              '<div style="font-size:10px;font-weight:700;color:var(--br);margin-bottom:3px">'+cm.name+'</div>'+
+              (isA?
+                '<textarea data-idx="'+globalIdx+'" onchange="editComEntry('+id+','+globalIdx+',this.value)" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid var(--bo2);border-radius:3px;resize:vertical;min-height:36px;font-family:inherit">'+cm.text+'</textarea>':
+                '<div style="font-size:12px;line-height:1.5">'+cm.text+'</div>')+
+            '</div>'+
+            (isA?'<button onclick="deleteComEntry('+id+','+globalIdx+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;padding:2px;flex-shrink:0">&#128465;</button>':'')+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }).join('');
+}
+function postComLog(){
+  var txt=document.getElementById('comlog-text').value.trim();if(!txt){tst('Write a comment.');return;}
+  var nm=document.getElementById('comlog-name').value.trim()||'Admin';
+  if(!COM[comlogId])COM[comlogId]=[];
+  COM[comlogId].push({name:nm,text:txt,time:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})});
+  sv();
+  document.getElementById('comlog-text').value='';
+  renderComTimeline(comlogId);
+  renderReg();
+  tst('Comment posted','ok');
+}
+function editComEntry(id,idx,val){
+  if(COM[id]&&COM[id][idx])COM[id][idx].text=val;
+  sv();tst('Comment updated','ok');
+}
+function deleteComEntry(id,idx){
+  if(!confirm('Delete this comment?'))return;
+  if(COM[id])COM[id].splice(idx,1);
+  sv();renderComTimeline(id);renderReg();tst('Comment deleted');
 }
 
 // Hook showP
