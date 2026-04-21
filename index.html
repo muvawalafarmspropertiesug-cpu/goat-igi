@@ -2,6 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<meta name="theme-color" content="#3d1a0a"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Muvawala IGI"/>
+<meta name="application-name" content="Muvawala IGI"/>
+<meta name="description" content="Muvawala Goat Farms - IGI Register & Client Portal"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233d1a0a'/%3E%3Ctext y='.9em' font-size='70' x='10'%3E%F0%9F%90%90%3C/text%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Muvawala Goat Farms — IGI Register</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -288,6 +297,13 @@ tr:hover td{background:var(--su2);}
 </style>
 </head>
 <body>
+
+
+<div id="pwa-install-btn" style="display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:999;background:#3d1a0a;color:#fff;border:none;border-radius:50px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.35);align-items:center;gap:9px;white-space:nowrap" onclick="installPWA()">
+  <span style="font-size:18px">&#128241;</span> Install Muvawala app
+  <button onclick="event.stopPropagation();document.getElementById('pwa-install-btn').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;margin-left:4px">&#10005;</button>
+</div>
+
 <header class="hdr">
   <div class="brd"><div class="blogo">&#128016;</div><div class="bt"><h1>Muvawala Goat Farms</h1><p>IGI Register &amp; Client Portal &middot; Live</p></div></div>
   <div class="hr2"><span class="hdt" id="hdt"></span><button class="abtn" id="abtn" onclick="loginAdmin()">Admin</button></div>
@@ -1481,7 +1497,7 @@ popPar();
 renderDash();
 upBdg();
 chkSelfReg();
-updateClientSessionUI();
+if(typeof updateClientSessionUI==="function")updateClientSessionUI();
 </script>
 
 <!-- VET PRODUCT DETAIL MODAL -->
@@ -1680,6 +1696,20 @@ PPR Vaccine - 10 dose - UGX 32,000 - vaccines - in stock"></textarea>
     </div>
   </div>
 </div>
+
+<script>
+// PWA install prompt
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  window._installPrompt = e;
+  var btn = document.getElementById('pwa-install-btn');
+  if(btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', function(){
+  var btn = document.getElementById('pwa-install-btn');
+  if(btn) btn.style.display = 'none';
+});
+</script>
 </body>
 </html>
 <script>
@@ -2975,6 +3005,16 @@ function saveSecEdit(){
   tst('Section '+editSecKey+' updated!','ok');
 }
 
+
+function installPWA(){
+  if(window._installPrompt){
+    window._installPrompt.prompt();
+    window._installPrompt.userChoice.then(function(r){
+      if(r.outcome==='accepted') document.getElementById('pwa-install-btn').style.display='none';
+      window._installPrompt=null;
+    });
+  }
+}
 // Hook showP
 var _origShowP=showP;
 showP=function(id,btn){_origShowP(id,btn);if(id==='vet')renderVet();};
