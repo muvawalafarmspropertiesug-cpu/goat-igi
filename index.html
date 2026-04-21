@@ -263,6 +263,28 @@ tr:hover td{background:var(--su2);}
 .comm-lbl{font-size:9px;opacity:.75;margin-top:1px;}
 
 
+
+/* CLIENT DASHBOARD */
+.cli-dash{background:linear-gradient(135deg,var(--br) 0%,var(--br2) 100%);color:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.cli-dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-top:10px;}
+.cli-dash-item{background:rgba(255,255,255,.15);border-radius:var(--rs);padding:9px 6px;text-align:center;}
+.cli-dash-val{font-size:20px;font-weight:700;line-height:1;}
+.cli-dash-lbl{font-size:9px;opacity:.75;margin-top:2px;}
+.sec-summary{background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:8px;}
+.sec-summary h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--br);margin-bottom:8px;padding-bottom:5px;border-top:none;display:flex;justify-content:space-between;align-items:center;}
+.sec-summary .sec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:4px;}
+.obl-month{margin-bottom:14px;}
+.obl-month-hdr{font-size:11px;font-weight:700;color:var(--br);border-bottom:2px solid var(--br);padding-bottom:4px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.obl-log-entry{padding:6px 9px;border-radius:var(--rs);margin-bottom:5px;border-left:3px solid var(--bo2);}
+.obl-log-compliant{border-left-color:#10b981;background:#f0fdf4;}
+.obl-log-non-compliant{border-left-color:#ef4444;background:#fff1f2;}
+.obl-log-pending{border-left-color:#f59e0b;background:#fffbeb;}
+.doc-upload-item{background:var(--su2);border:1.5px dashed var(--bo2);border-radius:var(--rs);padding:10px;text-align:center;cursor:pointer;transition:all .15s;}
+.doc-upload-item:hover{border-color:var(--br);background:var(--al);}
+.doc-upload-item.done{border:1.5px solid var(--gn);background:var(--gl);cursor:default;}
+.doc-upload-item.rejected{border:1.5px solid var(--rd);background:var(--rl);}
+.pw-modal input{width:100%;font-size:13px;padding:9px 11px;border-radius:var(--rs);border:1px solid var(--bo2);margin-bottom:8px;}
+
 </style>
 </head>
 <body>
@@ -543,7 +565,7 @@ tr:hover td{background:var(--su2);}
 
 <div class="pnl" id="pnl-cli">
   <div id="clilst">
-    <div class="clhdr">
+    <div class="clhdr" id="cli-panel-hdr">
       <div><h2 style="font-size:14px;font-weight:700;color:var(--br)">Client registry</h2><p style="font-size:11px;color:var(--tx2)">Invest in Wealth &mdash; KYC profiles</p></div>
       <div class="brow">
         <button class="btn btn-a" onclick="closeOv('ov-inv');openInv()">&#128231; Send invite</button>
@@ -1169,28 +1191,180 @@ function openObl(cid,key,lbl){oblcid=cid;oblkey=key;document.getElementById('obl
 function saveObl(){if(!OBL[oblcid])OBL[oblcid]={};if(!OBL[oblcid][oblkey])OBL[oblcid][oblkey]=[];OBL[oblcid][oblkey].push({status:fv('oblst'),date:fv('obldt')||new Date().toLocaleDateString('en-GB'),notes:fv('oblnt')});sv();closeOv('ov-obl');tst('Logged','ok');renderDash();if(document.getElementById('clidet').style.display!=='none'){var c=CLI.find(function(x){return x.id===oblcid;});if(c)viewCli(c.id);}}
 function viewCli(id){
   var c=CLI.find(function(x){return x.id===id;});if(!c)return;
-  document.getElementById('clilst').style.display='none';document.getElementById('clidet').style.display='block';
-  var lk=bkp();var gR=c.tagGroup?REC.filter(function(r){return r.parent.startsWith(c.tagGroup);}):[];
+  document.getElementById('clilst').style.display='none';
+  document.getElementById('clidet').style.display='block';
+  var gR=c.tagGroup?REC.filter(function(r){return r.parent.startsWith(c.tagGroup);}):[];
   var alive=gR.filter(function(r){return r.status==='Alive';}).length;
   var died=gR.filter(function(r){return r.status==='Died';}).length;
   var concern=gR.filter(function(r){return r.status==='Concern';}).length;
-  var docs=c.docs||{};var ini=(c.fullName||'?').split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+  var docs=c.docs||{};
+  var ini=(c.fullName||'?').split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
   var avH=docs.photo?'<img src="'+docs.photo+'" alt="p"/>':'<span>'+ini+'</span>';
-  var kyc=calcKYC(c);var dl=ctrDays(c);var pc=ctrPct(c);var cs2=ctrSt(c);var cmp=compSt(c.id);
-  var obs=OBL[c.id]||{};var now=new Date();var vd=lastSat(now.getFullYear(),now.getMonth());
+  var kyc=calcKYC(c);var dl=ctrDays(c);var pc2=ctrPct(c);var cs2=ctrSt(c);var cmp=compSt(c.id);
+  var obs=OBL[c.id]||{};
+  var now=new Date();var vd=lastSat(now.getFullYear(),now.getMonth());
   var vdate=p2(vd)+'/'+p2(now.getMonth()+1)+'/'+now.getFullYear();
   var acks=c.acknowledgements||{};
-  var ckT=['Goats housed in Nakasongola','Mgmt fee 3 months advance','Monthly farm visits','Sale requires written consent','No liability force majeure','Commission: '+(c.commission||'20')+'%','18-month contract term'];
-  var oblHTML=oblDefs().map(function(o){var rec=obs[o.k]||[];var last=rec[rec.length-1];var st=last?last.status:'pending';var dot=st==='compliant'?'cg2':st==='non-compliant'?'cr2':'cgr2';var hist=rec.slice(-3).reverse().map(function(r){return '<span style="font-size:9px;color:'+(r.status==='compliant'?'var(--gn)':r.status==='non-compliant'?'var(--rd)':'var(--tx3)')+'">'+r.date+': '+r.status+(r.notes?' ('+r.notes+')':'')+'</span>';}).join('<br>');return '<div class="obi"><div class="obil"><span class="obidot '+dot+'"></span><div><div style="font-size:12px">'+o.l+'</div><div style="font-size:10px;color:var(--tx2)">'+(last?last.date+' . '+last.status:'Not yet logged')+'</div>'+(hist?'<div style="margin-top:2px">'+hist+'</div>':'')+'</div></div>'+(isA?'<button class="btn btn-s btn-p" onclick="openObl('+c.id+',\''+o.k+'\',\''+o.l+'\')">Log</button>':'')+'</div>';}).join('');
-  var docHTML=Object.entries({photo:'&#128247; Passport photo',nidF:'&#128196; NID Front',nidB:'&#128196; NID Back',contract:'&#128221; Contract',invoice:'&#128181; Invoice',passport:'&#128213; Passport',extra:'&#128196; Other'}).map(function(e2){var k=e2[0],lbl=e2[1];var data=docs[k];var rej=docs[k+'_rej'];var inner='';if(data){var isImg=data.startsWith('data:image');inner=(isImg?'<img src="'+data+'" style="width:100%;height:50px;object-fit:cover;border-radius:4px;margin-bottom:2px"/>':'<div style="font-size:15px">&#9989;</div>')+'<div class="dil">'+lbl+'</div>';if(rej)inner+='<div class="drn">&#10060; '+rej+'</div>';if(isA&&!rej)inner+='<div class="dacts"><button class="btn btn-s btn-d" onclick="event.stopPropagation();openRejDoc('+c.id+',\''+k+'\')">Reject</button></div>';}else{inner='<div style="font-size:15px;opacity:.4">&#128196;</div><div class="dil" style="opacity:.5">'+lbl+'</div><div style="font-size:9px;color:var(--tx3)">Not uploaded</div>';}var cls=rej?'di rj':data?'di up':'di';return '<div class="'+cls+'" style="cursor:default">'+inner+'</div>';}).join('');
-  document.getElementById('clidetcnt').innerHTML=
-    '<div class="kycs"><h3>Relationship summary - '+(c.fullName||'Client')+' <span style="font-size:10px;background:rgba(255,255,255,.2);padding:2px 7px;border-radius:20px;margin-left:6px">'+(cmp==='compliant'?'&#9989; Compliant':'&#10060; Non-compliant')+'</span></h3><div class="kycg"><div class="kyci"><div class="kycv">'+(c.goatCount||0)+'</div><div class="kycl">Goats</div></div><div class="kyci"><div class="kycv">'+gR.length+'</div><div class="kycl">Kids recorded</div></div><div class="kyci"><div class="kycv">'+alive+'</div><div class="kycl">Kids alive</div></div><div class="kyci"><div class="kycv">'+(died+concern)+'</div><div class="kycl">Deaths/concern</div></div><div class="kyci"><div class="kycv">'+kyc+'%</div><div class="kycl">KYC complete</div></div><div class="kyci"><div class="kycv">'+(dl!==null?(dl>0?dl+'d':'Expired'):'--')+'</div><div class="kycl">Days left</div></div></div>'+(c.contractDate?'<div style="font-size:10px;opacity:.7;margin-top:6px">18-month contract . Next farm visit: '+vdate+'</div><div class="cprog"><div class="cprogf" style="width:'+pc+'%"></div></div>':'')+'</div>'+
-    '<div class="cdh"><div class="cdhav">'+avH+'</div><div style="flex:1"><div style="font-size:15px;font-weight:700">'+(c.fullName||'Unnamed')+'</div><div style="font-size:11px;color:var(--tx2);margin-top:1px">'+(c.tagGroup?'Group '+c.tagGroup+' . ':'')+' '+(c.goatCount||0)+' goats . '+(c.invoiceNo||'')+'</div><div style="font-size:11px;color:var(--tx2);margin-top:1px">'+(c.phone1||'')+' '+(c.email?'. '+c.email:'')+'</div><div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-p btn-s" onclick="openCF('+c.id+')">Edit</button><button class="btn btn-g btn-s" onclick="expPDF('+c.id+')">&#8681; PDF</button><button class="btn btn-s" onclick="dlAgreement()">&#8681; Agreement</button>'+(isA?'<button class="btn btn-d btn-s" onclick="delCli('+c.id+')">Delete</button>':'')+'</div></div></div>'+
-    '<div class="ig"><div class="ic"><h4>Section A - Client</h4>'+ir('Full name',c.fullName)+ir('National ID',c.nationalId)+ir('NIN',c.nin)+ir('DOB',c.dob)+ir('Gender',c.gender)+ir('Phone 1',c.phone1)+ir('Phone 2',c.phone2)+ir('Email',c.email)+ir('Address',c.address)+ir('District',c.district)+'</div><div class="ic"><h4>Section B - Investment</h4>'+ir('Tag group',c.tagGroup)+ir('No. goats',c.goatCount)+ir('Contract date',c.contractDate?new Date(c.contractDate).toLocaleDateString('en-GB'):'')+ir('Tenor',c.tenor)+ir('Investment',c.amount+' UGX')+ir('Mgmt fee/goat',c.mgmtFee+' UGX/mo')+ir('Commission',c.commission+'%')+ir('Invoice No.',c.invoiceNo)+ir('Bank',c.bankName)+ir('Mobile money',c.mobileMoney)+'</div><div class="ic"><h4>Section D - Next of Kin</h4>'+ir('Name',c.kinName)+ir('Relationship',c.kinRel)+ir('Phone 1',c.kinPhone1)+ir('Phone 2',c.kinPhone2)+ir('Address',c.kinAddr)+'</div><div class="ic"><h4>Section C - Acknowledgements</h4>'+ckT.map(function(t,i){return '<div class="ir"><span class="il">'+t+'</span><span class="iv">'+(acks['ck'+(i+1)]?'&#9989;':'&#9744;')+'</span></div>';}).join('')+'</div><div class="ic"><h4>Section E/F - Official</h4>'+ir('Signature date',c.sigDate)+ir('Witness',c.witnessName)+ir('Received by',c.receivedBy)+ir('Approved by',c.approvedBy)+ir('Remarks',c.remarks)+ir('Contract status','<span class="css css-'+(cs2==='Active'?'a':'e')+'">'+cs2+'</span>')+'</div></div>'+
-    '<div class="fs"><h3>Obligations tracker <span style="font-size:11px;color:'+(cmp==='compliant'?'var(--gn)':'var(--rd)')+';margin-left:6px">'+(cmp==='compliant'?'&#9989; All compliant':'&#10060; Non-compliance detected')+'</span></h3>'+oblHTML+'</div>'+
-    '<div class="fs"><h3>Documents</h3><div class="dug">'+docHTML+'</div></div>'+
-    '<div class="fs"><h3>Goat records - Group '+(c.tagGroup||'N/A')+'</h3>'+(gR.length?'<div class="tw"><table><thead><tr><th>Tag</th><th>Breed</th><th>Kid tag</th><th>Date</th><th>Status</th></tr></thead><tbody>'+gR.map(function(r){return '<tr><td><strong>'+r.parent+'</strong></td><td>'+brB(r.breed)+'</td><td>'+(r.kid||'--')+'</td><td style="font-size:10px">'+(r.date||'--')+'</td><td>'+stB(r.status)+'</td></tr>';}).join('')+'</tbody></table></div>':'<p style="font-size:12px;color:var(--tx3)">No goat records for this group yet.</p>')+'</div>';
+  var isOwner=(clientSession&&clientSession.id===c.id);
+  var canEdit=isA||isOwner;
+
+  // Build HTML
+  var html='';
+
+  // ── HERO DASHBOARD BAR ────────────────────────────────────────────
+  html+='<div class="cli-dash">'+
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+      '<div class="cdhav">'+avH+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:17px;font-weight:700;margin-bottom:2px">'+(c.fullName||'Client')+'</div>'+
+        '<div style="font-size:11px;opacity:.8">'+(c.tagGroup?'Group '+c.tagGroup+' &bull; ':'')+(c.goatCount||0)+' goats &bull; Invoice: '+(c.invoiceNo||'--')+'</div>'+
+        '<div style="font-size:11px;opacity:.8;margin-top:1px">'+(c.phone1||'')+' '+(c.email?'&bull; '+c.email:'')+'</div>'+
+        '<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">'+
+          (canEdit?'<button class="btn btn-s" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="expPDF('+c.id+')">&#8681; PDF</button>':'')+
+          (canEdit?'<button class="btn btn-s" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="dlAgreement()">&#8681; Agreement</button>':'')+
+          (isA?'<button class="btn btn-s" style="background:#e9c46a;color:#3d1a0a;border-color:#e9c46a" onclick="openResetPw('+c.id+')">&#128272; Reset password</button>':'')+
+          (isOwner?'<button class="btn btn-s" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="openChangePw('+c.id+')">&#128272; Change password</button>':'')+
+          (isA?'<button class="btn btn-s btn-d" onclick="delCli('+c.id+')">Delete</button>':'')+
+        '</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<span style="background:'+(cs2==='Active'?'rgba(255,255,255,.25)':'rgba(239,68,68,.4)')+';padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">'+cs2+'</span><br>'+
+        '<span style="margin-top:4px;display:inline-block;background:'+(cmp==='compliant'?'rgba(16,185,129,.3)':'rgba(239,68,68,.3)')+';padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">'+(cmp==='compliant'?'&#9989; Compliant':'&#10060; Non-compliant')+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="cli-dash-grid">'+
+      '<div class="cli-dash-item"><div class="cli-dash-val">'+(c.goatCount||0)+'</div><div class="cli-dash-lbl">Goats invested</div></div>'+
+      '<div class="cli-dash-item"><div class="cli-dash-val">'+alive+'</div><div class="cli-dash-lbl">Kids alive</div></div>'+
+      '<div class="cli-dash-item"><div class="cli-dash-val">'+(died+concern)+'</div><div class="cli-dash-lbl">Deaths/concern</div></div>'+
+      '<div class="cli-dash-item"><div class="cli-dash-val">'+kyc+'%</div><div class="cli-dash-lbl">KYC complete</div></div>'+
+      '<div class="cli-dash-item"><div class="cli-dash-val">'+(dl!==null?(dl>0?dl+'d':'Expired'):'--')+'</div><div class="cli-dash-lbl">Days left</div></div>'+
+      '<div class="cli-dash-item"><div class="cli-dash-val">'+vdate+'</div><div class="cli-dash-lbl">Next farm visit</div></div>'+
+    '</div>'+
+    (c.contractDate?'<div style="margin-top:8px;font-size:10px;opacity:.7">18-month contract progress</div><div class="cprog"><div class="cprogf" style="width:'+pc2+'%"></div></div>':'')+
+  '</div>';
+
+  // ── SECTIONS A-F SUMMARY (read-only for client, edit button for admin) ─
+  var secDefs=[
+    {key:'A',title:'Client information',
+     fields:[['Full name',c.fullName],['National ID',c.nationalId],['NIN',c.nin],['DOB',c.dob],['Gender',c.gender],['Phone 1',c.phone1],['Phone 2',c.phone2],['Email',c.email],['Address',(c.address||'')+' '+(c.district||'')],['Occupation',c.occupation]]},
+    {key:'B',title:'Investment details',
+     fields:[['Tag group',c.tagGroup],['No. goats',c.goatCount],['Contract date',c.contractDate?new Date(c.contractDate).toLocaleDateString('en-GB'):''],['Tenor',c.tenor],['Investment (UGX)',c.amount],['Mgmt fee/goat/mo',c.mgmtFee+' UGX'],['Commission',c.commission+'%'],['Invoice No.',c.invoiceNo],['Bank',c.bankName],['Mobile money',c.mobileMoney]]},
+    {key:'C',title:'Agreement acknowledgements',
+     fields:[['Goats housed in Nakasongola',acks.ck1?'Acknowledged':'Not yet'],['Mgmt fee 3 months advance',acks.ck2?'Acknowledged':'Not yet'],['Monthly farm visits',acks.ck3?'Acknowledged':'Not yet'],['Sale requires written consent',acks.ck4?'Acknowledged':'Not yet'],['No liability force majeure',acks.ck5?'Acknowledged':'Not yet'],['Commission on sales',acks.ck6?'Acknowledged':'Not yet'],['18-month contract term',acks.ck7?'Acknowledged':'Not yet']]},
+    {key:'D',title:'Next of kin',
+     fields:[['Name',c.kinName],['Relationship',c.kinRel],['Phone 1',c.kinPhone1],['Phone 2',c.kinPhone2],['Address',c.kinAddr]]},
+    {key:'E-F',title:'Declaration & official',
+     fields:[['Signature date',c.sigDate],['Witness',c.witnessName],['Received by',c.receivedBy],['Approved by',c.approvedBy],['Remarks',c.remarks],['Contract status','<span class="css css-'+(cs2==='Active'?'a':'e')+'">'+cs2+'</span>']]}
+  ];
+
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:10px">';
+  secDefs.forEach(function(sec){
+    html+='<div class="sec-summary">'+
+      '<h4>Section '+sec.key+' &mdash; '+sec.title+
+        (isA?'<button class="btn btn-s btn-p" onclick="openSecEdit('+c.id+',\''+sec.key+'\')" style="font-size:9px;padding:2px 7px">&#9998; Edit</button>':'')+
+      '</h4>'+
+      '<div class="sec-grid">'+
+        sec.fields.filter(function(f){return f[1];}).map(function(f){
+          return '<div class="ir"><span class="il">'+f[0]+'</span><span class="iv">'+f[1]+'</span></div>';
+        }).join('')+
+      '</div>'+
+    '</div>';
+  });
+  html+='</div>';
+
+  // ── DOCUMENTS (client can upload/re-upload) ──────────────────────
+  var docDefs=[
+    {k:'photo',icon:'&#128247;',lbl:'Passport photo',accept:'image/*'},
+    {k:'nidF',icon:'&#128196;',lbl:'NID Front',accept:'image/*,.pdf'},
+    {k:'nidB',icon:'&#128196;',lbl:'NID Back',accept:'image/*,.pdf'},
+    {k:'contract',icon:'&#128221;',lbl:'Signed contract',accept:'image/*,.pdf'},
+    {k:'invoice',icon:'&#128181;',lbl:'Invoice copy',accept:'image/*,.pdf'},
+    {k:'passport',icon:'&#128213;',lbl:'Passport',accept:'image/*,.pdf'},
+    {k:'extra',icon:'&#128196;',lbl:'Other doc',accept:'image/*,.pdf'}
+  ];
+
+  html+='<div class="fs"><h3>&#128196; Documents</h3>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px">';
+  docDefs.forEach(function(dd){
+    var data=docs[dd.k];var rej=docs[dd.k+'_rej'];
+    var cls='doc-upload-item'+(rej?' rejected':data?' done':'');
+    var preview=data&&data.startsWith('data:image')?'<img src="'+data+'" style="width:100%;height:50px;object-fit:cover;border-radius:4px;margin-bottom:4px"/>':'';
+    var statusTxt=rej?'<div style="font-size:9px;color:var(--rd);margin-top:2px">&#10060; '+rej+'</div>':data?'<div style="font-size:9px;color:var(--gn)">&#9989; Uploaded</div>':'<div style="font-size:9px;color:var(--tx3)">Not uploaded</div>';
+    var uploadBtn=canEdit?'<input type="file" id="doc-up-'+dd.k+'-'+c.id+'" accept="'+dd.accept+'" style="display:none" onchange="clientDocUp('+c.id+',\''+dd.k+'\',this)"/>'+
+      '<button class="btn btn-s" style="margin-top:4px;font-size:9px" onclick="document.getElementById(\'doc-up-'+dd.k+'-'+c.id+'\').click()">'+(data?'&#8635; Re-upload':'&#8679; Upload')+'</button>':'';
+    html+='<div class="'+cls+'">'+preview+'<div style="font-size:11px;font-weight:600">'+dd.icon+' '+dd.lbl+'</div>'+statusTxt+uploadBtn;
+    if(isA&&data&&!rej)html+='<button class="btn btn-s btn-d" style="font-size:9px;margin-top:3px" onclick="openRejDoc('+c.id+',\''+dd.k+'\')">Reject</button>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  // ── OBLIGATIONS TRACKER (monthly calendar) ───────────────────────
+  var oblDefs2=oblDefs();
+  html+='<div class="fs"><h3>&#128197; Obligations tracker'+
+    '<span style="font-size:11px;color:'+(cmp==='compliant'?'var(--gn)':'var(--rd)')+';margin-left:8px">'+(cmp==='compliant'?'&#9989; All compliant':'&#10060; Non-compliance detected')+'</span>'+
+    '</h3>';
+
+  oblDefs2.forEach(function(obl){
+    var oblRecs=obs[obl.k]||[];
+    // Group by month
+    var byMonth={};
+    oblRecs.forEach(function(r){
+      var mo=r.month||r.date||'Unknown';
+      if(!byMonth[mo])byMonth[mo]=[];
+      byMonth[mo].push(r);
+    });
+    var lastRec=oblRecs.length?oblRecs[oblRecs.length-1]:null;
+    var lastSt=lastRec?lastRec.status:'pending';
+    var dotCls=lastSt==='compliant'?'cg2':lastSt==='non-compliant'?'cr2':'cgr2';
+
+    html+='<div style="border:1px solid var(--bo);border-radius:var(--r);padding:11px;margin-bottom:8px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<span class="cdot '+dotCls+'" style="width:12px;height:12px"></span>'+
+          '<span style="font-size:12px;font-weight:700">'+obl.l+'</span>'+
+          '<span style="font-size:10px;color:var(--tx2)">'+(lastRec?lastRec.date||lastRec.month:'Not yet logged')+'</span>'+
+        '</div>'+
+        (canEdit?'<button class="btn btn-s btn-p" onclick="openOblLog('+c.id+',\''+obl.k+'\',\''+obl.l+'\')">&#128197; Log</button>':'')+
+      '</div>';
+
+    if(oblRecs.length){
+      // Show last 3 months
+      var recent=oblRecs.slice(-3).reverse();
+      html+='<div style="display:flex;flex-direction:column;gap:4px">';
+      recent.forEach(function(r){
+        var cls='obl-log-entry obl-log-'+r.status;
+        html+='<div class="'+cls+'">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+            '<div>'+
+              '<span style="font-size:10px;font-weight:700;color:var(--tx2)">'+(r.month||r.date)+'</span>'+
+              '<span style="font-size:10px;font-weight:700;margin-left:8px;color:'+(r.status==='compliant'?'var(--gn)':r.status==='non-compliant'?'var(--rd)':'var(--ab)')+'">'+r.status+'</span>'+
+              (r.note?'<div style="font-size:11px;color:var(--tx);margin-top:2px">'+r.note+'</div>':'')+
+              (r.fileData&&r.fileData.startsWith('data:image')?'<img src="'+r.fileData+'" style="width:60px;height:40px;object-fit:cover;border-radius:3px;margin-top:4px"/>':
+               r.fileData?'<div style="font-size:10px;color:var(--bl);margin-top:2px">&#128196; Document attached</div>':'')+
+            '</div>'+
+            (isA?'<button onclick="deleteOblLog('+c.id+',\''+obl.k+'\','+oblRecs.indexOf(r)+')" style="background:none;border:none;color:var(--tx3);cursor:pointer;font-size:11px">&#128465;</button>':'')+
+          '</div>'+
+        '</div>';
+      });
+      html+='</div>';
+      if(oblRecs.length>3)html+='<div style="font-size:10px;color:var(--tx3);margin-top:4px">+ '+(oblRecs.length-3)+' earlier entries</div>';
+    }else{
+      html+='<div style="font-size:11px;color:var(--tx3);font-style:italic">No entries yet.</div>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+
+  // ── GOAT RECORDS ────────────────────────────────────────────────
+  html+='<div class="fs"><h3>Goat records &mdash; Group '+(c.tagGroup||'N/A')+'</h3>'+
+    (gR.length?'<div class="tw"><table><thead><tr><th>Tag</th><th>Breed</th><th>Kid tag</th><th>Date</th><th>Status</th></tr></thead><tbody>'+
+      gR.map(function(r){return '<tr><td><strong>'+r.parent+'</strong></td><td>'+brB(r.breed)+'</td><td>'+(r.kid||'--')+'</td><td style="font-size:10px">'+(r.date||'--')+'</td><td>'+stB(r.status)+'</td></tr>';}).join('')+
+    '</tbody></table></div>':'<p style="font-size:12px;color:var(--tx3)">No goat records for this group yet.</p>')+
+  '</div>';
+
+  document.getElementById('clidetcnt').innerHTML=html;
 }
+
 function ir(l,v){return '<div class="ir"><span class="il">'+l+'</span><span class="iv">'+(v||'<span style="color:var(--tx3)">--</span>')+'</span></div>';}
 // -- CLIENT FORM -------------------------------------------------------
 function openCF(id,selfReg){
@@ -1255,10 +1429,59 @@ document.getElementById('hdt').textContent=new Date().toLocaleDateString('en-GB'
 document.getElementById('fdt').value=new Date().toISOString().split('T')[0];
 var fgs=document.getElementById('fgrp');Object.keys(GRP).forEach(function(p){var o=document.createElement('option');o.value=p;o.textContent=p+' ('+GRP[p].max+')';fgs.appendChild(o);});
 var ctgs=document.getElementById('c-tg');Object.keys(GRP).forEach(function(p){var o=document.createElement('option');o.value=p;o.textContent=p+' - '+GRP[p].max+' stock';ctgs.appendChild(o);});
+var clientSession = JSON.parse(localStorage.getItem('cli_session')||'null');
+
+function openClientLoginModal(){
+  document.getElementById('cli-login-phone').value='';
+  document.getElementById('cli-login-pw').value='';
+  document.getElementById('cli-login-err').textContent='';
+  document.getElementById('ov-clilogin').classList.add('sh');
+}
+
+function doClientLogin(){
+  var phone=document.getElementById('cli-login-phone').value.trim().replace(/\s/g,'');
+  var pw=document.getElementById('cli-login-pw').value;
+  // Find client by phone
+  var client=CLI.find(function(c){
+    return (c.phone1||'').replace(/\s/g,'')=== phone ||
+           (c.phone2||'').replace(/\s/g,'')=== phone;
+  });
+  if(!client){document.getElementById('cli-login-err').textContent='Phone number not found.';return;}
+  // Check password
+  var storedPw=client.password||client.phone1.replace(/\s/g,'').slice(-4); // default = last 4 digits
+  if(pw!==storedPw){document.getElementById('cli-login-err').textContent='Incorrect password.';return;}
+  clientSession={id:client.id,name:client.fullName,phone:phone};
+  localStorage.setItem('cli_session',JSON.stringify(clientSession));
+  closeOv('ov-clilogin');
+  tst('Welcome, '+client.fullName+'!','ok');
+  // Show client dashboard
+  viewCli(client.id);
+  updateClientSessionUI();
+}
+
+function updateClientSessionUI(){
+  var btn=document.getElementById('cliLoginBtn');
+  if(clientSession){
+    if(btn)btn.textContent='&#128100; '+clientSession.name.split(' ')[0]+' (logout)';
+    if(btn)btn.onclick=function(){logoutClient();};
+  }else{
+    if(btn)btn.textContent='&#128100; Client login';
+    if(btn)btn.onclick=function(){openClientLoginModal();};
+  }
+}
+
+function logoutClient(){
+  clientSession=null;localStorage.removeItem('cli_session');
+  updateClientSessionUI();tst('Logged out');
+  backCli();
+}
+
+
 popPar();
 renderDash();
 upBdg();
 chkSelfReg();
+updateClientSessionUI();
 </script>
 
 <!-- VET PRODUCT DETAIL MODAL -->
@@ -1373,6 +1596,88 @@ PPR Vaccine - 10 dose - UGX 32,000 - vaccines - in stock"></textarea>
     <!-- Timeline -->
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);margin-bottom:8px">Comment history &amp; timeline</div>
     <div id="comlog-timeline" style="max-height:340px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- CLIENT LOGIN MODAL -->
+<div class="ov" id="ov-clilogin">
+  <div class="mo pw-modal">
+    <h2>&#128100; Client login</h2>
+    <p class="mosb">Enter your phone number and password to access your dashboard.</p>
+    <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase">Phone number</label>
+    <input id="cli-login-phone" placeholder="e.g. 0783449091" type="tel"/>
+    <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase">Password</label>
+    <input id="cli-login-pw" type="password" placeholder="Your password" onkeydown="if(event.key==='Enter')doClientLogin()"/>
+    <div id="cli-login-err" style="color:var(--rd);font-size:11px;min-height:14px;margin-bottom:7px"></div>
+    <div class="brow"><button class="btn btn-p" style="flex:1" onclick="doClientLogin()">Login</button><button class="btn" onclick="closeOv('ov-clilogin')">Cancel</button></div>
+    <div style="text-align:center;margin-top:9px;font-size:11px;color:var(--tx2)">Forgot your password? Contact <a href="mailto:muvawalafarmspropertiesug@gmail.com" style="color:var(--br)">Muvawala admin</a></div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="ov" id="ov-changepw">
+  <div class="mo pw-modal">
+    <h2>&#128272; Change password</h2>
+    <p class="mosb" id="changepw-sub">Update your login password.</p>
+    <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase" id="changepw-oldlbl">Current password</label>
+    <input id="changepw-old" type="password" placeholder="Current password"/>
+    <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase">New password</label>
+    <input id="changepw-new" type="password" placeholder="New password (min 6 characters)"/>
+    <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase">Confirm new password</label>
+    <input id="changepw-confirm" type="password" placeholder="Repeat new password"/>
+    <div id="changepw-err" style="color:var(--rd);font-size:11px;min-height:14px;margin-bottom:7px"></div>
+    <div class="brow"><button class="btn btn-p" style="flex:1" onclick="doChangePw()">Save new password</button><button class="btn" onclick="closeOv('ov-changepw')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- OBLIGATIONS LOG MODAL -->
+<div class="ov" id="ov-obllog">
+  <div class="mo" style="max-width:520px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2>&#128197; Log obligation</h2>
+      <button class="btn" onclick="closeOv('ov-obllog')">&#10005;</button>
+    </div>
+    <p class="mosb" id="obllog-sub"></p>
+    <div class="fg" style="margin-bottom:7px">
+      <label>Month</label>
+      <input type="month" id="obllog-month" style="font-size:12px;padding:7px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%"/>
+    </div>
+    <div class="fg" style="margin-bottom:7px">
+      <label>Status</label>
+      <select id="obllog-status" style="font-size:12px;padding:7px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%">
+        <option value="compliant">&#9989; Compliant</option>
+        <option value="non-compliant">&#10060; Non-compliant</option>
+        <option value="pending">&#9744; Pending</option>
+      </select>
+    </div>
+    <div class="fg" style="margin-bottom:7px">
+      <label>Evidence / note</label>
+      <textarea id="obllog-note" placeholder="e.g. Farm visited on 26/04/2026, attended by client..." style="min-height:60px"></textarea>
+    </div>
+    <div class="fg" style="margin-bottom:9px">
+      <label>Supporting document (optional)</label>
+      <input type="file" id="obllog-file" accept="image/*,.pdf" onchange="handleOblFile(this)" style="font-size:12px"/>
+      <div id="obllog-filepreview" style="display:none;margin-top:5px"></div>
+    </div>
+    <div class="brow">
+      <button class="btn btn-p" style="flex:1" onclick="saveOblLog()">Save log entry</button>
+      <button class="btn" onclick="closeOv('ov-obllog')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN EDIT SECTION MODAL -->
+<div class="ov" id="ov-editsec">
+  <div class="mo mow" style="max-width:700px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h2 id="editsec-title">Edit client section</h2>
+      <button class="btn" onclick="closeOv('ov-editsec')">&#10005;</button>
+    </div>
+    <div id="editsec-body"></div>
+    <div class="brow" style="margin-top:10px;border-top:1px solid var(--bo);padding-top:10px">
+      <button class="btn btn-p" style="flex:1" onclick="saveSecEdit()">&#10003; Save &amp; update client dashboard</button>
+      <button class="btn" onclick="closeOv('ov-editsec')">Cancel</button>
+    </div>
   </div>
 </div>
 </body>
@@ -2435,6 +2740,239 @@ function deleteComEntry(id,idx){
   if(!confirm('Delete this comment?'))return;
   if(COM[id])COM[id].splice(idx,1);
   sv();renderComTimeline(id);renderReg();tst('Comment deleted');
+}
+
+
+// ── CLIENT SESSION ───────────────────────────────────────────────────
+
+// ── PASSWORD MANAGEMENT ──────────────────────────────────────────────
+function openResetPw(cid){
+  // Admin resets - sets a new temporary password
+  var client=CLI.find(function(x){return x.id===cid;});if(!client)return;
+  var newPw=prompt('Set new temporary password for '+client.fullName+':\n(They should change it after logging in)');
+  if(!newPw||newPw.length<4){tst('Password must be at least 4 characters.');return;}
+  client.password=newPw;sv();
+  tst('Password reset for '+client.fullName,'ok');
+  if(client.email){
+    var sub='Muvawala Goat Farms - Your password has been reset';
+    var body='Dear '+client.fullName+',\n\nYour login password has been reset by the administrator.\n\nNew temporary password: '+newPw+'\n\nPlease log in and change your password.\n\nLogin with your phone: '+client.phone1+'\n\nMuvawala Goat Farms\nmuvawalafarmspropertiesug@gmail.com';
+    window.open('mailto:'+client.email+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body));
+  }
+}
+
+function openChangePw(cid){
+  var client=CLI.find(function(x){return x.id===cid;});if(!client)return;
+  document.getElementById('changepw-sub').textContent='Change password for '+client.fullName;
+  document.getElementById('changepw-old').value='';
+  document.getElementById('changepw-new').value='';
+  document.getElementById('changepw-confirm').value='';
+  document.getElementById('changepw-err').textContent='';
+  document.getElementById('changepw-oldlbl').style.display='';
+  document.getElementById('ov-changepw').classList.add('sh');
+  document.getElementById('ov-changepw').dataset.cid=cid;
+}
+
+function doChangePw(){
+  var cid=parseInt(document.getElementById('ov-changepw').dataset.cid);
+  var client=CLI.find(function(x){return x.id===cid;});if(!client)return;
+  var oldPw=document.getElementById('changepw-old').value;
+  var newPw=document.getElementById('changepw-new').value;
+  var confirmPw=document.getElementById('changepw-confirm').value;
+  var storedPw=client.password||client.phone1.replace(/\s/g,'').slice(-4);
+  if(oldPw!==storedPw){document.getElementById('changepw-err').textContent='Current password is incorrect.';return;}
+  if(newPw.length<6){document.getElementById('changepw-err').textContent='New password must be at least 6 characters.';return;}
+  if(newPw!==confirmPw){document.getElementById('changepw-err').textContent='Passwords do not match.';return;}
+  client.password=newPw;sv();
+  closeOv('ov-changepw');
+  tst('Password changed successfully!','ok');
+}
+
+// ── DOCUMENT UPLOAD BY CLIENT ────────────────────────────────────────
+function clientDocUp(cid,key,input){
+  if(!input.files||!input.files[0])return;
+  var client=CLI.find(function(x){return x.id===cid;});if(!client)return;
+  if(!client.docs)client.docs={};
+  var file=input.files[0];
+  if(file.type.indexOf('image')===0){
+    compImg(file,function(dt){
+      client.docs[key]=dt;
+      delete client.docs[key+'_rej']; // clear rejection
+      sv();viewCli(cid);tst('Document uploaded','ok');
+    });
+  }else if(file.size>2*1024*1024){
+    tst('PDF too large. Please reduce size.','err');
+  }else{
+    var r=new FileReader();
+    r.onload=function(e){
+      client.docs[key]=e.target.result;
+      delete client.docs[key+'_rej'];
+      sv();viewCli(cid);tst('Document uploaded','ok');
+    };
+    r.readAsDataURL(file);
+  }
+}
+
+// ── OBLIGATIONS CALENDAR LOG ─────────────────────────────────────────
+var oblLogClientId=null,oblLogKey=null;
+
+function openOblLog(cid,key,label){
+  oblLogClientId=cid;oblLogKey=key;
+  document.getElementById('obllog-sub').textContent=label;
+  var now=new Date();
+  document.getElementById('obllog-month').value=now.getFullYear()+'-'+p2(now.getMonth()+1);
+  document.getElementById('obllog-status').value='compliant';
+  document.getElementById('obllog-note').value='';
+  document.getElementById('obllog-filepreview').style.display='none';
+  document.getElementById('ov-obllog').classList.add('sh');
+}
+
+function handleOblFile(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var prev=document.getElementById('obllog-filepreview');
+  prev.style.display='block';
+  if(file.type.indexOf('image')===0){
+    compImg(file,function(dt){
+      input._data=dt;
+      prev.innerHTML='<img src="'+dt+'" style="width:80px;height:55px;object-fit:cover;border-radius:4px"/> '+file.name;
+    });
+  }else{
+    var r=new FileReader();
+    r.onload=function(e){input._data=e.target.result;prev.innerHTML='&#128196; '+file.name;};
+    r.readAsDataURL(file);
+  }
+}
+
+function saveOblLog(){
+  var month=document.getElementById('obllog-month').value;
+  var status=document.getElementById('obllog-status').value;
+  var note=document.getElementById('obllog-note').value.trim();
+  if(!month){tst('Select a month.');return;}
+  var fileInput=document.getElementById('obllog-file');
+  var fileData=fileInput._data||null;
+  var dt=new Date(month+'-01');
+  var dateStr=dt.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  if(!OBL[oblLogClientId])OBL[oblLogClientId]={};
+  if(!OBL[oblLogClientId][oblLogKey])OBL[oblLogClientId][oblLogKey]=[];
+  OBL[oblLogClientId][oblLogKey].push({
+    month:dateStr,date:new Date().toLocaleDateString('en-GB'),
+    status:status,note:note,fileData:fileData
+  });
+  sv();closeOv('ov-obllog');
+  viewCli(oblLogClientId);renderDash();
+  tst('Obligation logged for '+dateStr,'ok');
+  // Notify if non-compliant
+  if(status==='non-compliant'){
+    var client=CLI.find(function(x){return x.id===oblLogClientId;});
+    if(client&&client.email){
+      var sub='Muvawala Goat Farms - Obligation alert: '+document.getElementById('obllog-sub').textContent;
+      var body='Dear '+client.fullName+',\n\nThis is to notify you of a compliance update for '+dateStr+'.\n\nObligation: '+document.getElementById('obllog-sub').textContent+'\nStatus: Non-compliant\n'+(note?'Note: '+note+'\n':'')+'\nPlease contact us to resolve this.\n\nMuvawala Goat Farms\nmuvawalafarmspropertiesug@gmail.com';
+      window.open('mailto:'+client.email+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body));
+    }
+  }
+}
+
+function deleteOblLog(cid,key,idx){
+  if(!confirm('Delete this obligation log entry?'))return;
+  if(OBL[cid]&&OBL[cid][key])OBL[cid][key].splice(idx,1);
+  sv();viewCli(cid);renderDash();tst('Entry deleted');
+}
+
+// ── ADMIN SECTION EDIT ───────────────────────────────────────────────
+var editSecCid=null,editSecKey=null;
+
+function openSecEdit(cid,secKey){
+  editSecCid=cid;editSecKey=secKey;
+  var client=CLI.find(function(x){return x.id===cid;});if(!client)return;
+  document.getElementById('editsec-title').textContent='Edit Section '+secKey+' for '+client.fullName;
+  var body='';
+  if(secKey==='A'){
+    body=secFields([
+      ['Full legal name','c-fn2','text',client.fullName],['National ID','c-nid2','text',client.nationalId],
+      ['NIN','c-nin2','text',client.nin],['Date of birth','c-dob2','date',client.dob],
+      ['Gender','c-gen2','select-gender',client.gender],['Phone 1','c-ph12','tel',client.phone1],
+      ['Phone 2','c-ph22','tel',client.phone2],['Email','c-em2','email',client.email],
+      ['Address','c-addr2','text',client.address],['District','c-dist2','text',client.district],
+      ['Occupation','c-occ2','text',client.occupation]
+    ]);
+  }else if(secKey==='B'){
+    body=secFields([
+      ['Tag group','c-tg2','text',client.tagGroup],['Number of goats','c-gc2','number',client.goatCount],
+      ['Contract date','c-cd2','date',client.contractDate],['Tenor','c-tn2','text',client.tenor],
+      ['Investment (UGX)','c-amt2','text',client.amount],['Mgmt fee/goat/mo','c-mf2','text',client.mgmtFee],
+      ['Invoice No.','c-inv2','text',client.invoiceNo],['Commission %','c-com2','number',client.commission],
+      ['Bank','c-bn2','text',client.bankName],['Mobile money','c-mm2','text',client.mobileMoney]
+    ]);
+  }else if(secKey==='C'){
+    var acks=client.acknowledgements||{};
+    body='<div style="display:flex;flex-direction:column;gap:7px">';
+    ['Goats housed in Nakasongola','Pay management fee 3 months advance','Monthly farm visits (last Saturday)','Sale requires written consent','No liability force majeure','Commission on sales applies','Commit to 18-month term'].forEach(function(t,i){
+      var k='ck'+(i+1);
+      body+='<div class="cbi"><input type="checkbox" id="acs-'+k+'" '+(acks[k]?'checked':'')+'/><label for="acs-'+k+'">'+t+'</label></div>';
+    });
+    body+='</div>';
+  }else if(secKey==='D'){
+    body=secFields([
+      ['Next of kin name','c-kn2','text',client.kinName],['Relationship','c-kr2','text',client.kinRel],
+      ['Phone 1','c-kp12','tel',client.kinPhone1],['Phone 2','c-kp22','tel',client.kinPhone2],
+      ['Address','c-ka2','text',client.kinAddr]
+    ]);
+  }else if(secKey==='E-F'){
+    body=secFields([
+      ['Signature date','c-sd2','date',client.sigDate],['Witness name','c-wn2','text',client.witnessName],
+      ['Received by','c-rb2','text',client.receivedBy],['Approved by','c-ab2','text',client.approvedBy],
+      ['Remarks','c-rem2','text',client.remarks]
+    ]);
+  }
+  document.getElementById('editsec-body').innerHTML=body;
+  document.getElementById('ov-editsec').classList.add('sh');
+}
+
+function secFields(fields){
+  var html='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">';
+  fields.forEach(function(f){
+    var id=f[1],type=f[2],val=f[3]||'';
+    html+='<div class="fg"><label>'+f[0]+'</label>';
+    if(type==='select-gender'){
+      html+='<select id="'+id+'"><option value="">Select</option>'+['Male','Female','Other'].map(function(g){return '<option'+(val===g?' selected':'')+'>'+g+'</option>';}).join('')+'</select>';
+    }else{
+      html+='<input type="'+type+'" id="'+id+'" value="'+val+'"/>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function saveSecEdit(){
+  var client=CLI.find(function(x){return x.id===editSecCid;});if(!client)return;
+  var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  if(editSecKey==='A'){
+    client.fullName=g('c-fn2');client.nationalId=g('c-nid2');client.nin=g('c-nin2');
+    client.dob=g('c-dob2');client.gender=g('c-gen2');client.phone1=g('c-ph12');
+    client.phone2=g('c-ph22');client.email=g('c-em2');client.address=g('c-addr2');
+    client.district=g('c-dist2');client.occupation=g('c-occ2');
+  }else if(editSecKey==='B'){
+    client.tagGroup=g('c-tg2');client.goatCount=g('c-gc2');client.contractDate=g('c-cd2');
+    client.tenor=g('c-tn2');client.amount=g('c-amt2');client.mgmtFee=g('c-mf2');
+    client.invoiceNo=g('c-inv2');client.commission=g('c-com2');client.bankName=g('c-bn2');
+    client.mobileMoney=g('c-mm2');
+  }else if(editSecKey==='C'){
+    if(!client.acknowledgements)client.acknowledgements={};
+    ['ck1','ck2','ck3','ck4','ck5','ck6','ck7'].forEach(function(k){
+      var e=document.getElementById('acs-'+k);
+      if(e)client.acknowledgements[k]=e.checked;
+    });
+  }else if(editSecKey==='D'){
+    client.kinName=g('c-kn2');client.kinRel=g('c-kr2');client.kinPhone1=g('c-kp12');
+    client.kinPhone2=g('c-kp22');client.kinAddr=g('c-ka2');
+  }else if(editSecKey==='E-F'){
+    client.sigDate=g('c-sd2');client.witnessName=g('c-wn2');client.receivedBy=g('c-rb2');
+    client.approvedBy=g('c-ab2');client.remarks=g('c-rem2');
+  }
+  sv();closeOv('ov-editsec');
+  viewCli(editSecCid);renderDash();
+  tst('Section '+editSecKey+' updated!','ok');
 }
 
 // Hook showP
