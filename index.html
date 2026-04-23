@@ -13,6 +13,8 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233d1a0a'/%3E%3Ctext y='.9em' font-size='70' x='10'%3E%F0%9F%90%90%3C/text%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Muvawala Goat Farms — IGI Register</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -316,6 +318,77 @@ tr:hover td{background:var(--su2);}
 .lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:#e5e7eb;}
 .lg-divider span{font-size:10px;color:#9ca3af;}
 
+
+/* ORDER A VET TAB */
+.vv-hero{background:linear-gradient(135deg,#0f4c75 0%,#1b6ca8 100%);color:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.vv-hero h2{font-size:16px;font-weight:700;margin-bottom:3px;}
+.vv-hero p{font-size:11px;opacity:.8;}
+.vv-tabs{display:flex;gap:0;border:1px solid var(--bo);border-radius:var(--rs);overflow:hidden;margin-bottom:12px;}
+.vv-tab{padding:7px 14px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:var(--su2);color:var(--tx2);flex:1;text-align:center;}
+.vv-tab.on{background:#0f4c75;color:#fff;}
+.zone-card{background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.zone-name{font-size:13px;font-weight:700;}
+.zone-dist{font-size:11px;color:var(--tx2);}
+.zone-price{font-size:16px;font-weight:700;color:#0f4c75;}
+.visit-card{background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:8px;}
+.visit-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.vs-requested{background:#dbeafe;color:#1e3a8a;}
+.vs-assigned{background:#fef3c7;color:#92400e;}
+.vs-scheduled{background:#e0f2fe;color:#0c4a6e;}
+.vs-completed{background:#d1fae5;color:#064e3b;}
+.vs-cancelled{background:#fee2e2;color:#7f1d1d;}
+.vet-card{background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:8px;}
+.vet-avatar{width:40px;height:40px;border-radius:50%;background:#0f4c75;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;}
+.routine-badge{background:#fef3c7;border:1px solid #f59e0b;border-radius:var(--rs);padding:5px 10px;font-size:11px;color:#92400e;font-weight:600;}
+.routine-done{background:#d1fae5;border-color:#10b981;color:#064e3b;}
+.report-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:var(--r);padding:12px;margin-bottom:9px;}
+
+
+/* ENHANCEMENTS */
+.star-rating{display:flex;gap:5px;font-size:26px;cursor:pointer;}
+.star-rating span{transition:color .1s;color:#d1d5db;}
+.star-rating span.lit{color:#f59e0b;}
+.avail-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:8px 0;}
+.avail-day{padding:6px 3px;text-align:center;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid transparent;}
+.avail-day.avail{background:#d1fae5;color:#065f46;border-color:#10b981;}
+.avail-day.busy{background:#fee2e2;color:#7f1d1d;border-color:#ef4444;}
+.avail-day.today{border-color:#0f4c75!important;font-weight:800;}
+.avail-day.past{opacity:.35;cursor:default;}
+.perf-card{background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:8px;}
+.perf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:7px;margin-top:8px;}
+.perf-item{background:var(--su2);border-radius:var(--rs);padding:8px;text-align:center;}
+.perf-val{font-size:20px;font-weight:700;color:#0f4c75;}
+.perf-lbl{font-size:9px;color:var(--tx3);margin-top:2px;}
+#vv-map{height:320px;border-radius:var(--r);border:1px solid var(--bo);}
+.wa-btn{background:#25D366;color:#fff;border:none;border-radius:var(--rs);padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.wa-btn:hover{background:#128C7E;}
+.rx-pdf-btn{background:#0f4c75;color:#fff;border:none;border-radius:var(--rs);padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;}
+
+
+/* PLATFORM SaaS */
+:root{--pb:#0a2540;--pt:#0d6efd;--pg:#00b894;--po:#e17055;--pp:#6c5ce7;}
+.plat-hdr{background:linear-gradient(135deg,#0a2540,#1b3a5c,#0d6efd)!important;}
+.kpi-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px;}
+.kpi2{background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;text-align:center;border-top:3px solid var(--pb);}
+.kpi2-v{font-size:26px;font-weight:800;line-height:1;color:var(--pb);}
+.kpi2-l{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+.tier-badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.tier-trial{background:#fffbeb;color:#92400e;}
+.tier-basic{background:#f1f5f9;color:#475569;}
+.tier-pro{background:#eff6ff;color:#1d4ed8;}
+.tier-ent{background:#f5f3ff;color:#6d28d9;}
+.farm2{background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:8px;border-left:3px solid var(--pg);}
+.farm2.inactive{border-left-color:var(--po);}
+.sub-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px;}
+.sub-plan2{background:var(--su);border:2px solid var(--bo);border-radius:var(--r);padding:12px;}
+.sub-plan2.pop{border-color:var(--pt);}
+.sp-name{font-size:12px;font-weight:700;color:var(--pb);}
+.sp-price{font-size:20px;font-weight:800;color:var(--pt);margin:4px 0;}
+.sp-feat{font-size:10px;color:var(--tx2);line-height:1.7;}
+.insight-pill{background:#f0fdf4;border:1px solid #86efac;border-radius:var(--rs);padding:4px 9px;font-size:10px;color:#166534;font-weight:600;display:inline-block;margin:2px;}
+.exp-btn{background:var(--pb);color:#fff;border:none;border-radius:var(--rs);padding:7px 13px;font-size:11px;font-weight:700;cursor:pointer;}
+.reg-row{display:flex;justify-content:space-between;align-items:center;padding:7px 9px;background:var(--su2);border-radius:var(--rs);margin-bottom:5px;}
+
 </style>
 </head>
 <body>
@@ -373,6 +446,10 @@ tr:hover td{background:var(--su2);}
   <button class="nt" onclick="showP('cal',this)">Calendar</button>
   <button class="nt" onclick="showP('cli',this)" id="clitab">&#128101; Clients<span class="pb" id="pbdg" style="display:none">0</span></button>
   <button class="nt" onclick="showP('vet',this)" id="vettab">&#128138; Your Vet Shop</button>
+  <button class="nt" onclick="showP('vetvisit',this)" id="vetvisittab">&#128663; Order a Vet</button>
+  <button class="nt" onclick="showP('platform',this)" id="platformtab" style="background:#0a2540;color:#e9c46a;font-weight:700;border-color:#0a2540">&#127758; Platform</button>
+  <button class="nt" onclick="showP('farms',this)" id="farmstab">&#127983; All Farms</button>
+  <button class="nt" onclick="showP('analytics',this)" id="analyticstab">&#128200; Analytics</button>
 </nav>
 
 <!-- MODALS -->
@@ -819,6 +896,302 @@ tr:hover td{background:var(--su2);}
         <div id="catalogTable"></div>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- ORDER A VET PANEL -->
+<div class="pnl" id="pnl-vetvisit">
+  <div class="vv-hero">
+    <h2>&#128663; Order a Vet Visit</h2>
+    <p>Request a qualified vet to visit your farm. Pricing based on distance from Kampala.</p>
+  </div>
+
+  <div class="vv-tabs" id="vv-tabs-bar">
+    <button class="vv-tab on" onclick="showVVView('request',this)">&#128203; Request Visit</button>
+    <button class="vv-tab" onclick="showVVView('myvisits',this)">&#128197; My Visits</button>
+    <button class="vv-tab" onclick="showVVView('vets',this)" id="vv-vets-tab">&#128101; Vets</button>
+    <button class="vv-tab" id="vv-admin-tab" style="display:none" onclick="showVVView('admin',this)">&#9881; Manage</button>
+    <button class="vv-tab" id="vv-vet-dash-tab" style="display:none" onclick="showVVView('vetdash',this)">&#128200; My Dashboard</button>
+  </div>
+
+  <!-- REQUEST VISIT VIEW -->
+  <div id="vv-request">
+
+    <!-- FARM PROFILE CARD (auto-populated from client profile) -->
+    <div id="vv-farm-card" style="display:none;background:linear-gradient(135deg,#0f4c75,#1b6ca8);color:#fff;border-radius:var(--r);padding:13px;margin-bottom:10px">
+      <div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Your farm details (auto-filled from profile)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px" id="vv-farm-card-body"></div>
+    </div>
+
+    <div class="fs">
+      <h3>&#128205; Request a vet visit</h3>
+
+      <!-- GPS LOCATION -->
+      <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:var(--r);padding:11px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:#0f4c75;margin-bottom:7px">&#128204; Farm location (for accurate pricing)</div>
+        <div style="display:flex;gap:7px;align-items:flex-start;flex-wrap:wrap">
+          <button class="btn btn-s" style="background:#0f4c75;color:#fff;border-color:#0f4c75;flex-shrink:0" onclick="getGPSLocation()">&#128204; Share GPS location</button>
+          <div style="flex:1;min-width:200px">
+            <input id="vv-address" placeholder="Or type farm address / road / landmark" style="font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%;margin-bottom:5px"/>
+            <select id="vv-district" onchange="updateVetPrice()" style="font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%">
+              <option value="">-- Or select district manually --</option>
+            </select>
+          </div>
+        </div>
+        <div id="vv-gps-status" style="display:none;margin-top:7px;padding:6px 9px;background:#d1fae5;border-radius:var(--rs);font-size:11px;color:#065f46"></div>
+        <div id="vv-gps-error" style="display:none;margin-top:7px;padding:6px 9px;background:#fee2e2;border-radius:var(--rs);font-size:11px;color:#7f1d1d"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px;margin-bottom:10px">
+        <div class="fg">
+          <label>Preferred visit date</label>
+          <input type="date" id="vv-date" style="font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%"/>
+        </div>
+        <div class="fg">
+          <label>Preferred time</label>
+          <select id="vv-time" style="font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%">
+            <option>Morning (8am - 12pm)</option>
+            <option>Afternoon (12pm - 4pm)</option>
+            <option>Any time</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Visit type</label>
+          <select id="vv-type" onchange="updateVetPrice()" style="font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%">
+            <option value="routine">Routine farm inspection</option>
+            <option value="vaccination">Vaccination program</option>
+            <option value="treatment">Sick animal treatment</option>
+            <option value="emergency">Emergency visit (+30%)</option>
+            <option value="deworming">Deworming program</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- GOAT TAGS (auto-populated) -->
+      <div id="vv-tags-box" style="display:none;background:var(--su2);border-radius:var(--r);padding:11px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:7px">&#128016; Goats on this farm (auto-loaded from register)</div>
+        <div id="vv-tags-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px"></div>
+        <div class="fg" style="margin-bottom:0">
+          <label style="font-size:10px">Select goats that need attention (leave all selected for general visit)</label>
+          <div style="display:flex;gap:5px;margin-top:4px">
+            <button class="btn btn-s" onclick="selectAllTags(true)">Select all</button>
+            <button class="btn btn-s" onclick="selectAllTags(false)">Deselect all</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fg" style="margin-bottom:10px">
+        <label>Describe reason / symptoms / observations</label>
+        <textarea id="vv-notes" placeholder="e.g. CIK006 not eating for 2 days, CIK003 has nasal discharge. General herd deworming also needed..." style="min-height:70px"></textarea>
+      </div>
+
+      <!-- PRICE ESTIMATE -->
+      <div id="vv-price-box" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:var(--r);padding:12px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:#1e3a8a;margin-bottom:7px">&#128204; ESTIMATED VISIT COST</div>
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div><div style="font-size:10px;color:var(--tx2)">Distance zone</div><div id="vv-zone-name" style="font-size:13px;font-weight:700;color:#0f4c75"></div></div>
+          <div><div style="font-size:10px;color:var(--tx2)">Distance from Kampala</div><div id="vv-zone-dist" style="font-size:13px;font-weight:700"></div></div>
+          <div><div style="font-size:10px;color:var(--tx2)">Visit fee</div><div id="vv-zone-price" style="font-size:22px;font-weight:700;color:#0f4c75"></div></div>
+        </div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:6px">&#9432; Final price confirmed by admin before visit. Drugs billed separately via Vet Shop.</div>
+      </div>
+
+      <button class="btn btn-p" style="background:#0f4c75;border-color:#0f4c75;width:100%;padding:12px;font-size:14px;font-weight:700" onclick="submitVetVisit()">&#128203; Submit visit request</button>
+    </div>
+
+    <!-- ROUTINE VISIT STATUS -->
+    <div class="fs" id="vv-routine-box">
+      <h3>&#9989; Routine visit requirement</h3>
+      <div id="vv-routine-status"></div>
+    </div>
+  </div>
+
+  <!-- MY VISITS VIEW -->
+  <div id="vv-myvisits" style="display:none">
+    <div id="vv-myvisits-out"></div>
+    <div id="vv-myvisits-empty" class="emp" style="display:none">No visit requests yet.</div>
+  </div>
+
+  <!-- VETS DIRECTORY VIEW -->
+  <div id="vv-vets" style="display:none">
+    <div id="vv-vets-out"></div>
+    <div style="margin-top:10px;background:var(--al);border-radius:var(--rs);padding:10px;font-size:11px;color:var(--ab)">
+      <strong>Are you a vet?</strong> Sign up to join our network and receive farm visit assignments.
+      <button class="btn btn-s btn-p" style="margin-top:6px;display:block" onclick="openVetSignup()">&#128203; Register as a vet</button>
+    </div>
+  </div>
+
+  <!-- ADMIN MANAGE VIEW -->
+  <div id="vv-admin" style="display:none">
+    <div class="commission-summary" id="vv-admin-summary"></div>
+    <div class="fs">
+      <h3>&#128204; Distance pricing zones</h3>
+      <p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Set visit fees per distance zone. Edit inline below or use Smart Import to paste/upload a new price list.</p>
+      <div style="background:#fffbeb;border:1px solid var(--ac);border-radius:var(--rs);padding:10px;margin-bottom:9px">
+        <div style="font-size:11px;font-weight:700;color:var(--ab);margin-bottom:6px">&#128196; Smart price import</div>
+        <p style="font-size:10px;color:var(--tx2);margin-bottom:6px">Paste a price list (one zone per line): <code style="background:#fff;padding:1px 5px;border-radius:3px">Zone Name | Distance range | Fee (UGX)</code><br>
+        Example: <code style="font-size:10px;background:#e8f5e9;padding:1px 5px;border-radius:3px">Zone 3 - Mid | 80-150 km | 300000</code></p>
+        <textarea id="vv-price-import" style="width:100%;font-size:11px;padding:7px;border-radius:var(--rs);border:1px solid var(--bo2);min-height:70px;font-family:monospace;resize:vertical" placeholder="Zone 1 - City | 0-20 km | 80000&#10;Zone 2 - Short | 40-80 km | 180000&#10;Zone 3 - Mid | 80-150 km | 280000"></textarea>
+        <div class="brow" style="margin-top:6px">
+          <button class="btn btn-s btn-p" onclick="importVetPrices()">&#128269; Parse &amp; apply prices</button>
+          <button class="btn btn-s" onclick="document.getElementById('vv-price-import').value=''">Clear</button>
+        </div>
+      </div>
+      <div id="vv-pricing-table"></div>
+      <button class="btn btn-p btn-s" style="margin-top:7px" onclick="saveVetPricing()">&#10003; Save pricing</button>
+    </div>
+
+    <!-- VET SIGNUP LINK (shareable) -->
+    <div class="fs">
+      <h3>&#128279; Shareable vet signup link</h3>
+      <p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Share this link with potential vets to self-enrol. They go through the full 4-step vetting process before appearing in your pending queue.</p>
+      <div style="background:var(--su2);border-radius:var(--rs);padding:9px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <code id="vet-signup-link" style="flex:1;font-size:11px;color:#0f4c75;word-break:break-all"></code>
+        <button class="btn btn-s btn-p" onclick="copyVetLink()">&#128203; Copy link</button>
+        <button class="btn btn-s" onclick="shareVetLink()">&#128232; Share via WhatsApp</button>
+      </div>
+    </div>
+    <!-- FARM MAP -->
+    <div class="fs">
+      <h3>&#128506; Farm locations map</h3>
+      <p style="font-size:11px;color:var(--tx2);margin-bottom:8px">All registered client farms. Green = GPS coordinates known. Blue = district-based estimate.</p>
+      <div id="vv-map"></div>
+      <div id="vv-map-legend" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:11px">
+        <span><span style="color:#10b981">&#9679;</span> GPS location</span>
+        <span><span style="color:#0f4c75">&#9679;</span> District estimate</span>
+        <span><span style="color:#f59e0b">&#9679;</span> Visit requested</span>
+        <span><span style="color:#ef4444">&#9679;</span> Non-compliant</span>
+      </div>
+    </div>
+
+    <!-- VET PERFORMANCE -->
+    <div class="fs">
+      <h3>&#128200; Vet performance reports</h3>
+      <div id="vv-perf-out"></div>
+    </div>
+
+        <div class="fs">
+      <h3>&#128101; All vet visit requests</h3>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px" id="vv-filter-bar">
+        <button class="vcat on" onclick="filterVisits('all',this)">All</button>
+        <button class="vcat" onclick="filterVisits('Requested',this)">Requested</button>
+        <button class="vcat" onclick="filterVisits('Assigned',this)">Assigned</button>
+        <button class="vcat" onclick="filterVisits('Scheduled',this)">Scheduled</button>
+        <button class="vcat" onclick="filterVisits('Completed',this)">Completed</button>
+      </div>
+      <div id="vv-all-visits-out"></div>
+    </div>
+  </div>
+
+  <!-- VET DASHBOARD VIEW -->
+  <div id="vv-vetdash" style="display:none">
+    <div id="vv-vetdash-out"></div>
+  </div>
+</div>
+
+
+
+<!-- PLATFORM OVERVIEW PANEL -->
+<div class="pnl" id="pnl-platform">
+  <div class="plat-hdr" style="border-radius:var(--r);padding:18px;margin-bottom:14px;color:#fff">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:40px">&#127758;</div>
+      <div style="flex:1">
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.3px">FarmTrack Africa</div>
+        <div style="font-size:12px;opacity:.8;margin-top:2px">Livestock Management Platform &bull; Powered by Muvawala Goat Farms &amp; Properties</div>
+        <div style="font-size:11px;opacity:.65;margin-top:2px">Tracking farms across Uganda &bull; East Africa &bull; Africa</div>
+      </div>
+      <div style="text-align:right;background:rgba(255,255,255,.1);padding:10px 16px;border-radius:var(--r)">
+        <div id="plat-farm-count" style="font-size:32px;font-weight:800">0</div>
+        <div style="font-size:10px;opacity:.75;text-transform:uppercase">Active farms</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid2" id="plat-kpis"></div>
+
+  <div class="fs">
+    <h3 style="display:flex;justify-content:space-between;align-items:center">
+      Subscription plans
+      <span class="insight-pill">SaaS Revenue Model</span>
+    </h3>
+    <div class="sub-plans">
+      <div class="sub-plan2"><div class="sp-name">&#127807; Basic</div><div class="sp-price">UGX 50K<small style="font-size:11px;font-weight:400">/mo</small></div><div class="sp-feat">&#10003; Up to 50 goats<br>&#10003; Goat register<br>&#10003; Vet shop<br>&#10007; Analytics</div></div>
+      <div class="sub-plan2 pop"><div style="background:#0d6efd;color:#fff;font-size:9px;padding:1px 7px;border-radius:10px;display:inline-block;margin-bottom:3px">POPULAR</div><div class="sp-name">&#128640; Professional</div><div class="sp-price">UGX 150K<small style="font-size:11px;font-weight:400">/mo</small></div><div class="sp-feat">&#10003; Unlimited goats<br>&#10003; Full register+KYC<br>&#10003; Vet shop+visits<br>&#10003; Basic analytics</div></div>
+      <div class="sub-plan2"><div class="sp-name">&#127970; Enterprise</div><div class="sp-price">UGX 400K<small style="font-size:11px;font-weight:400">/mo</small></div><div class="sp-feat">&#10003; Multi-farm<br>&#10003; Full analytics<br>&#10003; API access<br>&#10003; Dedicated vet</div></div>
+      <div class="sub-plan2"><div class="sp-name">&#127468;&#127784; Pan-Africa</div><div class="sp-price">USD 200<small style="font-size:11px;font-weight:400">/mo</small></div><div class="sp-feat">&#10003; Multi-country<br>&#10003; Multi-currency<br>&#10003; Custom reports<br>&#10003; SLA guarantee</div></div>
+    </div>
+  </div>
+
+  <div class="fs">
+    <h3 style="display:flex;justify-content:space-between">Farm subscriptions <button class="exp-btn" onclick="exportPlatformCSV()">&#8681; Export all data</button></h3>
+    <div id="plat-subs"></div>
+  </div>
+
+  <div class="fs">
+    <h3>&#127758; Regional distribution</h3>
+    <div id="plat-regions"></div>
+  </div>
+</div>
+
+<!-- ALL FARMS PANEL -->
+<div class="pnl" id="pnl-farms">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+    <div>
+      <h2 style="font-size:16px;font-weight:700">&#127983; All farms</h2>
+      <p style="font-size:11px;color:var(--tx2)">Every farm on the platform with full detail</p>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <input id="farms-q" placeholder="Search farm, owner, tag group..." oninput="renderAllFarms()" style="font-size:12px;padding:7px 10px;border-radius:var(--rs);border:1px solid var(--bo2);width:180px"/>
+      <select id="farms-region" onchange="renderAllFarms()" style="font-size:12px;padding:7px;border-radius:var(--rs);border:1px solid var(--bo2)">
+        <option value="">All regions</option>
+        <option>Uganda</option><option>Kenya</option><option>Tanzania</option><option>Rwanda</option><option>Ethiopia</option><option>South Sudan</option><option>Other</option>
+      </select>
+      <select id="farms-tier" onchange="renderAllFarms()" style="font-size:12px;padding:7px;border-radius:var(--rs);border:1px solid var(--bo2)">
+        <option value="">All tiers</option>
+        <option>Trial</option><option>Basic</option><option>Professional</option><option>Enterprise</option>
+      </select>
+      <button class="exp-btn" onclick="exportFarmsCSV()">&#8681; CSV</button>
+    </div>
+  </div>
+  <div id="farms-out"></div>
+</div>
+
+<!-- ANALYTICS PANEL -->
+<div class="pnl" id="pnl-analytics">
+  <div class="plat-hdr" style="border-radius:var(--r);padding:14px;margin-bottom:12px;color:#fff;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font-size:28px">&#128200;</div>
+    <div><div style="font-size:16px;font-weight:700">Platform analytics &amp; insights</div>
+    <div style="font-size:11px;opacity:.8">Real-time data from all registered farms across the network</div></div>
+    <div style="margin-left:auto"><button class="exp-btn" onclick="exportAnalyticsReport()">&#8681; Download report</button></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:10px">
+    <div class="fs"><h3>Farms by region</h3><canvas id="aC-region" height="180"></canvas></div>
+    <div class="fs"><h3>Goat breed distribution</h3><canvas id="aC-breed" height="180"></canvas></div>
+    <div class="fs"><h3>Subscription revenue trend</h3><canvas id="aC-revenue" height="180"></canvas></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:10px">
+    <div class="fs"><h3>Goat status across all farms</h3><canvas id="aC-status" height="180"></canvas></div>
+    <div class="fs"><h3>Vet visits by month</h3><canvas id="aC-visits" height="180"></canvas></div>
+    <div class="fs"><h3>Farm growth over time</h3><canvas id="aC-growth" height="180"></canvas></div>
+  </div>
+
+  <div class="fs">
+    <h3>&#128161; Platform insights <span class="insight-pill">Auto-generated</span></h3>
+    <div id="analytics-insights"></div>
+  </div>
+
+  <div class="fs">
+    <h3>&#128016; Global goat tracker</h3>
+    <p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Track any individual goat by tag number across ALL farms on the platform.</p>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="global-goat-q" placeholder="Enter tag e.g. CIK006, JKT015, OFO003..." style="flex:1;font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2)" onkeydown="if(event.key==='Enter')trackGoatGlobal()"/>
+      <button class="btn btn-p" style="background:#0a2540;border-color:#0a2540" onclick="trackGoatGlobal()">&#128269; Track goat</button>
+    </div>
+    <div id="global-goat-result"></div>
   </div>
 </div>
 
@@ -1780,6 +2153,242 @@ window.addEventListener('appinstalled', function(){
   if(btn) btn.style.display = 'none';
 });
 </script>
+
+<!-- VET VISIT DETAIL MODAL -->
+<div class="ov" id="ov-visitdetail">
+  <div class="mo" style="max-width:580px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2 id="vd-title">Visit details</h2>
+      <button class="btn" onclick="closeOv('ov-visitdetail')">&#10005;</button>
+    </div>
+    <p class="mosb" id="vd-sub"></p>
+    <div id="vd-body"></div>
+    <div id="vd-admin-actions" style="display:none;margin-top:9px;border-top:1px solid var(--bo);padding-top:9px"></div>
+    <div style="margin-top:9px">
+      <div class="fg" style="margin-bottom:6px">
+        <label>Add comment / update</label>
+        <textarea id="vd-comment" placeholder="Add a note or update..." style="min-height:44px"></textarea>
+      </div>
+      <div class="brow">
+        <button class="btn btn-p" onclick="postVisitComment()">Post comment</button>
+        <button class="btn" onclick="closeOv('ov-visitdetail')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VET SIGNUP MODAL -->
+<div class="ov" id="ov-vetsignup">
+  <div class="mo" style="max-width:500px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2>&#128101; Register as a Vet</h2>
+      <button class="btn" onclick="closeOv('ov-vetsignup')">&#10005;</button>
+    </div>
+    <p class="mosb">Join the Muvawala vet network. Your profile will be reviewed by admin before activation.</p>
+    <!-- STEP 1: PERSONAL -->
+    <div id="vs-step1">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="fg"><label>Full name (as on ID)</label><input id="vs-name" placeholder="Dr. John Mukasa"/></div>
+        <div class="fg"><label>Phone (used for login)</label><input id="vs-phone" type="tel" placeholder="+256 7XX XXX XXX"/></div>
+        <div class="fg"><label>Email address</label><input id="vs-email" type="email" placeholder="vet@email.com"/></div>
+        <div class="fg"><label>National ID / Passport No.</label><input id="vs-natid" placeholder="CM9000123456ABCD"/></div>
+        <div class="fg"><label>Base district / location</label><input id="vs-loc" placeholder="e.g. Wakiso"/></div>
+        <div class="fg"><label>Set password</label><input id="vs-pw" type="password" placeholder="Min 6 characters"/></div>
+      </div>
+      <div class="brow" style="margin-top:10px">
+        <button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="vsNext(2)">Next: Qualifications &rarr;</button>
+        <button class="btn" onclick="closeOv('ov-vetsignup')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: QUALIFICATIONS -->
+    <div id="vs-step2" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="fg"><label>Uganda Vet Board Reg. No.</label><input id="vs-regno" placeholder="UVB/2024/001"/></div>
+        <div class="fg"><label>Speciality</label>
+          <select id="vs-spec" style="font-size:12px;padding:7px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%">
+            <option>General livestock</option><option>Goats &amp; sheep</option>
+            <option>Cattle</option><option>Poultry</option><option>Surgery</option>
+          </select>
+        </div>
+        <div class="fg"><label>Highest qualification</label>
+          <select id="vs-qual" style="font-size:12px;padding:7px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%">
+            <option>BVM (Bachelor of Veterinary Medicine)</option>
+            <option>DVM (Doctor of Veterinary Medicine)</option>
+            <option>MVSc (Master of Veterinary Science)</option>
+            <option>Diploma in Animal Health</option>
+            <option>Certificate in Animal Husbandry</option>
+          </select>
+        </div>
+        <div class="fg"><label>University / Institution</label><input id="vs-uni" placeholder="e.g. Makerere University"/></div>
+        <div class="fg"><label>Year of graduation</label><input id="vs-gradyr" type="number" placeholder="2018" min="1990" max="2026"/></div>
+        <div class="fg"><label>Years of field experience</label><input id="vs-exp" type="number" placeholder="5" min="0"/></div>
+      </div>
+      <div class="fg" style="margin-top:6px"><label>Professional bio &amp; experience summary</label>
+        <textarea id="vs-bio" placeholder="e.g. BVM from Makerere 2018, 6 years goat and cattle practice in central Uganda. Experienced in vaccination programs, deworming, mastitis treatment..." style="min-height:60px"></textarea>
+      </div>
+      <div class="brow" style="margin-top:10px">
+        <button class="btn" onclick="vsBack(1)">&larr; Back</button>
+        <button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="vsNext(3)">Next: Vetting &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: VETTING CHECKLIST -->
+    <div id="vs-step3" style="display:none">
+      <div style="background:#fffbeb;border:1px solid var(--ac);border-radius:var(--r);padding:11px;margin-bottom:10px;font-size:11px;color:var(--ab)">
+        <strong>&#9888; Vetting requirements</strong><br>
+        All vets joining the Muvawala network must meet these standards. Tick each to confirm.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px" id="vs-checklist">
+        <label class="cbi" style="align-items:flex-start;gap:8px"><input type="checkbox" id="vc1"/><span><strong>Uganda Vet Board registration</strong> &mdash; I am currently registered with the Uganda Vet Board (UVB) and my licence is valid and up to date.</span></label>
+        <label class="cbi" style="align-items:flex-start;gap:8px"><input type="checkbox" id="vc2"/><span><strong>Professional indemnity</strong> &mdash; I hold or agree to obtain professional indemnity insurance before conducting visits.</span></label>
+        <label class="cbi" style="align-items:flex-start;gap:8px"><input type="checkbox" id="vc3"/><span><strong>Goat / small ruminant experience</strong> &mdash; I have direct hands-on experience treating goats and small ruminants.</span></label>
+        <label class="cbi" style="align-items:flex-start;gap:8px"><input type="checkbox" id="vc4"/><span><strong>Own transport</strong> &mdash; I have reliable transport to reach farms in the districts I will cover.</span></label>
+        <label class="cbi" style="align-items:flex-start;gap:8px"><input type="checkbox" id="vc5"/><span><strong>Drug handling</strong> &mdash; I understand proper cold-chain and drug handling requirements for vaccines and medications.</span></label>
+        <label class="cbi" style="align-items:flex-start;gap:8px"><input type="checkbox" id="vc6"/><span><strong>Reporting</strong> &mdash; I agree to submit a full digital report on this portal after every farm visit within 24 hours.</span></label>
+        <label class="cbi" style="align-items:flex-start;gap:8px"><input type="checkbox" id="vc7"/><span><strong>Code of conduct</strong> &mdash; I agree to Muvawala Goat Farms conduct standards including confidentiality, punctuality and client respect.</span></label>
+      </div>
+      <div class="fg" style="margin-top:10px"><label>Reference contact (person who can vouch for your work)</label>
+        <input id="vs-ref" placeholder="Name, Organisation, Phone e.g. Dr. Katende, MAK Vet Faculty, +256 772 000 000"/>
+      </div>
+      <div class="brow" style="margin-top:10px">
+        <button class="btn" onclick="vsBack(2)">&larr; Back</button>
+        <button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="vsNext(4)">Next: Review &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: REVIEW & SUBMIT -->
+    <div id="vs-step4" style="display:none">
+      <div id="vs-review-box" style="background:var(--su2);border-radius:var(--r);padding:12px;font-size:12px;margin-bottom:10px;max-height:220px;overflow-y:auto"></div>
+      <div style="background:#d1fae5;border-radius:var(--rs);padding:9px 11px;font-size:11px;color:#065f46;margin-bottom:10px">
+        &#9989; By submitting you confirm all information is accurate. Your application will be reviewed within 48 hours.
+      </div>
+      <div class="brow">
+        <button class="btn" onclick="vsBack(3)">&larr; Edit</button>
+        <button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="submitVetSignup()">&#128203; Submit application</button>
+        <button class="btn" onclick="closeOv('ov-vetsignup')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VET LOGIN MODAL -->
+<div class="ov" id="ov-vetlogin">
+  <div class="mo pw-modal" style="max-width:380px">
+    <h2>&#128101; Vet login</h2>
+    <p class="mosb">Login to your vet dashboard to manage your visit assignments.</p>
+    <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase">Phone number</label>
+    <input id="vl-phone" type="tel" placeholder="+256..." style="margin-bottom:8px"/>
+    <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase">Password</label>
+    <input id="vl-pw" type="password" placeholder="Your password" onkeydown="if(event.key==='Enter')doVetLogin()" style="margin-bottom:8px"/>
+    <div id="vl-err" style="color:var(--rd);font-size:11px;min-height:14px;margin-bottom:7px"></div>
+    <div class="brow">
+      <button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="doVetLogin()">Login</button>
+      <button class="btn" onclick="closeOv('ov-vetlogin');openVetSignup()">Register instead</button>
+      <button class="btn" onclick="closeOv('ov-vetlogin')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- VET REPORT SMART IMPORT MODAL -->
+<div class="ov" id="ov-vetreport">
+  <div class="mo" style="max-width:640px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2>&#128203; Smart Report Import</h2>
+      <button class="btn" onclick="closeOv('ov-vetreport')">&#10005;</button>
+    </div>
+    <p class="mosb">Paste your full vet visit report. The system auto-updates each goat's records, flags health issues and generates drug orders.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div class="fg"><label>Visit reference</label><input id="vr-visitid" placeholder="VIS-0001" readonly/></div>
+      <div class="fg"><label>Visit date</label><input type="date" id="vr-date"/></div>
+    </div>
+    <div class="fg" style="margin-bottom:7px">
+      <label>General farm observations (applies to all animals)</label>
+      <textarea id="vr-general" placeholder="e.g. General herd condition fair. Water source adequate. Housing needs improvement..." style="min-height:60px"></textarea>
+    </div>
+    <div style="background:#fffbeb;border:1px solid var(--ac);border-radius:var(--rs);padding:8px 11px;font-size:10px;color:var(--ab);margin-bottom:8px;line-height:1.7">
+      <strong>Report format per animal (one per line):</strong><br>
+      <code style="background:#fff;padding:2px 6px;border-radius:3px">TAG | STATUS | WEIGHT | CONDITION | TREATMENT | DRUGS NEEDED | NOTES</code><br>
+      Example: <code style="background:#e8f5e9;padding:1px 5px;border-radius:3px">CIK002 | Alive | 18kg | Good | Dewormed | Albendazole 10ml | Follow up in 3 weeks</code><br>
+      <em>Drug names are auto-matched to Vet Shop catalog and create orders.</em>
+    </div>
+    <textarea id="vr-report" style="width:100%;font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);min-height:150px;font-family:monospace;resize:vertical" placeholder="CIK001 | Alive | 20kg | Excellent | Vaccinated | Newcastle vaccine 1 dose | Healthy&#10;CIK002 | Concern | 15kg | Poor | Treated | Oxytetracycline 5ml, Vitamin B | Monitor closely&#10;CIK003 | Alive | 22kg | Good | Dewormed | Ivermectin 2ml | No issues"></textarea>
+    <div id="vr-preview" style="display:none;margin-top:9px"></div>
+    <div class="brow" style="margin-top:8px">
+      <button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="parseVetReport()">&#128269; Parse &amp; preview report</button>
+      <button class="btn" onclick="document.getElementById('vr-report').value='';document.getElementById('vr-preview').style.display='none'">Clear</button>
+      <button class="btn" onclick="closeOv('ov-vetreport')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- STAR RATING MODAL -->
+<div class="ov" id="ov-vetrate">
+  <div class="mo pw-modal" style="max-width:400px;text-align:center">
+    <h2>&#11088; Rate your vet visit</h2>
+    <p class="mosb" id="rate-sub">How was your experience?</p>
+    <div style="margin:14px 0">
+      <div class="star-rating" id="rate-stars" style="justify-content:center">
+        <span onclick="setVisitRating(1)">&#9733;</span>
+        <span onclick="setVisitRating(2)">&#9733;</span>
+        <span onclick="setVisitRating(3)">&#9733;</span>
+        <span onclick="setVisitRating(4)">&#9733;</span>
+        <span onclick="setVisitRating(5)">&#9733;</span>
+      </div>
+      <div id="rate-label" style="font-size:12px;color:var(--tx2);margin-top:6px;min-height:18px"></div>
+    </div>
+    <textarea id="rate-comment" placeholder="Optional: describe your experience with the vet..." style="width:100%;font-size:12px;padding:8px;border-radius:var(--rs);border:1px solid var(--bo2);min-height:60px;margin-bottom:10px;font-family:inherit"></textarea>
+    <div class="brow">
+      <button class="btn btn-p" style="flex:1;background:#f59e0b;border-color:#f59e0b;color:#fff" onclick="submitVisitRating()">Submit rating</button>
+      <button class="btn" onclick="closeOv('ov-vetrate')">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- VET AVAILABILITY CALENDAR MODAL -->
+<div class="ov" id="ov-vetavail">
+  <div class="mo" style="max-width:460px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2>&#128197; My availability</h2>
+      <button class="btn" onclick="closeOv('ov-vetavail')">&#10005;</button>
+    </div>
+    <p class="mosb">Mark days you are available for farm visits. Clients will see this when choosing a date.</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <button class="btn btn-s" onclick="availNav(-1)">&#8592;</button>
+      <div id="avail-month-label" style="font-size:13px;font-weight:700"></div>
+      <button class="btn btn-s" onclick="availNav(1)">&#8594;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;text-align:center;font-size:10px;font-weight:700;color:var(--tx2)">
+      <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+    </div>
+    <div class="avail-cal" id="avail-cal-grid"></div>
+    <div style="display:flex;gap:10px;font-size:11px;margin:8px 0">
+      <span><span style="background:#d1fae5;padding:1px 7px;border-radius:4px;color:#065f46">Green</span> = Available</span>
+      <span><span style="background:#fee2e2;padding:1px 7px;border-radius:4px;color:#7f1d1d">Red</span> = Busy/unavailable</span>
+    </div>
+    <div class="brow" style="margin-top:9px">
+      <button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="saveAvailability()">Save availability</button>
+      <button class="btn" onclick="closeOv('ov-vetavail')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRESCRIPTION PDF MODAL -->
+<div class="ov" id="ov-rxpdf">
+  <div class="mo" style="max-width:500px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2>&#128138; Drug prescription</h2>
+      <button class="btn" onclick="closeOv('ov-rxpdf')">&#10005;</button>
+    </div>
+    <p class="mosb" id="rx-sub">Prescription from vet visit report</p>
+    <div id="rx-body" style="max-height:360px;overflow-y:auto"></div>
+    <div class="brow" style="margin-top:10px">
+      <button class="rx-pdf-btn" onclick="downloadRxPDF()">&#8681; Download PDF prescription</button>
+      <button class="wa-btn" onclick="shareRxWhatsApp()">&#128232; Share via WhatsApp</button>
+      <button class="btn" onclick="closeOv('ov-rxpdf')">Close</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 <script>
@@ -3162,4 +3771,2044 @@ function lgLogout(){
 // Hook showP
 var _origShowP=showP;
 showP=function(id,btn){_origShowP(id,btn);if(id==='vet')renderVet();};
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// ORDER A VET - Complete module
+// ═══════════════════════════════════════════════════════════════════
+
+// DATA
+var VET_VETS = JSON.parse(localStorage.getItem('vet_vets') || '[]');
+var VET_VISITS = JSON.parse(localStorage.getItem('vet_visits') || '[]');
+var VET_PRICES = JSON.parse(localStorage.getItem('vet_prices') || 'null');
+var vetSession = JSON.parse(localStorage.getItem('vet_session') || 'null');
+var vvFilter = 'all';
+var currentVisitId = null;
+var vvid = Math.max.apply(null, VET_VISITS.map(function(v){return v.id||0;}).concat([0])) + 1;
+
+function svVetVisit(){
+  localStorage.setItem('vet_vets', JSON.stringify(VET_VETS));
+  localStorage.setItem('vet_visits', JSON.stringify(VET_VISITS));
+  localStorage.setItem('vet_prices', JSON.stringify(VET_PRICES));
+}
+
+// UGANDA DISTRICTS WITH DISTANCE FROM KAMPALA (KM)
+var UG_DISTRICTS = [
+  {name:'Kampala',dist:0,zone:'Zone 1 - City'},
+  {name:'Wakiso',dist:15,zone:'Zone 1 - Near'},
+  {name:'Mukono',dist:25,zone:'Zone 1 - Near'},
+  {name:'Mpigi',dist:35,zone:'Zone 2 - Short'},
+  {name:'Buikwe',dist:40,zone:'Zone 2 - Short'},
+  {name:'Luwero',dist:65,zone:'Zone 2 - Short'},
+  {name:'Nakasongola',dist:110,zone:'Zone 3 - Mid'},
+  {name:'Kayunga',dist:70,zone:'Zone 2 - Short'},
+  {name:'Mityana',dist:80,zone:'Zone 3 - Mid'},
+  {name:'Mubende',dist:140,zone:'Zone 3 - Mid'},
+  {name:'Masaka',dist:135,zone:'Zone 3 - Mid'},
+  {name:'Rakai',dist:190,zone:'Zone 4 - Long'},
+  {name:'Lyantonde',dist:185,zone:'Zone 4 - Long'},
+  {name:'Sembabule',dist:130,zone:'Zone 3 - Mid'},
+  {name:'Kalangala',dist:100,zone:'Zone 3 - Mid'},
+  {name:'Kalungu',dist:110,zone:'Zone 3 - Mid'},
+  {name:'Gomba',dist:100,zone:'Zone 3 - Mid'},
+  {name:'Kiboga',dist:110,zone:'Zone 3 - Mid'},
+  {name:'Kyankwanzi',dist:130,zone:'Zone 3 - Mid'},
+  {name:'Jinja',dist:80,zone:'Zone 3 - Mid'},
+  {name:'Kamuli',dist:130,zone:'Zone 3 - Mid'},
+  {name:'Iganga',dist:110,zone:'Zone 3 - Mid'},
+  {name:'Bugiri',dist:145,zone:'Zone 4 - Long'},
+  {name:'Mayuge',dist:135,zone:'Zone 3 - Mid'},
+  {name:'Busia',dist:185,zone:'Zone 4 - Long'},
+  {name:'Tororo',dist:195,zone:'Zone 4 - Long'},
+  {name:'Mbale',dist:215,zone:'Zone 4 - Long'},
+  {name:'Sironko',dist:240,zone:'Zone 5 - Far'},
+  {name:'Kapchorwa',dist:265,zone:'Zone 5 - Far'},
+  {name:'Soroti',dist:260,zone:'Zone 5 - Far'},
+  {name:'Kumi',dist:240,zone:'Zone 5 - Far'},
+  {name:'Gulu',dist:335,zone:'Zone 5 - Far'},
+  {name:'Lira',dist:300,zone:'Zone 5 - Far'},
+  {name:'Arua',dist:490,zone:'Zone 6 - Remote'},
+  {name:'Mbarara',dist:270,zone:'Zone 5 - Far'},
+  {name:'Bushenyi',dist:310,zone:'Zone 5 - Far'},
+  {name:'Kabale',dist:415,zone:'Zone 6 - Remote'},
+  {name:'Kasese',dist:380,zone:'Zone 6 - Remote'},
+  {name:'Fort Portal',dist:300,zone:'Zone 5 - Far'},
+  {name:'Hoima',dist:195,zone:'Zone 4 - Long'},
+  {name:'Masindi',dist:215,zone:'Zone 4 - Long'},
+  {name:'Moroto',dist:480,zone:'Zone 6 - Remote'},
+  {name:'Other',dist:200,zone:'Zone 4 - Long'}
+];
+
+// DEFAULT PRICING (UGX per zone)
+var DEFAULT_PRICES = {
+  'Zone 1 - City':   {fee:80000,   label:'0-20 km'},
+  'Zone 1 - Near':   {fee:120000,  label:'20-40 km'},
+  'Zone 2 - Short':  {fee:180000,  label:'40-80 km'},
+  'Zone 3 - Mid':    {fee:280000,  label:'80-150 km'},
+  'Zone 4 - Long':   {fee:380000,  label:'150-200 km'},
+  'Zone 5 - Far':    {fee:520000,  label:'200-350 km'},
+  'Zone 6 - Remote': {fee:700000,  label:'350 km+'}
+};
+
+function getVetPrices(){
+  return VET_PRICES || DEFAULT_PRICES;
+}
+
+function formatUGX2(n){return 'UGX '+Number(n).toLocaleString();}
+
+// ── RENDER VET VISIT TAB ─────────────────────────────────────────────
+function renderVetVisit(){
+  // Populate district dropdown
+  var sel = document.getElementById('vv-district');
+  if(sel && sel.options.length <= 1){
+    UG_DISTRICTS.forEach(function(d){
+      var o = document.createElement('option');
+      o.value = d.name;
+      o.textContent = d.name + ' (~' + d.dist + ' km)';
+      sel.appendChild(o);
+    });
+  }
+  // Set min date to today
+  var dateInp = document.getElementById('vv-date');
+  if(dateInp) dateInp.min = new Date().toISOString().split('T')[0];
+
+  // Show/hide tabs based on role
+  var adminTab = document.getElementById('vv-admin-tab');
+  var vetDashTab = document.getElementById('vv-vet-dash-tab');
+  if(adminTab) adminTab.style.display = isA ? '' : 'none';
+  if(vetDashTab) vetDashTab.style.display = vetSession ? '' : 'none';
+
+  // Routine visit status
+  renderRoutineStatus();
+
+  showVVView('request');
+}
+
+function showVVView(view, btn){
+  ['vv-request','vv-myvisits','vv-vets','vv-admin','vv-vetdash'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+  var target = document.getElementById('vv-' + view);
+  if(target) target.style.display = 'block';
+  document.querySelectorAll('.vv-tab').forEach(function(b){b.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  if(view === 'myvisits') renderMyVisits();
+  else if(view === 'vets') renderVetDirectory();
+  else if(view === 'admin') renderVetAdmin2();
+  else if(view === 'vetdash') renderVetDash();
+}
+
+// ── PRICING ─────────────────────────────────────────────────────────
+function updateVetPrice(){
+  var dist = document.getElementById('vv-district').value;
+  var box = document.getElementById('vv-price-box');
+  if(!dist){box.style.display='none';return;}
+  var d = UG_DISTRICTS.find(function(x){return x.name===dist;});
+  if(!d){box.style.display='none';return;}
+  var prices = getVetPrices();
+  var zp = prices[d.zone] || {fee:200000,label:'varies'};
+  var vtype = document.getElementById('vv-type').value;
+  var fee = zp.fee;
+  if(vtype === 'emergency') fee = Math.round(fee * 1.3);
+  document.getElementById('vv-zone-name').textContent = d.zone;
+  document.getElementById('vv-zone-dist').textContent = '~' + d.dist + ' km from Kampala';
+  document.getElementById('vv-zone-price').textContent = formatUGX2(fee);
+  box.style.display = 'block';
+}
+
+// ── SUBMIT VISIT REQUEST ─────────────────────────────────────────────
+function submitVetVisit(){
+  var dist = document.getElementById('vv-district').value;
+  var addr = document.getElementById('vv-address').value.trim();
+  var date = document.getElementById('vv-date').value;
+  var time = document.getElementById('vv-time').value;
+  var type = document.getElementById('vv-type').value;
+  var animals = document.getElementById('vv-animals').value;
+  var notes = document.getElementById('vv-notes').value.trim();
+  if(!dist){tst('Select your district.');return;}
+  if(!date){tst('Select a preferred visit date.');return;}
+
+  var d = UG_DISTRICTS.find(function(x){return x.name===dist;});
+  var prices = getVetPrices();
+  var zp = d ? (prices[d.zone]||{fee:200000}) : {fee:200000};
+  var fee = type==='emergency' ? Math.round(zp.fee*1.3) : zp.fee;
+
+  var clientName = clientSession ? clientSession.name : (isA ? 'Admin' : 'Unknown');
+  var clientId = clientSession ? clientSession.id : null;
+  // Find client group if exists
+  var client = clientId ? CLI.find(function(x){return x.id===clientId;}) : null;
+
+  var visit = {
+    id: vvid++,
+    ref: 'VIS-' + String(vvid-1).padStart(4,'0'),
+    date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    preferredDate: new Date(date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    preferredTime: time,
+    clientId: clientId,
+    clientName: clientName,
+    tagGroup: client ? client.tagGroup : '',
+    district: dist,
+    address: addr,
+    distKm: d ? d.dist : 0,
+    zone: d ? d.zone : '',
+    visitType: type,
+    animals: parseInt(animals)||0,
+    notes: notes,
+    fee: fee,
+    status: 'Requested',
+    assignedVetId: null,
+    assignedVetName: '',
+    scheduledDate: '',
+    comments: [],
+    report: null,
+    isRoutine: type==='routine',
+    drugOrders: []
+  };
+  VET_VISITS.unshift(visit);
+  svVetVisit();
+
+  // Email admin
+  var sub = 'New Vet Visit Request - ' + visit.ref + ' - ' + clientName;
+  var body = 'New vet visit request received.\n\nRef: ' + visit.ref + '\nClient: ' + clientName + '\nDistrict: ' + dist + ' (~' + (d?d.dist:0) + 'km)\nPreferred date: ' + visit.preferredDate + '\nType: ' + type + '\nAnimals: ' + (animals||'N/A') + '\nFee estimate: ' + formatUGX2(fee) + '\n\nNotes:\n' + (notes||'None') + '\n\nPlease assign a vet and confirm the visit.\n\nMuvawala Goat Farms Portal';
+  window.open('mailto:muvawalafarmspropertiesug@gmail.com?subject=' + encodeURIComponent(sub) + '&body=' + encodeURIComponent(body));
+
+  // Clear form
+  document.getElementById('vv-district').value='';
+  document.getElementById('vv-address').value='';
+  document.getElementById('vv-date').value='';
+  document.getElementById('vv-notes').value='';
+  document.getElementById('vv-price-box').style.display='none';
+
+  tst('Visit request submitted! Ref: ' + visit.ref,'ok');
+  renderRoutineStatus();
+  showVVView('myvisits', document.querySelector('.vv-tab:nth-child(2)'));
+}
+
+// ── ROUTINE VISIT TRACKER ────────────────────────────────────────────
+function renderRoutineStatus(){
+  var el = document.getElementById('vv-routine-box');
+  if(!el) return;
+  var clientId = clientSession ? clientSession.id : null;
+  if(!clientId && !isA){el.style.display='none';return;}
+  el.style.display = 'block';
+  var myVisits = VET_VISITS.filter(function(v){
+    return v.clientId === clientId || (isA && v.tagGroup);
+  });
+  var routineDone = myVisits.some(function(v){return v.isRoutine && v.status==='Completed';});
+  var html = '<div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--rs);background:' + (routineDone?'var(--gl)':'#fffbeb') + ';border:1px solid ' + (routineDone?'#10b981':'#f59e0b') + '">' +
+    '<span style="font-size:22px">' + (routineDone?'&#9989;':'&#9744;') + '</span>' +
+    '<div><div style="font-size:12px;font-weight:700;color:' + (routineDone?'var(--gn)':'var(--ab)') + '">' +
+    (routineDone ? 'Routine vet visit completed' : 'Routine visit required') + '</div>' +
+    '<div style="font-size:11px;color:var(--tx2)">' + (routineDone ? 'Your farm has had at least one routine inspection.' : 'Every farm must have at least one routine vet visit. Please request one.') + '</div></div></div>';
+  document.getElementById('vv-routine-status').innerHTML = html;
+}
+
+// ── MY VISITS ────────────────────────────────────────────────────────
+function renderMyVisits(){
+  var el = document.getElementById('vv-myvisits-out');
+  var em = document.getElementById('vv-myvisits-empty');
+  var clientId = clientSession ? clientSession.id : null;
+  var mine = isA ? VET_VISITS : VET_VISITS.filter(function(v){return v.clientId===clientId;});
+  if(!mine.length){el.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  el.innerHTML = mine.map(function(v){
+    var stCls = 'vs-' + v.status.toLowerCase();
+    return '<div class="visit-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">' +
+        '<div><div style="font-size:12px;font-weight:700;color:#0f4c75">' + v.ref + '</div>' +
+        '<div style="font-size:10px;color:var(--tx2)">' + v.visitType + ' &bull; ' + v.preferredDate + '</div></div>' +
+        '<span class="visit-status ' + stCls + '">' + v.status + '</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--tx2);margin-bottom:6px">&#128205; ' + v.district + ' (~' + v.distKm + 'km) &bull; Fee: <strong>' + formatUGX2(v.fee) + '</strong></div>' +
+      (v.assignedVetName?'<div style="font-size:11px;color:#0f4c75;margin-bottom:5px">&#128101; Assigned vet: <strong>' + v.assignedVetName + '</strong></div>':'')+
+      (v.report?'<div style="font-size:11px;color:var(--gn);margin-bottom:5px">&#128203; Vet report on file</div>':'')+
+      '<button class="btn btn-s btn-p" onclick="openVisitDetail(' + v.id + ')">View details</button>' +
+      '</div>';
+  }).join('');
+}
+
+// ── VISIT DETAIL ─────────────────────────────────────────────────────
+function openVisitDetail(id){
+  currentVisitId = id;
+  var v = VET_VISITS.find(function(x){return x.id===id;});if(!v)return;
+  document.getElementById('vd-title').textContent = v.ref;
+  document.getElementById('vd-sub').textContent = v.visitType + ' - ' + v.clientName + ' - ' + v.status;
+  var html = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px">' +
+    '<span class="visit-status vs-' + v.status.toLowerCase() + '">' + v.status + '</span>' +
+    (v.isRoutine?'<span class="routine-badge">Routine visit</span>':'') +
+    '</div>';
+  html += '<div style="background:var(--su2);border-radius:var(--rs);padding:9px;margin-bottom:9px;display:grid;grid-template-columns:1fr 1fr;gap:5px">';
+  var fields = [['District',v.district+' (~'+v.distKm+'km)'],['Zone',v.zone],['Address',v.address||'--'],['Preferred date',v.preferredDate],['Time',v.preferredTime],['Animals',v.animals||'--'],['Visit fee',formatUGX2(v.fee)],['Assigned vet',v.assignedVetName||'Not yet assigned']];
+  fields.forEach(function(f){html+='<div><div style="font-size:9px;color:var(--tx3);text-transform:uppercase">'+f[0]+'</div><div style="font-size:12px;font-weight:600">'+f[1]+'</div></div>';});
+  html += '</div>';
+  if(v.notes) html += '<div style="font-size:11px;padding:7px 9px;background:var(--al);border-radius:var(--rs);margin-bottom:9px"><strong>Client notes:</strong> ' + v.notes + '</div>';
+
+  // Report
+  if(v.report){
+    html += '<div class="report-box"><div style="font-size:11px;font-weight:700;color:#0f4c75;margin-bottom:5px">&#128203; Vet report — ' + v.report.date + '</div>';
+    html += '<div style="font-size:11px;margin-bottom:5px"><strong>General observations:</strong> ' + (v.report.general||'--') + '</div>';
+    if(v.report.animals&&v.report.animals.length){
+      html += '<table style="width:100%;font-size:10px;border-collapse:collapse"><thead><tr><th style="background:#0f4c75;color:#fff;padding:3px 5px;text-align:left">Tag</th><th style="background:#0f4c75;color:#fff;padding:3px 5px">Status</th><th style="background:#0f4c75;color:#fff;padding:3px 5px">Condition</th><th style="background:#0f4c75;color:#fff;padding:3px 5px">Treatment</th><th style="background:#0f4c75;color:#fff;padding:3px 5px">Drugs</th></tr></thead><tbody>';
+      v.report.animals.forEach(function(a){
+        html += '<tr style="border-bottom:1px solid var(--bo)"><td style="padding:3px 5px;font-weight:700">'+a.tag+'</td><td style="padding:3px 5px">'+a.status+'</td><td style="padding:3px 5px">'+a.condition+'</td><td style="padding:3px 5px">'+a.treatment+'</td><td style="padding:3px 5px;color:#0f4c75">'+a.drugs+'</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+  }
+
+  // Comments
+  if(v.comments&&v.comments.length){
+    html += '<div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:5px">COMMENTS</div>';
+    html += v.comments.map(function(cm){
+      return '<div class="comm-item"><div class="comm-meta"><strong>' + cm.name + '</strong> &bull; ' + cm.date + '</div><div style="font-size:12px">' + cm.text + '</div></div>';
+    }).join('');
+  }
+  document.getElementById('vd-body').innerHTML = html;
+
+  // Admin actions
+  var adminActions = document.getElementById('vd-admin-actions');
+  if(isA){
+    adminActions.style.display = 'block';
+    var statuses = ['Requested','Assigned','Scheduled','Completed','Cancelled'];
+    var vets = VET_VETS.filter(function(vt){return vt.status==='Active';});
+    adminActions.innerHTML =
+      '<div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:5px">UPDATE STATUS:</div>' +
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">' +
+      statuses.map(function(s){
+        return '<button class="btn btn-s'+(v.status===s?' btn-p':'')+'" onclick="updateVisitStatus(\''+s+'\')" style="'+(v.status===s?'background:#0f4c75;color:#fff;border-color:#0f4c75;':'')+'">' + s + '</button>';
+      }).join('') + '</div>' +
+      (vets.length?'<div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:5px">ASSIGN VET:</div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">' +
+      vets.map(function(vt){return '<button class="btn btn-s'+(v.assignedVetId===vt.id?' btn-p':'')+'" onclick="assignVet('+vt.id+')">' + vt.name + '</button>';}).join('') + '</div>':'<div style="font-size:11px;color:var(--tx3);margin-bottom:7px">No active vets yet. Approve vets under Vets directory.</div>') +
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">' +
+      '<button class="btn btn-s btn-p" onclick="openVetReport(' + v.id + ')">&#128203; Import vet report</button>' +
+      (v.scheduledDate?'':'<div class="fg" style="flex:1;min-width:150px"><input type="date" id="vd-sched-date" placeholder="Confirm visit date" style="font-size:11px;padding:5px;border-radius:var(--rs);border:1px solid var(--bo2);width:100%"/><button class="btn btn-s" style="margin-top:4px" onclick="confirmVisitDate(' + v.id + ')">Set date</button></div>') +
+      '</div>';
+  } else {
+    adminActions.style.display = 'none';
+  }
+  document.getElementById('vd-comment').value = '';
+  document.getElementById('ov-visitdetail').classList.add('sh');
+}
+
+function updateVisitStatus(status){
+  var v = VET_VISITS.find(function(x){return x.id===currentVisitId;});if(!v)return;
+  v.status = status;
+  v.comments = v.comments||[];
+  v.comments.push({name:'Muvawala Admin',date:new Date().toLocaleDateString('en-GB'),text:'Status updated to: ' + status});
+  svVetVisit();openVisitDetail(currentVisitId);renderMyVisits();
+  tst('Status: ' + status,'ok');
+  // If completed and routine, update dashboard
+  if(status==='Completed'){renderRoutineStatus();renderDash();}
+}
+
+function assignVet(vetId){
+  var v = VET_VISITS.find(function(x){return x.id===currentVisitId;});if(!v)return;
+  var vet = VET_VETS.find(function(x){return x.id===vetId;});if(!vet)return;
+  v.assignedVetId = vetId;
+  v.assignedVetName = vet.name;
+  v.status = 'Assigned';
+  v.comments = v.comments||[];
+  v.comments.push({name:'Muvawala Admin',date:new Date().toLocaleDateString('en-GB'),text:'Assigned to ' + vet.name});
+  svVetVisit();openVisitDetail(currentVisitId);
+  tst('Assigned to ' + vet.name,'ok');
+}
+
+function confirmVisitDate(id){
+  var v = VET_VISITS.find(function(x){return x.id===id;});if(!v)return;
+  var d = document.getElementById('vd-sched-date');if(!d||!d.value)return;
+  v.scheduledDate = new Date(d.value).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  v.status = 'Scheduled';
+  v.comments.push({name:'Muvawala Admin',date:new Date().toLocaleDateString('en-GB'),text:'Visit confirmed for ' + v.scheduledDate});
+  svVetVisit();openVisitDetail(id);tst('Visit scheduled for ' + v.scheduledDate,'ok');
+}
+
+function postVisitComment(){
+  var txt = document.getElementById('vd-comment').value.trim();if(!txt){tst('Enter a comment.');return;}
+  var v = VET_VISITS.find(function(x){return x.id===currentVisitId;});if(!v)return;
+  v.comments = v.comments||[];
+  var name = isA?'Muvawala Admin':(vetSession?vetSession.name:(clientSession?clientSession.name:'Client'));
+  v.comments.push({name:name,date:new Date().toLocaleDateString('en-GB'),text:txt});
+  svVetVisit();openVisitDetail(currentVisitId);tst('Comment posted','ok');
+}
+
+// ── VET DIRECTORY ────────────────────────────────────────────────────
+function renderVetDirectory(){
+  var el = document.getElementById('vv-vets-out');if(!el)return;
+  var active = VET_VETS.filter(function(v){return v.status==='Active';});
+  var pending = VET_VETS.filter(function(v){return v.status==='Pending';});
+  var html = '';
+  if(active.length){
+    html += '<div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:7px">OUR REGISTERED VETS (' + active.length + ')</div>';
+    html += active.map(function(v){
+      var visits = VET_VISITS.filter(function(vv){return vv.assignedVetId===v.id&&vv.status==='Completed';}).length;
+      return '<div class="vet-card"><div style="display:flex;align-items:center;gap:10px">' +
+        '<div class="vet-avatar">' + (v.name||'V').charAt(0).toUpperCase() + '</div>' +
+        '<div style="flex:1"><div style="font-size:13px;font-weight:700">' + v.name + '</div>' +
+        '<div style="font-size:11px;color:var(--tx2)">' + v.speciality + ' &bull; ' + v.location + '</div>' +
+        '<div style="font-size:10px;color:var(--tx3)">' + v.regno + ' &bull; ' + v.experience + ' yrs exp &bull; ' + visits + ' visits completed</div>' +
+        '</div>' +
+        (isA?'<div style="display:flex;gap:4px"><button class="btn btn-s btn-d" onclick="deactivateVet('+v.id+')">Deactivate</button></div>':'')+
+      '</div>' +
+      (v.bio?'<div style="font-size:11px;color:var(--tx2);margin-top:6px;padding-top:6px;border-top:1px solid var(--bo)">'+v.bio+'</div>':'')+
+      '</div>';
+    }).join('');
+  } else {
+    html += '<div class="emp">No active vets registered yet.</div>';
+  }
+  if(isA&&pending.length){
+    html += '<div style="font-size:11px;font-weight:700;color:var(--ab);margin:10px 0 7px">PENDING APPROVAL (' + pending.length + ')</div>';
+    html += pending.map(function(v){
+      return '<div class="vet-card" style="border-color:#f59e0b">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div><div style="font-size:13px;font-weight:700">' + v.name + '</div>' +
+        '<div style="font-size:11px;color:var(--tx2)">' + v.speciality + ' &bull; ' + v.phone + ' &bull; ' + v.email + '</div>' +
+        '<div style="font-size:10px;color:var(--tx3)">' + v.regno + ' &bull; ' + v.experience + ' yrs</div></div>' +
+        '<div style="display:flex;gap:5px">' +
+        '<button class="btn btn-s btn-p" onclick="approveVet(' + v.id + ')">&#10003; Approve</button>' +
+        '<button class="btn btn-s btn-d" onclick="rejectVet(' + v.id + ')">&#10005; Reject</button>' +
+        '</div></div>' +
+        (v.bio?'<div style="font-size:11px;color:var(--tx2);margin-top:5px">' + v.bio + '</div>':'')+
+        '</div>';
+    }).join('');
+  }
+  el.innerHTML = html;
+
+  // Show vet login button if no vet session
+  if(!vetSession){
+    var loginBtn = '<button class="btn btn-s" style="margin-top:8px;background:#0f4c75;color:#fff;border-color:#0f4c75" onclick="openVetLogin()">&#128274; Vet login</button>';
+    el.innerHTML = el.innerHTML + '<div style="margin-top:7px">' + loginBtn + '</div>';
+  } else {
+    el.innerHTML = el.innerHTML + '<div style="margin-top:7px;font-size:11px;color:var(--gn)">&#9989; Logged in as ' + vetSession.name + ' <button class="btn btn-s btn-d" onclick="vetLogout()">Logout</button></div>';
+  }
+}
+
+function approveVet(id){
+  var v = VET_VETS.find(function(x){return x.id===id;});if(!v)return;
+  v.status = 'Active';svVetVisit();renderVetDirectory();
+  tst(v.name + ' approved and activated!','ok');
+  if(v.email){window.open('mailto:'+v.email+'?subject=Muvawala Vet Network - Application Approved&body=Dear '+v.name+',\n\nYour registration as a vet on Muvawala Goat Farms portal has been approved.\n\nYou can now login using your phone number and password.\n\nMuvawala Goat Farms');}
+}
+function rejectVet(id){
+  if(!confirm('Reject this vet application?'))return;
+  VET_VETS = VET_VETS.filter(function(x){return x.id!==id;});
+  svVetVisit();renderVetDirectory();tst('Application rejected.');
+}
+function deactivateVet(id){
+  var v = VET_VETS.find(function(x){return x.id===id;});if(!v)return;
+  v.status = 'Inactive';svVetVisit();renderVetDirectory();tst(v.name + ' deactivated.');
+}
+
+// ── VET SIGNUP ────────────────────────────────────────────────────────
+var vetidx = Math.max.apply(null, VET_VETS.map(function(v){return v.id||0;}).concat([0])) + 1;
+
+function openVetSignup(){closeOv('ov-vetlogin');document.getElementById('ov-vetsignup').classList.add('sh');}
+function openVetLogin(){document.getElementById('ov-vetlogin').classList.add('sh');}
+
+function submitVetSignup(){
+  var name = document.getElementById('vs-name').value.trim();
+  var phone = document.getElementById('vs-phone').value.trim();
+  var pw = document.getElementById('vs-pw').value;
+  if(!name||!phone){tst('Name and phone required.');return;}
+  if(pw.length<6){tst('Password must be at least 6 characters.');return;}
+  var vet = {
+    id:vetidx++,name:name,phone:phone,email:document.getElementById('vs-email').value.trim(),
+    regno:document.getElementById('vs-regno').value.trim(),
+    speciality:document.getElementById('vs-spec').value,
+    experience:document.getElementById('vs-exp').value||0,
+    location:document.getElementById('vs-loc').value.trim(),
+    bio:document.getElementById('vs-bio').value.trim(),
+    password:pw,status:'Pending',joinDate:new Date().toLocaleDateString('en-GB')
+  };
+  VET_VETS.push(vet);svVetVisit();
+  closeOv('ov-vetsignup');
+  tst('Application submitted! Admin will review and activate your account.','ok');
+  window.open('mailto:muvawalafarmspropertiesug@gmail.com?subject=New Vet Registration - ' + name + '&body=New vet registration from ' + name + ' (' + phone + ').\n\nSpeciality: ' + vet.speciality + '\nReg No: ' + vet.regno + '\n\nPlease review and approve in the portal under Order a Vet > Manage > Vets directory.');
+  renderVetDirectory();
+}
+
+function doVetLogin(){
+  var phone = document.getElementById('vl-phone').value.trim().replace(/\s/g,'');
+  var pw = document.getElementById('vl-pw').value;
+  var err = document.getElementById('vl-err');
+  var vet = VET_VETS.find(function(v){return v.phone.replace(/\s/g,'')=== phone;});
+  if(!vet){err.textContent='Phone not found.';return;}
+  if(vet.status!=='Active'){err.textContent='Account pending approval by admin.';return;}
+  if(vet.password!==pw){err.textContent='Incorrect password.';return;}
+  vetSession={id:vet.id,name:vet.name,phone:phone};
+  localStorage.setItem('vet_session',JSON.stringify(vetSession));
+  closeOv('ov-vetlogin');
+  tst('Welcome, ' + vet.name + '!','ok');
+  document.getElementById('vv-vet-dash-tab').style.display='';
+  showVVView('vetdash', document.getElementById('vv-vet-dash-tab'));
+}
+function vetLogout(){
+  vetSession=null;localStorage.removeItem('vet_session');
+  document.getElementById('vv-vet-dash-tab').style.display='none';
+  tst('Vet logged out.');renderVetDirectory();
+}
+
+// ── VET DASHBOARD ─────────────────────────────────────────────────────
+function renderVetDash(){
+  if(!vetSession){document.getElementById('vv-vetdash-out').innerHTML='<div class="emp">Please login as a vet to view your dashboard.</div>';return;}
+  var myVisits = VET_VISITS.filter(function(v){return v.assignedVetId===vetSession.id;});
+  var pending = myVisits.filter(function(v){return v.status==='Assigned'||v.status==='Scheduled';});
+  var completed = myVisits.filter(function(v){return v.status==='Completed';});
+  var html = '<div class="vv-hero">' +
+    '<h2>&#128200; ' + vetSession.name + ' - Vet Dashboard</h2>' +
+    '<p>Manage your assigned farm visits and submit reports</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">' +
+    '<div style="background:rgba(255,255,255,.15);border-radius:var(--rs);padding:8px;text-align:center"><div style="font-size:20px;font-weight:700">' + myVisits.length + '</div><div style="font-size:9px;opacity:.75">Total assigned</div></div>' +
+    '<div style="background:rgba(255,255,255,.15);border-radius:var(--rs);padding:8px;text-align:center"><div style="font-size:20px;font-weight:700">' + pending.length + '</div><div style="font-size:9px;opacity:.75">Pending visits</div></div>' +
+    '<div style="background:rgba(255,255,255,.15);border-radius:var(--rs);padding:8px;text-align:center"><div style="font-size:20px;font-weight:700">' + completed.length + '</div><div style="font-size:9px;opacity:.75">Completed</div></div>' +
+    '</div></div>';
+
+  if(pending.length){
+    html += '<div class="fs"><h3>&#128197; Upcoming visits</h3>';
+    html += pending.map(function(v){
+      return '<div class="visit-card">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:5px">' +
+        '<div><strong style="color:#0f4c75">' + v.ref + '</strong> &bull; ' + v.visitType + '</div>' +
+        '<span class="visit-status vs-' + v.status.toLowerCase() + '">' + v.status + '</span></div>' +
+        '<div style="font-size:11px;color:var(--tx2)">Client: ' + v.clientName + ' &bull; ' + v.district + ' (~' + v.distKm + 'km)</div>' +
+        '<div style="font-size:11px;color:var(--tx2)">Preferred: ' + v.preferredDate + (v.scheduledDate?' &bull; Confirmed: <strong>' + v.scheduledDate + '</strong>':'') + '</div>' +
+        '<div style="display:flex;gap:5px;margin-top:7px">' +
+        '<button class="btn btn-s btn-p" onclick="openVetReport(' + v.id + ')">&#128203; Submit report</button>' +
+        '<button class="btn btn-s" onclick="openVisitDetail(' + v.id + ')">View details</button>' +
+        '</div></div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  if(completed.length){
+    html += '<div class="fs"><h3>&#9989; Completed visits</h3>';
+    html += completed.map(function(v){
+      return '<div class="visit-card">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
+        '<strong style="color:#0f4c75">' + v.ref + '</strong>' +
+        '<span class="visit-status vs-completed">Completed</span></div>' +
+        '<div style="font-size:11px;color:var(--tx2)">' + v.clientName + ' &bull; ' + v.district + '</div>' +
+        '<button class="btn btn-s" style="margin-top:6px" onclick="openVisitDetail(' + v.id + ')">View report</button>' +
+        '</div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  if(!myVisits.length) html += '<div class="emp">No visits assigned yet. Check back soon.</div>';
+  document.getElementById('vv-vetdash-out').innerHTML = html;
+}
+
+// ── VET REPORT SMART IMPORT ──────────────────────────────────────────
+function openVetReport(visitId){
+  var v = VET_VISITS.find(function(x){return x.id===visitId;});if(!v)return;
+  currentVisitId = visitId;
+  document.getElementById('vr-visitid').value = v.ref;
+  document.getElementById('vr-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('vr-general').value = '';
+  document.getElementById('vr-report').value = '';
+  document.getElementById('vr-preview').style.display = 'none';
+  document.getElementById('ov-vetreport').classList.add('sh');
+}
+
+function parseVetReport(){
+  var raw = document.getElementById('vr-report').value.trim();
+  if(!raw){tst('Paste the report data first.');return;}
+  var general = document.getElementById('vr-general').value.trim();
+  var lines = raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>3;});
+  var parsed = [];
+  lines.forEach(function(line){
+    var parts = line.split('|').map(function(p){return p.trim();});
+    if(parts.length<2)return;
+    var tag = parts[0].toUpperCase().replace(/\s/g,'');
+    if(!tag)return;
+    parsed.push({
+      tag:tag, status:parts[1]||'Alive', weight:parts[2]||'',
+      condition:parts[3]||'', treatment:parts[4]||'',
+      drugs:parts[5]||'', notes:parts[6]||''
+    });
+  });
+  if(!parsed.length){tst('No valid records found. Use format: TAG | STATUS | WEIGHT | CONDITION | TREATMENT | DRUGS | NOTES');return;}
+  window._vrParsed = {general:general, animals:parsed};
+
+  // Match tags to existing records
+  var matched=0,unmatched=[];
+  parsed.forEach(function(p){
+    var r = REC.find(function(x){return x.parent.toUpperCase()===p.tag;});
+    if(r)matched++;else unmatched.push(p.tag);
+  });
+
+  // Match drugs to vet shop
+  var allDrugs = [];
+  parsed.forEach(function(p){
+    if(p.drugs){
+      p.drugs.split(',').forEach(function(d){
+        var dname = d.trim();
+        var prod = VPRODS.find(function(pr){return pr.name.toLowerCase().indexOf(dname.split(' ')[0].toLowerCase())>-1;});
+        if(prod&&allDrugs.indexOf(prod.name)===-1)allDrugs.push(prod.name);
+      });
+    }
+  });
+
+  var prev = document.getElementById('vr-preview');
+  prev.style.display = 'block';
+  prev.innerHTML =
+    '<div style="padding:8px 11px;background:var(--gl);border-radius:var(--rs);font-size:11px;color:var(--gn);margin-bottom:8px">' +
+    '&#9989; <strong>' + parsed.length + ' animals</strong> parsed &bull; ' + matched + ' matched to register &bull; ' +
+    (unmatched.length?'<span style="color:#f59e0b">'+unmatched.length+' unmatched: '+unmatched.join(', ')+'</span>':'all matched') + '</div>' +
+    (allDrugs.length?'<div style="padding:7px 10px;background:#eff6ff;border-radius:var(--rs);font-size:11px;color:#1e3a8a;margin-bottom:8px">&#128138; <strong>Drugs detected</strong> matching Vet Shop catalog: ' + allDrugs.join(', ') + '<br><em style="font-size:10px">These will be pre-filled in a Vet Shop cart on import.</em></div>':'')+
+    '<div style="overflow-x:auto;max-height:220px;overflow-y:auto"><table style="width:100%;font-size:11px;border-collapse:collapse">' +
+    '<thead><tr>' + ['Tag','Status','Weight','Condition','Treatment','Drugs','Notes'].map(function(h){return '<th style="background:#0f4c75;color:#fff;padding:3px 6px;text-align:left">'+h+'</th>';}).join('') + '</tr></thead><tbody>' +
+    parsed.map(function(p){
+      var found = REC.find(function(x){return x.parent.toUpperCase()===p.tag;});
+      return '<tr style="border-bottom:1px solid var(--bo);background:' + (found?'#f0fdf4':'#fff1f2') + '">' +
+        '<td style="padding:3px 6px;font-weight:700">' + p.tag + '</td>' +
+        '<td style="padding:3px 6px">' + p.status + '</td>' +
+        '<td style="padding:3px 6px">' + p.weight + '</td>' +
+        '<td style="padding:3px 6px">' + p.condition + '</td>' +
+        '<td style="padding:3px 6px">' + p.treatment + '</td>' +
+        '<td style="padding:3px 6px;color:#0f4c75">' + p.drugs + '</td>' +
+        '<td style="padding:3px 6px">' + p.notes + '</td></tr>';
+    }).join('') + '</tbody></table></div>' +
+    '<div class="brow" style="margin-top:9px">' +
+    '<button class="btn btn-p" style="flex:1;background:#0f4c75;border-color:#0f4c75" onclick="confirmVetReport()">&#10003; Import report &amp; update records</button>' +
+    '<button class="btn" onclick="document.getElementById(\'vr-preview\').style.display=\'none\'">Cancel</button></div>';
+}
+
+function confirmVetReport(){
+  var data = window._vrParsed;if(!data)return;
+  var v = VET_VISITS.find(function(x){return x.id===currentVisitId;});if(!v)return;
+  var rDate = document.getElementById('vr-date').value;
+  var dateStr = rDate ? new Date(rDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : new Date().toLocaleDateString('en-GB');
+
+  // Save report to visit
+  v.report = {date:dateStr, general:data.general, animals:data.animals};
+  if(v.status!=='Completed') v.status = 'Completed';
+  v.comments = v.comments||[];
+  v.comments.push({name:vetSession?vetSession.name:'Admin',date:dateStr,text:'Vet report imported. ' + data.animals.length + ' animals assessed.'});
+
+  // Update each animal's record in the register
+  var updated=0;
+  data.animals.forEach(function(a){
+    var r = REC.find(function(x){return x.parent.toUpperCase()===a.tag;});
+    if(!r)return;
+    r.status = a.status;
+    r.notes = (r.notes?r.notes+'; ':'') + dateStr + ': ' + a.condition + (a.treatment?' - '+a.treatment:'');
+    // Add to comments
+    if(!COM[r.id])COM[r.id]=[];
+    COM[r.id].push({name:vetSession?vetSession.name:'Vet',text:a.condition + (a.treatment?' - '+a.treatment:'') + (a.notes?' - '+a.notes:''),time:dateStr});
+    updated++;
+  });
+
+  // Auto-create vet shop cart for drugs
+  var drugCart=[];
+  data.animals.forEach(function(a){
+    if(!a.drugs)return;
+    a.drugs.split(',').forEach(function(d){
+      var dname = d.trim();
+      var prod = VPRODS.find(function(pr){return pr.name.toLowerCase().indexOf(dname.split(' ')[0].toLowerCase())>-1;});
+      if(prod){
+        var ex = drugCart.find(function(x){return x.prodId===prod.id;});
+        if(ex)ex.qty++;
+        else drugCart.push({prodId:prod.id,name:prod.name,unit:prod.unit,qty:1,unitPrice:clientPrice(prod),basePrice:prod.basePrice,commission:getCommission(prod),supplier:prod.supplier});
+      }
+    });
+  });
+
+  if(drugCart.length){
+    VCART = drugCart;
+    updateCartBadge();
+    v.drugOrders = drugCart.map(function(x){return x.name+' x'+x.qty;});
+    tst('Report imported! ' + updated + ' records updated. ' + drugCart.length + ' drug(s) added to Vet Shop cart.','ok');
+  } else {
+    tst('Report imported! ' + updated + ' animal records updated.','ok');
+  }
+
+  sv();svVetVisit();
+  closeOv('ov-vetreport');
+  if(currentVisitId) openVisitDetail(currentVisitId);
+  renderReg();renderDash();renderRoutineStatus();
+}
+
+// ── ADMIN MANAGE ──────────────────────────────────────────────────────
+function renderVetAdmin2(){
+  var total = VET_VISITS.length;
+  var pending = VET_VISITS.filter(function(v){return v.status==='Requested';}).length;
+  var scheduled = VET_VISITS.filter(function(v){return v.status==='Scheduled';}).length;
+  var completed = VET_VISITS.filter(function(v){return v.status==='Completed';}).length;
+  var totalRevenue = VET_VISITS.filter(function(v){return v.status==='Completed';}).reduce(function(a,v){return a+v.fee;},0);
+  var el = document.getElementById('vv-admin-summary');if(el){
+    el.innerHTML = '<h3>&#128200; Visit overview</h3><div class="comm-grid">' +
+    '<div class="comm-item2"><div class="comm-val">' + total + '</div><div class="comm-lbl">Total requests</div></div>' +
+    '<div class="comm-item2"><div class="comm-val">' + pending + '</div><div class="comm-lbl">Pending</div></div>' +
+    '<div class="comm-item2"><div class="comm-val">' + scheduled + '</div><div class="comm-lbl">Scheduled</div></div>' +
+    '<div class="comm-item2"><div class="comm-val">' + completed + '</div><div class="comm-lbl">Completed</div></div>' +
+    '<div class="comm-item2"><div class="comm-val" style="font-size:12px">' + formatUGX2(totalRevenue) + '</div><div class="comm-lbl">Revenue</div></div>' +
+    '</div>';
+  }
+
+  // Pricing table
+  var prices = getVetPrices();
+  var pt = document.getElementById('vv-pricing-table');if(pt){
+    pt.innerHTML = '<table style="width:100%;font-size:11px;border-collapse:collapse">' +
+      '<thead><tr><th style="background:var(--br);color:#fff;padding:5px 8px;text-align:left">Zone</th><th style="background:var(--br);color:#fff;padding:5px 8px">Distance</th><th style="background:var(--br);color:#fff;padding:5px 8px">Visit fee (UGX)</th></tr></thead><tbody>' +
+      Object.keys(prices).map(function(zone){
+        var zp = prices[zone];
+        return '<tr style="border-bottom:1px solid var(--bo)">' +
+          '<td style="padding:5px 8px;font-weight:600">' + zone + '</td>' +
+          '<td style="padding:5px 8px;color:var(--tx2)">' + zp.label + '</td>' +
+          '<td style="padding:5px 8px"><input type="number" id="vp-' + zone.replace(/[^a-z0-9]/gi,'_') + '" value="' + zp.fee + '" style="width:100px;font-size:11px;padding:3px 6px;border:1px solid var(--bo2);border-radius:3px;text-align:right"/></td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+
+  // Filter and show visits
+  filterVisits(vvFilter);
+}
+
+function filterVisits(status, btn){
+  vvFilter = status;
+  document.querySelectorAll('#vv-filter-bar .vcat').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  var list = status==='all' ? VET_VISITS : VET_VISITS.filter(function(v){return v.status===status;});
+  var el = document.getElementById('vv-all-visits-out');if(!el)return;
+  if(!list.length){el.innerHTML='<p style="color:var(--tx3);font-size:12px">No visits in this category.</p>';return;}
+  el.innerHTML = list.map(function(v){
+    return '<div class="visit-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">' +
+      '<div><div style="font-size:12px;font-weight:700;color:#0f4c75">' + v.ref + ' &mdash; ' + v.clientName + '</div>' +
+      '<div style="font-size:10px;color:var(--tx2)">' + v.visitType + ' &bull; ' + v.district + ' &bull; ' + v.preferredDate + '</div></div>' +
+      '<span class="visit-status vs-' + v.status.toLowerCase() + '">' + v.status + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<span style="font-size:11px;color:var(--tx2)">Fee: <strong>' + formatUGX2(v.fee) + '</strong>' + (v.assignedVetName?' &bull; Vet: ' + v.assignedVetName:'') + '</span>' +
+      '<button class="btn btn-s btn-p" onclick="openVisitDetail(' + v.id + ')">Manage</button></div>' +
+      '</div>';
+  }).join('');
+}
+
+function saveVetPricing(){
+  var prices = getVetPrices();
+  Object.keys(prices).forEach(function(zone){
+    var el = document.getElementById('vp-' + zone.replace(/[^a-z0-9]/gi,'_'));
+    if(el) prices[zone].fee = parseInt(el.value)||prices[zone].fee;
+  });
+  VET_PRICES = prices;svVetVisit();tst('Pricing updated!','ok');
+}
+
+// Hook showP
+var _origShowP2 = showP;
+showP = function(id,btn){_origShowP2(id,btn);if(id==='vetvisit')renderVetVisit();};
+
+// Init vet session
+if(vetSession){var vdtab=document.getElementById('vv-vet-dash-tab');if(vdtab)vdtab.style.display='';}
+</script>
+<script>
+// ── VET VISIT ENHANCEMENTS ───────────────────────────────────────────
+
+// GPS LOCATION - Haversine distance from Kampala
+var KAMPALA = {lat: 0.3476, lng: 32.5825};
+var _gpsData = null;
+
+function haversine(lat1,lng1,lat2,lng2){
+  var R=6371;
+  var dLat=(lat2-lat1)*Math.PI/180;
+  var dLng=(lng2-lng1)*Math.PI/180;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+    Math.sin(dLng/2)*Math.sin(dLng/2);
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+
+function getGPSLocation(){
+  var statusEl=document.getElementById('vv-gps-status');
+  var errEl=document.getElementById('vv-gps-error');
+  statusEl.style.display='block';statusEl.textContent='Getting your location...';
+  errEl.style.display='none';
+  if(!navigator.geolocation){
+    errEl.style.display='block';errEl.textContent='GPS not available on this device. Please select your district manually.';
+    statusEl.style.display='none';return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      var lat=pos.coords.latitude;var lng=pos.coords.longitude;
+      var dist=haversine(KAMPALA.lat,KAMPALA.lng,lat,lng);
+      _gpsData={lat:lat,lng:lng,dist:dist};
+      // Find nearest zone
+      var zone=getZoneForDist(dist);
+      var prices=getVetPrices();
+      var zp=prices[zone]||{fee:200000};
+      var vtype=document.getElementById('vv-type').value;
+      var fee=vtype==='emergency'?Math.round(zp.fee*1.3):zp.fee;
+      statusEl.textContent='Location found! '+dist+'km from Kampala ('+lat.toFixed(4)+', '+lng.toFixed(4)+')';
+      document.getElementById('vv-zone-name').textContent=zone;
+      document.getElementById('vv-zone-dist').textContent='~'+dist+' km from Kampala (GPS calculated)';
+      document.getElementById('vv-zone-price').textContent=formatUGX2(fee);
+      document.getElementById('vv-price-box').style.display='block';
+      document.getElementById('vv-address').value='GPS: '+lat.toFixed(5)+', '+lng.toFixed(5);
+    },
+    function(err){
+      statusEl.style.display='none';
+      errEl.style.display='block';
+      errEl.textContent='Could not get GPS location. '+
+        (err.code===1?'Please allow location access and try again.':'Please select your district from the dropdown instead.');
+    },
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
+
+function getZoneForDist(dist){
+  if(dist<=20)return 'Zone 1 - City';
+  if(dist<=40)return 'Zone 1 - Near';
+  if(dist<=80)return 'Zone 2 - Short';
+  if(dist<=150)return 'Zone 3 - Mid';
+  if(dist<=200)return 'Zone 4 - Long';
+  if(dist<=350)return 'Zone 5 - Far';
+  return 'Zone 6 - Remote';
+}
+
+// AUTO-POPULATE FARM CARD FROM CLIENT PROFILE
+function autoFillFarmCard(){
+  var clientId=clientSession?clientSession.id:null;
+  if(!clientId)return;
+  var client=CLI.find(function(x){return x.id===clientId;});
+  if(!client)return;
+  var card=document.getElementById('vv-farm-card');
+  var body=document.getElementById('vv-farm-card-body');
+  if(!card||!body)return;
+  var gR=client.tagGroup?REC.filter(function(r){return r.parent.startsWith(client.tagGroup);}):[];
+  var alive=gR.filter(function(r){return r.status==='Alive';}).length;
+  var fields=[
+    ['Client',client.fullName],['Phone',client.phone1],
+    ['Group',client.tagGroup||'--'],['District',client.district||'--'],
+    ['Address',client.address||'--'],['Goats',client.goatCount+' registered, '+alive+' alive']
+  ];
+  body.innerHTML=fields.map(function(f){
+    return '<div style="background:rgba(255,255,255,.15);border-radius:var(--rs);padding:7px 9px">'+
+      '<div style="font-size:9px;opacity:.7;text-transform:uppercase">'+f[0]+'</div>'+
+      '<div style="font-size:12px;font-weight:700">'+f[1]+'</div></div>';
+  }).join('');
+  card.style.display='block';
+  // Auto-fill district if we have it
+  if(client.district){
+    var sel=document.getElementById('vv-district');
+    for(var i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===client.district){sel.selectedIndex=i;updateVetPrice();break;}
+    }
+  }
+  // Load goat tags
+  if(gR.length){
+    var tagBox=document.getElementById('vv-tags-box');
+    var tagList=document.getElementById('vv-tags-list');
+    if(tagBox&&tagList){
+      tagBox.style.display='block';
+      tagList.innerHTML=gR.map(function(r){
+        var stColor=r.status==='Alive'?'#064e3b':r.status==='Died'?'#7f1d1d':'#92400e';
+        var stBg=r.status==='Alive'?'#d1fae5':r.status==='Died'?'#fee2e2':'#fef3c7';
+        return '<label style="display:flex;align-items:center;gap:4px;cursor:pointer">'+
+          '<input type="checkbox" class="vv-tag-chk" data-tag="'+r.parent+'" checked/>'+
+          '<span style="background:'+stBg+';color:'+stColor+';padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700">'+
+          r.parent+(r.kid?' > '+r.kid:'')+'</span></label>';
+      }).join('');
+    }
+  }
+}
+
+function selectAllTags(val){
+  document.querySelectorAll('.vv-tag-chk').forEach(function(cb){cb.checked=val;});
+}
+
+// Override renderVetVisit to include auto-fill
+var _origRenderVetVisit=renderVetVisit;
+renderVetVisit=function(){
+  _origRenderVetVisit();
+  setTimeout(autoFillFarmCard,100);
+  // Check if URL has ?vetregister=true
+  if(window.location.search.indexOf('vetregister=true')>-1){
+    setTimeout(openVetSignup,400);
+  }
+  // Set signup link
+  var linkEl=document.getElementById('vet-signup-link');
+  if(linkEl)linkEl.textContent=window.location.href.split('?')[0]+'?vetregister=true';
+};
+
+// Get selected tags from checkboxes
+function getSelectedTags(){
+  var tags=[];
+  document.querySelectorAll('.vv-tag-chk:checked').forEach(function(cb){tags.push(cb.dataset.tag);});
+  return tags;
+}
+
+// Override submitVetVisit to include GPS data and selected tags
+var _origSubmitVetVisit=submitVetVisit;
+submitVetVisit=function(){
+  // Inject GPS and tags into the visit before original submit
+  window._vvGpsData=_gpsData;
+  window._vvTags=getSelectedTags();
+  _origSubmitVetVisit();
+};
+
+// Patch the visit object creation to include GPS + tags
+var _origSubmit=submitVetVisit;
+// Monkey-patch saveVisit fields
+var _vvOrigSubmit=window.submitVetVisit;
+window.submitVetVisit=function(){
+  var dist2=document.getElementById('vv-district').value;
+  var addr2=document.getElementById('vv-address').value.trim();
+  var date2=document.getElementById('vv-date').value;
+  var time2=document.getElementById('vv-time').value;
+  var type2=document.getElementById('vv-type').value;
+  var animals2=document.getElementById('vv-animals')?document.getElementById('vv-animals').value:'';
+  var notes2=document.getElementById('vv-notes').value.trim();
+  if(!dist2&&!_gpsData){tst('Share your GPS location or select your district.');return;}
+  if(!date2){tst('Select a preferred visit date.');return;}
+  var distName=dist2||((_gpsData?'GPS location':'')||'Unknown');
+  var d=UG_DISTRICTS.find(function(x){return x.name===dist2;});
+  var distKm=_gpsData?_gpsData.dist:(d?d.dist:100);
+  var zone2=_gpsData?getZoneForDist(_gpsData.dist):(d?d.zone:'Zone 3 - Mid');
+  var prices2=getVetPrices();
+  var zp2=prices2[zone2]||{fee:200000};
+  var fee2=type2==='emergency'?Math.round(zp2.fee*1.3):zp2.fee;
+  var clientId2=clientSession?clientSession.id:null;
+  var client2=clientId2?CLI.find(function(x){return x.id===clientId2;}):null;
+  var selectedTags=getSelectedTags();
+  var visit2={
+    id:vvid++,
+    ref:'VIS-'+String(vvid-1).padStart(4,'0'),
+    date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    preferredDate:new Date(date2).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    preferredTime:time2,
+    clientId:clientId2,
+    clientName:clientSession?clientSession.name:(isA?'Admin':'Unknown'),
+    tagGroup:client2?client2.tagGroup:'',
+    district:distName,
+    address:addr2||(_gpsData?'GPS: '+_gpsData.lat.toFixed(5)+', '+_gpsData.lng.toFixed(5):''),
+    gpsLat:_gpsData?_gpsData.lat:null,
+    gpsLng:_gpsData?_gpsData.lng:null,
+    distKm:distKm,zone:zone2,
+    visitType:type2,
+    animals:parseInt(animals2)||0,
+    selectedTags:selectedTags,
+    notes:notes2,fee:fee2,
+    status:'Requested',
+    assignedVetId:null,assignedVetName:'',scheduledDate:'',
+    comments:[],report:null,isRoutine:type2==='routine',drugOrders:[]
+  };
+  VET_VISITS.unshift(visit2);svVetVisit();
+  // Email admin
+  var sub2='New Vet Visit Request - '+visit2.ref+' - '+visit2.clientName;
+  var tagStr=selectedTags.length?('\n\nGoat tags for this visit:\n'+selectedTags.join(', ')):'';
+  var gpsStr=_gpsData?'\nGPS: '+_gpsData.lat.toFixed(5)+', '+_gpsData.lng.toFixed(5)+' ('+distKm+'km from Kampala)':'\nDistrict: '+distName+' (~'+distKm+'km)';
+  var body2='New vet visit request.\n\nRef: '+visit2.ref+'\nClient: '+visit2.clientName+'\nGroup: '+(visit2.tagGroup||'N/A')+gpsStr+'\nPreferred date: '+visit2.preferredDate+'\nType: '+type2+'\nFee estimate: '+formatUGX2(fee2)+tagStr+'\n\nNotes:\n'+(notes2||'None')+'\n\nMuvawala Goat Farms Portal';
+  window.open('mailto:muvawalafarmspropertiesug@gmail.com?subject='+encodeURIComponent(sub2)+'&body='+encodeURIComponent(body2));
+  _gpsData=null;
+  document.getElementById('vv-district').value='';
+  document.getElementById('vv-address').value='';
+  document.getElementById('vv-date').value='';
+  document.getElementById('vv-notes').value='';
+  document.getElementById('vv-price-box').style.display='none';
+  document.getElementById('vv-gps-status').style.display='none';
+  tst('Visit request submitted! Ref: '+visit2.ref,'ok');
+  renderRoutineStatus();
+  showVVView('myvisits',document.querySelector('.vv-tab:nth-child(2)'));
+};
+
+// VET SIGNUP STEPS
+function vsNext(step){
+  if(step===2){
+    var name=document.getElementById('vs-name').value.trim();
+    var phone=document.getElementById('vs-phone').value.trim();
+    var pw=document.getElementById('vs-pw').value;
+    if(!name||!phone){tst('Name and phone required.');return;}
+    if(pw.length<6){tst('Password must be at least 6 characters.');return;}
+  }
+  if(step===3){
+    var regno=document.getElementById('vs-regno').value.trim();
+    if(!regno){tst('Enter your Uganda Vet Board registration number.');return;}
+  }
+  if(step===4){
+    var allChecked=true;
+    for(var i=1;i<=7;i++){var cb=document.getElementById('vc'+i);if(cb&&!cb.checked){allChecked=false;break;}}
+    if(!allChecked){tst('Please confirm all vetting requirements.');return;}
+    // Build review summary
+    var rev=document.getElementById('vs-review-box');
+    if(rev){
+      rev.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px">APPLICATION SUMMARY</div>'+
+        [['Name',document.getElementById('vs-name').value],
+         ['Phone',document.getElementById('vs-phone').value],
+         ['Email',document.getElementById('vs-email').value],
+         ['Reg. No.',document.getElementById('vs-regno').value],
+         ['Speciality',document.getElementById('vs-spec').value],
+         ['Qualification',document.getElementById('vs-qual').value],
+         ['Institution',document.getElementById('vs-uni').value],
+         ['Experience',document.getElementById('vs-exp').value+' years'],
+         ['Location',document.getElementById('vs-loc').value],
+         ['Reference',document.getElementById('vs-ref').value]
+        ].map(function(f){return '<div class="ir"><span class="il">'+f[0]+'</span><span class="iv">'+(f[1]||'--')+'</span></div>';}).join('')+
+        '<div style="margin-top:8px;padding:6px;background:#d1fae5;border-radius:var(--rs);font-size:11px;color:#065f46">&#9989; All 7 vetting requirements confirmed</div>';
+    }
+  }
+  for(var s=1;s<=4;s++){
+    var el=document.getElementById('vs-step'+s);
+    var ind=document.getElementById('vs-step'+s+'-ind');
+    if(el)el.style.display=s===step?'block':'none';
+    if(ind){ind.style.background=s<step?'#1b6ca8':s===step?'#0f4c75':'var(--su2)';ind.style.color=s<=step?'#fff':'var(--tx2)';}
+  }
+}
+function vsBack(step){vsNext(step);}
+
+// Override submitVetSignup for multi-step data
+var _origVetSignup=submitVetSignup;
+submitVetSignup=function(){
+  var name=document.getElementById('vs-name').value.trim();
+  var phone=document.getElementById('vs-phone').value.trim();
+  var pw=document.getElementById('vs-pw').value;
+  if(!name||!phone||pw.length<6){tst('Please complete all required fields.');return;}
+  var vet={
+    id:vetidx++,name:name,phone:phone,
+    email:document.getElementById('vs-email').value.trim(),
+    natid:document.getElementById('vs-natid').value.trim(),
+    regno:document.getElementById('vs-regno').value.trim(),
+    speciality:document.getElementById('vs-spec').value,
+    qualification:document.getElementById('vs-qual').value,
+    university:document.getElementById('vs-uni').value.trim(),
+    gradYear:document.getElementById('vs-gradyr').value,
+    experience:document.getElementById('vs-exp').value||0,
+    location:document.getElementById('vs-loc').value.trim(),
+    bio:document.getElementById('vs-bio').value.trim(),
+    reference:document.getElementById('vs-ref').value.trim(),
+    password:pw,status:'Pending',
+    joinDate:new Date().toLocaleDateString('en-GB'),
+    vettingComplete:true
+  };
+  VET_VETS.push(vet);svVetVisit();
+  closeOv('ov-vetsignup');
+  tst('Application submitted! You will hear back within 48 hours.','ok');
+  window.open('mailto:muvawalafarmspropertiesug@gmail.com?subject=New Vet Application - '+name+'&body=New vet application from '+name+' ('+phone+').\n\nQualification: '+vet.qualification+'\nReg No: '+vet.regno+'\nSpeciality: '+vet.speciality+'\nExperience: '+vet.experience+' years\nReference: '+vet.reference+'\n\nReview and approve in portal: Order a Vet > Manage > Vets directory.');
+  renderVetDirectory();
+};
+
+// PRICE IMPORT
+function importVetPrices(){
+  var raw=document.getElementById('vv-price-import').value.trim();
+  if(!raw){tst('Paste a price list first.');return;}
+  var prices=getVetPrices();
+  var lines=raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>3;});
+  var updated=0;
+  lines.forEach(function(line){
+    var parts=line.split('|').map(function(p){return p.trim();});
+    if(parts.length<3)return;
+    var zone=parts[0];
+    var label=parts[1];
+    var fee=parseInt(parts[2].replace(/[^0-9]/g,''));
+    if(!fee||!zone)return;
+    prices[zone]={fee:fee,label:label||'varies'};updated++;
+  });
+  VET_PRICES=prices;svVetVisit();
+  document.getElementById('vv-price-import').value='';
+  tst(updated+' pricing zones updated!','ok');
+  renderVetAdmin2();
+}
+
+// SHAREABLE VET LINK
+function copyVetLink(){
+  var link=window.location.href.split('?')[0]+'?vetregister=true';
+  if(navigator.clipboard){navigator.clipboard.writeText(link).then(function(){tst('Link copied!','ok');});}
+  else{tst('Link: '+link);}
+}
+function shareVetLink(){
+  var link=window.location.href.split('?')[0]+'?vetregister=true';
+  var msg='Join the Muvawala Goat Farms Vet Network! Register as a certified vet and receive farm visit assignments. Apply here: '+link;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg));
+}
+
+// Enhance openVisitDetail to show selected tags
+var _origOpenVisitDetail=openVisitDetail;
+openVisitDetail=function(id){
+  _origOpenVisitDetail(id);
+  var v=VET_VISITS.find(function(x){return x.id===id;});
+  if(!v||!v.selectedTags||!v.selectedTags.length)return;
+  var body=document.getElementById('vd-body');
+  if(!body)return;
+  var tagHtml='<div style="background:#f0fdf4;border:1px solid #10b981;border-radius:var(--rs);padding:9px;margin-bottom:9px">'+
+    '<div style="font-size:10px;font-weight:700;color:#065f46;margin-bottom:6px">&#128016; GOATS FOR THIS VISIT</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
+    v.selectedTags.map(function(t){
+      var r=REC.find(function(x){return x.parent===t;});
+      return '<span style="background:#d1fae5;color:#064e3b;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700">'+
+        t+(r&&r.breed?' ('+r.breed+')':'')+(r&&r.status==='Died'?' &#10060;':'')+'</span>';
+    }).join('')+'</div></div>';
+  body.innerHTML=tagHtml+body.innerHTML;
+};
+
+// Check URL for vet registration link on page load
+window.addEventListener('load',function(){
+  if(window.location.search.indexOf('vetregister=true')>-1){
+    showP('vetvisit',document.getElementById('vetvisittab'));
+    setTimeout(openVetSignup,600);
+  }
+});
+</script>
+<script>
+// ══════════════════════════════════════════════════════════════════
+// 6 ENHANCEMENTS MODULE
+// ══════════════════════════════════════════════════════════════════
+
+var VET_RATINGS = JSON.parse(localStorage.getItem('vet_ratings') || '{}');
+var VET_AVAIL   = JSON.parse(localStorage.getItem('vet_avail')   || '{}');
+var _rateVisitId = null;
+var _rateStars   = 0;
+var _availMonth  = null;
+var _availVetId  = null;
+var _leafletMap  = null;
+var _rxVisitId   = null;
+
+function svEnhancements(){
+  localStorage.setItem('vet_ratings', JSON.stringify(VET_RATINGS));
+  localStorage.setItem('vet_avail',   JSON.stringify(VET_AVAIL));
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 1. STAR RATING  -- client rates vet after visit is Completed
+// ─────────────────────────────────────────────────────────────────
+var RATE_LABELS = ['','Poor','Below average','Good','Very good','Excellent!'];
+
+function openVisitRating(visitId){
+  var v = VET_VISITS.find(function(x){return x.id===visitId;});
+  if(!v)return;
+  _rateVisitId = visitId;
+  _rateStars   = v.rating || 0;
+  document.getElementById('rate-sub').textContent =
+    v.ref + ' - ' + (v.assignedVetName || 'Vet') + ' - ' + v.preferredDate;
+  document.getElementById('rate-comment').value = v.ratingComment || '';
+  renderRateStars();
+  document.getElementById('ov-vetrate').classList.add('sh');
+}
+
+function setVisitRating(n){
+  _rateStars = n;
+  renderRateStars();
+}
+
+function renderRateStars(){
+  var stars = document.getElementById('rate-stars').querySelectorAll('span');
+  stars.forEach(function(s,i){ s.className = i < _rateStars ? 'lit' : ''; });
+  document.getElementById('rate-label').textContent = RATE_LABELS[_rateStars] || 'Tap a star to rate';
+}
+
+function submitVisitRating(){
+  if(!_rateStars){tst('Please select a star rating.');return;}
+  var v = VET_VISITS.find(function(x){return x.id===_rateVisitId;});
+  if(!v)return;
+  v.rating = _rateStars;
+  v.ratingComment = document.getElementById('rate-comment').value.trim();
+  v.ratedBy = clientSession ? clientSession.name : 'Client';
+  v.ratedOn = new Date().toLocaleDateString('en-GB');
+  // Update vet aggregate rating
+  if(v.assignedVetId){
+    if(!VET_RATINGS[v.assignedVetId]) VET_RATINGS[v.assignedVetId] = [];
+    VET_RATINGS[v.assignedVetId].push({
+      stars:_rateStars, comment:v.ratingComment,
+      by:v.ratedBy, date:v.ratedOn, visitRef:v.ref
+    });
+  }
+  svVetVisit(); svEnhancements();
+  closeOv('ov-vetrate');
+  tst('Thank you for your rating!','ok');
+  renderMyVisits();
+}
+
+function getVetAvgRating(vetId){
+  var rats = VET_RATINGS[vetId] || [];
+  if(!rats.length) return null;
+  return (rats.reduce(function(a,r){return a+r.stars;},0)/rats.length).toFixed(1);
+}
+
+function renderStarBar(avg, total){
+  if(!avg) return '<span style="font-size:10px;color:var(--tx3)">Not yet rated</span>';
+  var full = Math.round(parseFloat(avg));
+  return '<span style="color:#f59e0b">' + '&#9733;'.repeat(full) + '&#9734;'.repeat(5-full) + '</span>' +
+    ' <span style="font-size:10px;color:var(--tx2)">' + avg + '/5 (' + total + ' ratings)</span>';
+}
+
+// Patch renderMyVisits to add rating button on completed visits
+var _origRenderMyVisits = renderMyVisits;
+renderMyVisits = function(){
+  _origRenderMyVisits();
+  var el = document.getElementById('vv-myvisits-out');
+  if(!el) return;
+  // Find completed unrated visits and add rate button
+  VET_VISITS.forEach(function(v){
+    if(v.status !== 'Completed') return;
+    var card = el.querySelector('[data-vid="' + v.id + '"]');
+    // Inject rating UI into card if it contains the visit ref
+    var html = el.innerHTML;
+    if(v.rating){
+      var ratingHtml = '<div style="margin-top:5px;font-size:11px">' + renderStarBar(v.rating, 1) +
+        (v.ratingComment ? ' <em style="color:var(--tx2)">\"' + v.ratingComment + '\"</em>' : '') + '</div>';
+      el.innerHTML = html.replace('View details</button>\n      </div>', 'View details</button></div>' + ratingHtml);
+    } else {
+      el.innerHTML = html.replace(
+        'View details</button>\n      </div>',
+        '<button class="btn btn-s" style="background:#f59e0b;border-color:#f59e0b;color:#fff" onclick="openVisitRating(' + v.id + ')">&#11088; Rate visit</button>' +
+        'View details</button></div>'
+      );
+    }
+  });
+};
+
+// ─────────────────────────────────────────────────────────────────
+// 2. VET AVAILABILITY CALENDAR
+// ─────────────────────────────────────────────────────────────────
+function openAvailability(vetId){
+  _availVetId = vetId || (vetSession ? vetSession.id : null);
+  if(!_availVetId){tst('Not logged in as vet.');return;}
+  var now = new Date();
+  _availMonth = {y: now.getFullYear(), m: now.getMonth()};
+  renderAvailCal();
+  document.getElementById('ov-vetavail').classList.add('sh');
+}
+
+function availNav(dir){
+  _availMonth.m += dir;
+  if(_availMonth.m > 11){_availMonth.m = 0; _availMonth.y++;}
+  if(_availMonth.m < 0){_availMonth.m = 11; _availMonth.y--;}
+  renderAvailCal();
+}
+
+function renderAvailCal(){
+  var y = _availMonth.y; var m = _availMonth.m;
+  var months = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+  document.getElementById('avail-month-label').textContent = months[m] + ' ' + y;
+  var avail = (VET_AVAIL[_availVetId] || {});
+  var grid = document.getElementById('avail-cal-grid');
+  var today = new Date(); today.setHours(0,0,0,0);
+  var firstDay = new Date(y, m, 1).getDay();
+  var daysInMonth = new Date(y, m+1, 0).getDate();
+  var html = '';
+  // Empty cells before first day
+  for(var i=0; i<firstDay; i++) html += '<div></div>';
+  for(var d=1; d<=daysInMonth; d++){
+    var dateKey = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var dt = new Date(y, m, d);
+    var isPast = dt < today;
+    var isToday = dt.toDateString() === today.toDateString();
+    var status = avail[dateKey] || 'none';
+    var cls = 'avail-day' + (isToday?' today':'') + (isPast?' past':'') +
+              (status==='avail'?' avail':'') + (status==='busy'?' busy':'');
+    var onclick = isPast ? '' : ' onclick="toggleAvailDay(\'' + dateKey + '\')"';
+    html += '<div class="' + cls + '" id="aday-' + dateKey + '"' + onclick + '>' + d + '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function toggleAvailDay(dateKey){
+  var avail = VET_AVAIL[_availVetId] || {};
+  var cur = avail[dateKey] || 'none';
+  avail[dateKey] = cur === 'none' ? 'avail' : cur === 'avail' ? 'busy' : 'none';
+  VET_AVAIL[_availVetId] = avail;
+  var el = document.getElementById('aday-' + dateKey);
+  if(el){
+    el.className = 'avail-day' + (avail[dateKey]==='avail'?' avail':avail[dateKey]==='busy'?' busy':'');
+  }
+}
+
+function saveAvailability(){
+  svEnhancements();
+  closeOv('ov-vetavail');
+  tst('Availability saved! Clients will see your available dates.','ok');
+}
+
+function getVetAvailability(vetId){
+  return VET_AVAIL[vetId] || {};
+}
+
+// Show availability hint on date picker
+function updateDatePickerHints(vetId){
+  // Called when vet is assigned to a visit so client sees their availability
+  var avail = getVetAvailability(vetId);
+  var dateInp = document.getElementById('vv-date');
+  if(!dateInp) return;
+  // We'll inject a note below the date picker
+  var noteId = 'vv-avail-note';
+  var existing = document.getElementById(noteId);
+  if(!existing){
+    existing = document.createElement('div');
+    existing.id = noteId;
+    existing.style.cssText = 'font-size:10px;color:#0f4c75;margin-top:3px';
+    dateInp.parentNode.appendChild(existing);
+  }
+  var today = new Date();
+  var nextAvail = null;
+  for(var i=0; i<60; i++){
+    var d = new Date(today); d.setDate(today.getDate()+i);
+    var key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(avail[key]==='avail'){nextAvail=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});break;}
+  }
+  existing.textContent = nextAvail ? 'Vet next available: ' + nextAvail : '';
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 3. WHATSAPP NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────
+function sendWhatsApp(phone, message){
+  var clean = phone.replace(/[^0-9+]/g,'');
+  if(clean.startsWith('0')) clean = '+256' + clean.slice(1);
+  window.open('https://wa.me/' + clean.replace('+','') + '?text=' + encodeURIComponent(message));
+}
+
+function notifyClientWhatsApp(visitId, eventType){
+  var v = VET_VISITS.find(function(x){return x.id===visitId;});
+  if(!v) return;
+  var client = v.clientId ? CLI.find(function(x){return x.id===v.clientId;}) : null;
+  var phone = client ? client.phone1 : null;
+  if(!phone){tst('No phone number for this client.');return;}
+  var msg = '';
+  if(eventType==='assigned'){
+    msg = 'Dear ' + v.clientName + ', your vet visit request (' + v.ref + ') has been assigned to ' +
+      v.assignedVetName + '. Preferred date: ' + v.preferredDate + '. Muvawala Goat Farms.';
+  } else if(eventType==='scheduled'){
+    msg = 'Dear ' + v.clientName + ', your vet visit (' + v.ref + ') is confirmed for ' +
+      (v.scheduledDate || v.preferredDate) + ' - ' + v.preferredTime + '. Vet: ' + v.assignedVetName +
+      '. Location: ' + v.address + '. Muvawala Goat Farms.';
+  } else if(eventType==='completed'){
+    msg = 'Dear ' + v.clientName + ', your vet visit (' + v.ref + ') has been completed. ' +
+      'Vet: ' + v.assignedVetName + '. Please rate your experience in the Muvawala app. Thank you!';
+  } else if(eventType==='reminder'){
+    msg = 'Reminder: Your vet visit (' + v.ref + ') is scheduled for tomorrow - ' +
+      (v.scheduledDate || v.preferredDate) + '. Vet: ' + v.assignedVetName + '. Muvawala Goat Farms.';
+  }
+  if(msg) sendWhatsApp(phone, msg);
+}
+
+function notifyVetWhatsApp(visitId){
+  var v = VET_VISITS.find(function(x){return x.id===visitId;});
+  if(!v||!v.assignedVetId) return;
+  var vet = VET_VETS.find(function(x){return x.id===v.assignedVetId;});
+  if(!vet||!vet.phone) return;
+  var client = v.clientId ? CLI.find(function(x){return x.id===v.clientId;}) : null;
+  var tagList = v.selectedTags && v.selectedTags.length ? v.selectedTags.join(', ') : 'N/A';
+  var msg = 'Hello ' + vet.name + ', you have a new farm visit assignment from Muvawala Goat Farms.\n\n' +
+    'Ref: ' + v.ref + '\nClient: ' + v.clientName + '\nFarm: ' + v.address + '\nDate: ' + v.preferredDate +
+    '\nType: ' + v.visitType + '\nAnimals: ' + tagList +
+    '\n\nPlease log in to the portal for full details. Muvawala Goat Farms.';
+  sendWhatsApp(vet.phone, msg);
+}
+
+// Patch updateVisitStatus to send WhatsApp on key status changes
+var _origUpdateVisitStatus = updateVisitStatus;
+updateVisitStatus = function(status){
+  _origUpdateVisitStatus(status);
+  var v = VET_VISITS.find(function(x){return x.id===currentVisitId;});
+  if(!v) return;
+  if(status==='Assigned'){
+    // Ask admin to notify
+    if(confirm('Notify client via WhatsApp?')) notifyClientWhatsApp(v.id,'assigned');
+    if(confirm('Notify vet via WhatsApp?')) notifyVetWhatsApp(v.id);
+  } else if(status==='Scheduled'){
+    if(confirm('Send confirmation WhatsApp to client?')) notifyClientWhatsApp(v.id,'scheduled');
+  } else if(status==='Completed'){
+    if(confirm('Send completion + rating request to client via WhatsApp?')) notifyClientWhatsApp(v.id,'completed');
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────
+// 4. PER-VET PERFORMANCE REPORTS
+// ─────────────────────────────────────────────────────────────────
+function renderVetPerformance(){
+  var el = document.getElementById('vv-perf-out');
+  if(!el) return;
+  var activeVets = VET_VETS.filter(function(v){return v.status==='Active';});
+  if(!activeVets.length){
+    el.innerHTML = '<p style="font-size:12px;color:var(--tx3)">No active vets yet.</p>';
+    return;
+  }
+  el.innerHTML = activeVets.map(function(vet){
+    var myVisits  = VET_VISITS.filter(function(v){return v.assignedVetId===vet.id;});
+    var completed = myVisits.filter(function(v){return v.status==='Completed';});
+    var pending   = myVisits.filter(function(v){return v.status==='Assigned'||v.status==='Scheduled';});
+    var revenue   = completed.reduce(function(a,v){return a+v.fee;},0);
+    var rats      = VET_RATINGS[vet.id]||[];
+    var avgRating = rats.length ? (rats.reduce(function(a,r){return a+r.stars;},0)/rats.length).toFixed(1) : null;
+    var districts = [];
+    myVisits.forEach(function(v){if(v.district&&districts.indexOf(v.district)===-1)districts.push(v.district);});
+    var farms = [];
+    myVisits.forEach(function(v){if(v.clientId&&farms.indexOf(v.clientId)===-1)farms.push(v.clientId);});
+    return '<div class="perf-card">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+        '<div class="vet-avatar">' + vet.name.charAt(0).toUpperCase() + '</div>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:13px;font-weight:700">' + vet.name + '</div>' +
+          '<div style="font-size:11px;color:var(--tx2)">' + vet.speciality + ' - ' + vet.location + '</div>' +
+          '<div style="margin-top:3px">' + renderStarBar(avgRating, rats.length) + '</div>' +
+        '</div>' +
+        '<button class="wa-btn" onclick="notifyVetWhatsAppDirect(' + vet.id + ')">&#128232;</button>' +
+        '<button class="btn btn-s" onclick="openAvailability(' + vet.id + ')">&#128197; Availability</button>' +
+      '</div>' +
+      '<div class="perf-grid">' +
+        '<div class="perf-item"><div class="perf-val">' + myVisits.length + '</div><div class="perf-lbl">Assigned</div></div>' +
+        '<div class="perf-item"><div class="perf-val">' + completed.length + '</div><div class="perf-lbl">Completed</div></div>' +
+        '<div class="perf-item"><div class="perf-val">' + pending.length + '</div><div class="perf-lbl">Pending</div></div>' +
+        '<div class="perf-item"><div class="perf-val">' + farms.length + '</div><div class="perf-lbl">Farms</div></div>' +
+        '<div class="perf-item"><div class="perf-val">' + districts.length + '</div><div class="perf-lbl">Districts</div></div>' +
+        '<div class="perf-item"><div class="perf-val" style="font-size:13px">' + formatUGX2(revenue) + '</div><div class="perf-lbl">Revenue</div></div>' +
+      '</div>' +
+      (rats.length ? '<div style="margin-top:8px;border-top:1px solid var(--bo);padding-top:7px">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:5px">RECENT REVIEWS</div>' +
+        rats.slice(-3).reverse().map(function(r){
+          return '<div class="comm-item"><div class="comm-meta">' + r.by + ' - ' + r.date + ' - ' + r.visitRef + '</div>' +
+            '<div style="color:#f59e0b">' + '&#9733;'.repeat(r.stars) + '&#9734;'.repeat(5-r.stars) + '</div>' +
+            (r.comment ? '<div style="font-size:11px">' + r.comment + '</div>' : '') + '</div>';
+        }).join('') + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function notifyVetWhatsAppDirect(vetId){
+  var vet = VET_VETS.find(function(x){return x.id===vetId;});
+  if(!vet||!vet.phone){tst('No phone number for this vet.');return;}
+  var pending = VET_VISITS.filter(function(v){return v.assignedVetId===vetId&&(v.status==='Assigned'||v.status==='Scheduled');});
+  var msg = 'Hello ' + vet.name + ', this is Muvawala Goat Farms. ' +
+    (pending.length ? 'You have ' + pending.length + ' upcoming visit(s) assigned to you. Please log into the portal for details.' : 'Please log in to your vet dashboard to check your assignments.') +
+    ' App: ' + window.location.href.split('?')[0];
+  sendWhatsApp(vet.phone, msg);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 5. PRESCRIPTION PDF
+// ─────────────────────────────────────────────────────────────────
+function openPrescription(visitId){
+  _rxVisitId = visitId;
+  var v = VET_VISITS.find(function(x){return x.id===visitId;});
+  if(!v||!v.report){tst('No vet report for this visit yet.');return;}
+  var vet = v.assignedVetId ? VET_VETS.find(function(x){return x.id===v.assignedVetId;}) : null;
+  var client = v.clientId ? CLI.find(function(x){return x.id===v.clientId;}) : null;
+  document.getElementById('rx-sub').textContent = v.ref + ' - ' + v.clientName + ' - ' + v.report.date;
+  var html = '<div style="font-family:serif">' +
+    '<div style="text-align:center;border-bottom:2px solid #0f4c75;padding-bottom:10px;margin-bottom:12px">' +
+      '<div style="font-size:18px;font-weight:700;color:#0f4c75">VETERINARY PRESCRIPTION</div>' +
+      '<div style="font-size:12px;color:var(--tx2)">Muvawala Goat Farms & Properties</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px">' +
+      '<div><strong>Visit ref:</strong> ' + v.ref + '</div>' +
+      '<div><strong>Date:</strong> ' + v.report.date + '</div>' +
+      '<div><strong>Prescribing vet:</strong> ' + (vet?vet.name:'--') + '</div>' +
+      '<div><strong>Vet reg no.:</strong> ' + (vet?vet.regno:'--') + '</div>' +
+      '<div><strong>Client:</strong> ' + v.clientName + '</div>' +
+      '<div><strong>Farm group:</strong> ' + (v.tagGroup||'--') + '</div>' +
+    '</div>' +
+    '<div style="font-size:11px;background:#f0f9ff;padding:8px;border-radius:5px;margin-bottom:10px">' +
+      '<strong>General observations:</strong> ' + (v.report.general||'--') + '</div>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:11px">' +
+      '<thead><tr>' +
+      ['Tag','Status','Condition','Treatment prescribed','Drugs & dosage','Follow-up'].map(function(h){
+        return '<th style="background:#0f4c75;color:#fff;padding:4px 6px;text-align:left">' + h + '</th>';
+      }).join('') + '</tr></thead><tbody>' +
+    (v.report.animals||[]).map(function(a, i){
+      return '<tr style="background:' + (i%2?'#f8fafc':'#fff') + ';border-bottom:1px solid #e2e8f0">' +
+        '<td style="padding:4px 6px;font-weight:700">' + a.tag + '</td>' +
+        '<td style="padding:4px 6px">' + a.status + '</td>' +
+        '<td style="padding:4px 6px">' + a.condition + '</td>' +
+        '<td style="padding:4px 6px">' + a.treatment + '</td>' +
+        '<td style="padding:4px 6px;color:#0f4c75;font-weight:600">' + a.drugs + '</td>' +
+        '<td style="padding:4px 6px">' + (a.notes||'--') + '</td></tr>';
+    }).join('') + '</tbody></table>' +
+    '<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:20px">' +
+      '<div style="border-top:1px solid #000;padding-top:4px;font-size:10px">Prescribing Vet Signature</div>' +
+      '<div style="border-top:1px solid #000;padding-top:4px;font-size:10px">Client Signature & Date</div>' +
+    '</div>' +
+    '<div style="margin-top:12px;text-align:center;font-size:9px;color:var(--tx3)">Muvawala Goat Farms & Properties - muvawalafarmspropertiesug@gmail.com - +256 709 066 457</div>' +
+  '</div>';
+  document.getElementById('rx-body').innerHTML = html;
+  document.getElementById('ov-rxpdf').classList.add('sh');
+}
+
+function downloadRxPDF(){
+  var v = VET_VISITS.find(function(x){return x.id===_rxVisitId;});
+  if(!v||!v.report) return;
+  var vet = v.assignedVetId ? VET_VETS.find(function(x){return x.id===v.assignedVetId;}) : null;
+  var content = document.getElementById('rx-body').innerHTML;
+  var fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rx - ' + v.ref + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;padding:20px;max-width:800px;margin:0 auto}' +
+    'table{width:100%;border-collapse:collapse}' +
+    'th{background:#0f4c75;color:#fff;padding:5px 8px;text-align:left}' +
+    'td{padding:4px 8px;border-bottom:1px solid #e2e8f0}' +
+    '@media print{body{padding:10px}}</style></head><body>' + content + '</body></html>';
+  var blob = new Blob([fullHtml], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'prescription-' + v.ref + '.html'; a.click();
+  URL.revokeObjectURL(url);
+  tst('Prescription downloaded','ok');
+}
+
+function shareRxWhatsApp(){
+  var v = VET_VISITS.find(function(x){return x.id===_rxVisitId;});
+  if(!v||!v.report) return;
+  var client = v.clientId ? CLI.find(function(x){return x.id===v.clientId;}) : null;
+  var phone = client ? client.phone1 : null;
+  if(!phone){tst('No client phone number.');return;}
+  var drugList = (v.report.animals||[]).filter(function(a){return a.drugs;}).map(function(a){return a.tag+': '+a.drugs;}).join('\n');
+  var msg = 'MUVAWALA VET PRESCRIPTION\nRef: ' + v.ref + '\nDate: ' + v.report.date + '\n\nDRUGS PRESCRIBED:\n' +
+    (drugList||'None') + '\n\nGeneral: ' + (v.report.general||'--') +
+    '\n\nThese drugs are available in your Vet Shop in the Muvawala app.';
+  sendWhatsApp(phone, msg);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 6. FARM LOCATIONS MAP (Leaflet + OpenStreetMap)
+// ─────────────────────────────────────────────────────────────────
+// Uganda district approximate coordinates
+var DISTRICT_COORDS = {
+  'Kampala':{lat:0.3476,lng:32.5825},'Wakiso':{lat:0.3833,lng:32.4833},
+  'Mukono':{lat:0.3529,lng:32.7554},'Nakasongola':{lat:1.3283,lng:32.4594},
+  'Luwero':{lat:0.8486,lng:32.4806},'Jinja':{lat:0.4244,lng:33.2041},
+  'Masaka':{lat:-0.3333,lng:31.7333},'Mbarara':{lat:-0.6067,lng:30.6564},
+  'Gulu':{lat:2.7809,lng:32.2897},'Hoima':{lat:1.4333,lng:31.3500},
+  'Mubende':{lat:0.5767,lng:31.3752},'Fort Portal':{lat:0.6667,lng:30.2750},
+  'Kabale':{lat:-1.2467,lng:29.9889},'Kasese':{lat:0.1833,lng:30.0833},
+  'Soroti':{lat:1.7153,lng:33.6108},'Mbale':{lat:1.0806,lng:34.1750},
+  'Arua':{lat:3.0189,lng:30.9108},'Mityana':{lat:0.4167,lng:32.0333},
+  'Mpigi':{lat:0.2275,lng:32.3117},'Kayunga':{lat:0.7000,lng:32.8833}
+};
+
+function initFarmMap(){
+  var mapEl = document.getElementById('vv-map');
+  if(!mapEl) return;
+  if(_leafletMap){ _leafletMap.remove(); _leafletMap=null; }
+  _leafletMap = L.map('vv-map').setView([1.3733, 32.2903], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'Map data OpenStreetMap contributors', maxZoom:18
+  }).addTo(_leafletMap);
+
+  // Kampala star marker
+  L.marker([0.3476,32.5825], {
+    icon: L.divIcon({html:'<div style="background:#0f4c75;color:#fff;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap">Kampala HQ</div>',className:''})
+  }).addTo(_leafletMap);
+
+  // Client farms
+  CLI.forEach(function(client){
+    var lat=null, lng=null;
+    // Check for GPS coordinates from visit requests
+    var gpsVisit = VET_VISITS.find(function(v){return v.clientId===client.id && v.gpsLat;});
+    if(gpsVisit){
+      lat=gpsVisit.gpsLat; lng=gpsVisit.gpsLng;
+    } else if(client.district && DISTRICT_COORDS[client.district]){
+      var coord = DISTRICT_COORDS[client.district];
+      lat = coord.lat + (Math.random()-0.5)*0.08;
+      lng = coord.lng + (Math.random()-0.5)*0.08;
+    }
+    if(!lat) return;
+    var cmp = compSt(client.id);
+    var hasVisit = VET_VISITS.some(function(v){return v.clientId===client.id&&v.status!=='Cancelled';});
+    var color = cmp!=='compliant' ? '#ef4444' : hasVisit ? '#f59e0b' : '#10b981';
+    var circle = L.circleMarker([lat,lng], {
+      radius:8, fillColor:color, color:'#fff', weight:2,
+      opacity:1, fillOpacity:0.85
+    });
+    var gR = client.tagGroup ? REC.filter(function(r){return r.parent.startsWith(client.tagGroup);}) : [];
+    var alive = gR.filter(function(r){return r.status==='Alive';}).length;
+    circle.bindPopup(
+      '<strong>' + client.fullName + '</strong><br>' +
+      'Group: ' + (client.tagGroup||'--') + '<br>' +
+      'Goats: ' + (client.goatCount||0) + ' (' + alive + ' alive)<br>' +
+      'District: ' + (client.district||'--') + '<br>' +
+      'Compliance: ' + (cmp==='compliant'?'<span style="color:green">Compliant</span>':'<span style="color:red">Non-compliant</span>') +
+      (hasVisit?'<br><span style="color:#f59e0b">Vet visit requested</span>':'') +
+      '<br><button onclick="viewCli('+client.id+');closeOv(\'ov-map\');" style="margin-top:5px;padding:3px 8px;background:#0f4c75;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">View client</button>'
+    );
+    circle.addTo(_leafletMap);
+  });
+}
+
+// Patch renderVetAdmin2 to include perf + map
+var _origRenderVetAdmin2 = renderVetAdmin2;
+renderVetAdmin2 = function(){
+  _origRenderVetAdmin2();
+  renderVetPerformance();
+  setTimeout(initFarmMap, 200);
+  // Set signup link
+  var linkEl = document.getElementById('vet-signup-link');
+  if(linkEl) linkEl.textContent = window.location.href.split('?')[0] + '?vetregister=true';
+};
+
+// Patch openVisitDetail to add prescription + WhatsApp buttons
+var _origOpenVisitDetail2 = openVisitDetail;
+openVisitDetail = function(id){
+  _origOpenVisitDetail2(id);
+  var v = VET_VISITS.find(function(x){return x.id===id;});
+  if(!v) return;
+  var adminActions = document.getElementById('vd-admin-actions');
+  if(adminActions && isA && v.report){
+    var rxBtn = '<button class="rx-pdf-btn" onclick="openPrescription('+id+')" style="margin-top:6px">&#128138; Generate prescription PDF</button>';
+    adminActions.innerHTML += rxBtn;
+  }
+  // Show WhatsApp notify buttons
+  if(adminActions && isA && v.assignedVetId){
+    var waDiv = '<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button class="wa-btn" onclick="notifyClientWhatsApp('+id+',\'reminder\')">&#128232; Remind client</button>' +
+      '<button class="wa-btn" onclick="notifyVetWhatsApp('+id+')">&#128232; Message vet</button></div>';
+    adminActions.innerHTML += waDiv;
+  }
+};
+
+// Patch renderVetDash to show availability button and prescription
+var _origRenderVetDash = renderVetDash;
+renderVetDash = function(){
+  _origRenderVetDash();
+  var el = document.getElementById('vv-vetdash-out');
+  if(!el || !vetSession) return;
+  var myRats = VET_RATINGS[vetSession.id] || [];
+  var avg = myRats.length ? (myRats.reduce(function(a,r){return a+r.stars;},0)/myRats.length).toFixed(1) : null;
+  var ratingHtml = '<div class="fs"><h3>&#11088; My ratings</h3>' +
+    renderStarBar(avg, myRats.length) +
+    (myRats.length ? '<div style="margin-top:8px">' +
+      myRats.slice(-5).reverse().map(function(r){
+        return '<div class="comm-item"><div class="comm-meta">' + r.by + ' - ' + r.date + '</div>' +
+          '<div style="color:#f59e0b">' + '&#9733;'.repeat(r.stars) + '&#9734;'.repeat(5-r.stars) + '</div>' +
+          (r.comment?'<div style="font-size:12px">'+r.comment+'</div>':'')+'</div>';
+      }).join('') + '</div>' : '<p style="font-size:11px;color:var(--tx3);margin-top:6px">No ratings yet.</p>') +
+    '</div>';
+  var availBtn = '<div class="fs"><h3>&#128197; My availability</h3><p style="font-size:11px;color:var(--tx2);margin-bottom:8px">Set which days you are available for farm visits.</p>' +
+    '<button class="btn btn-p" style="background:#0f4c75;border-color:#0f4c75" onclick="openAvailability()">&#128197; Manage my availability calendar</button></div>';
+  el.innerHTML = el.innerHTML + ratingHtml + availBtn;
+};
+
+</script>
+<script>
+// ══════════════════════════════════════════════════════════════════
+// PLATFORM SaaS MODULE - FarmTrack Africa
+// ══════════════════════════════════════════════════════════════════
+
+// Subscription tiers with monthly fees (UGX)
+var TIERS = {
+  Trial:        {fee:0,       currency:'UGX', color:'#f59e0b', goatLimit:10},
+  Basic:        {fee:50000,   currency:'UGX', color:'#64748b', goatLimit:50},
+  Professional: {fee:150000,  currency:'UGX', color:'#0d6efd', goatLimit:999},
+  Enterprise:   {fee:400000,  currency:'UGX', color:'#6d28d9', goatLimit:9999}
+};
+
+// Countries/regions
+var REGIONS = ['Uganda','Kenya','Tanzania','Rwanda','Ethiopia','South Sudan','Other'];
+
+function svPlatform(){
+  localStorage.setItem('igi_cl', JSON.stringify(CLI));
+}
+
+// Ensure every farm has platform fields
+function ensureFarmFields(client){
+  if(!client.country)    client.country    = 'Uganda';
+  if(!client.region)     client.region     = client.district || 'Central';
+  if(!client.tier)       client.tier       = 'Trial';
+  if(!client.subStart)   client.subStart   = client.contractDate || new Date().toISOString().split('T')[0];
+  if(!client.farmStatus) client.farmStatus = 'Active';
+  return client;
+}
+
+function tierBadge(tier){
+  var cls = tier==='Trial'?'tier-trial':tier==='Basic'?'tier-basic':tier==='Professional'?'tier-pro':'tier-ent';
+  return '<span class="tier-badge ' + cls + '">' + (tier||'Trial') + '</span>';
+}
+
+function platformMonthlyRevenue(){
+  return CLI.reduce(function(a,c){
+    var t = TIERS[c.tier]||TIERS.Trial;
+    return a + t.fee;
+  },0);
+}
+
+// ── PLATFORM DASHBOARD ───────────────────────────────────────────────
+function renderPlatform(){
+  CLI.forEach(ensureFarmFields);
+  var totalFarms  = CLI.length;
+  var activeFarms = CLI.filter(function(c){return c.farmStatus!=='Inactive';}).length;
+  var totalGoats  = CLI.reduce(function(a,c){return a+(parseInt(c.goatCount)||0);},0);
+  var totalTagged = REC.length;
+  var alive       = REC.filter(function(r){return r.status==='Alive';}).length;
+  var totalVets   = VET_VETS ? VET_VETS.filter(function(v){return v.status==='Active';}).length : 0;
+  var totalVisits = VET_VISITS ? VET_VISITS.length : 0;
+  var revenue     = platformMonthlyRevenue();
+  var vetRevenue  = VET_ORDERS ? VET_ORDERS.reduce(function(a,o){return a+(o.total||0);},0) :
+                   (typeof VORDERS!=='undefined'?VORDERS.reduce(function(a,o){return a+(o.total||0);},0):0);
+
+  // Update hero count
+  var fc = document.getElementById('plat-farm-count');
+  if(fc) fc.textContent = activeFarms;
+
+  // KPIs
+  var kpiEl = document.getElementById('plat-kpis');
+  if(kpiEl){
+    var kpis = [
+      {v:totalFarms,    l:'Total farms',     c:'var(--pb)'},
+      {v:totalGoats,    l:'Goats registered',c:'var(--pg)'},
+      {v:totalTagged,   l:'Tagged animals',  c:'var(--pt)'},
+      {v:alive,         l:'Alive',           c:'#10b981'},
+      {v:totalVets,     l:'Active vets',     c:'var(--po)'},
+      {v:totalVisits,   l:'Vet visits',      c:'var(--pp)'},
+      {v:'UGX '+Number(revenue).toLocaleString(),   l:'Monthly sub rev', c:'var(--pb)'},
+      {v:'UGX '+Number(vetRevenue).toLocaleString(), l:'Vet shop revenue',c:'var(--pg)'}
+    ];
+    kpiEl.innerHTML = kpis.map(function(k){
+      return '<div class="kpi2" style="border-top-color:'+k.c+'"><div class="kpi2-v" style="color:'+k.c+'">'+k.v+'</div><div class="kpi2-l">'+k.l+'</div></div>';
+    }).join('');
+  }
+
+  // Subscriptions table
+  var subsEl = document.getElementById('plat-subs');
+  if(subsEl){
+    if(!CLI.length){subsEl.innerHTML='<p class="emp">No farms registered yet.</p>';}
+    else{
+      subsEl.innerHTML='<table style="width:100%;font-size:11px;border-collapse:collapse">'+
+        '<thead><tr>'+
+        ['Farm / Owner','Country','Tag group','Goats','Tier','Monthly fee','Status'].map(function(h){
+          return '<th style="background:var(--pb);color:#fff;padding:5px 8px;text-align:left">'+h+'</th>';
+        }).join('')+'</tr></thead><tbody>'+
+        CLI.map(function(client){
+          var t=TIERS[client.tier]||TIERS.Trial;
+          var gR=client.tagGroup?REC.filter(function(r){return r.parent.startsWith(client.tagGroup);}):[];
+          var alive2=gR.filter(function(r){return r.status==='Alive';}).length;
+          return '<tr style="border-bottom:1px solid var(--bo);cursor:pointer" onclick="viewCli('+client.id+');showP(\'cli\',document.getElementById(\'clitab\'))">' +
+            '<td style="padding:5px 8px"><strong>'+client.fullName+'</strong><div style="font-size:9px;color:var(--tx3)">'+client.phone1+'</div></td>'+
+            '<td style="padding:5px 8px">'+regionFlag(client.country)+' '+(client.country||'Uganda')+'</td>'+
+            '<td style="padding:5px 8px;font-weight:700;color:var(--br)">'+(client.tagGroup||'--')+'</td>'+
+            '<td style="padding:5px 8px">'+(client.goatCount||0)+' <span style="color:var(--gn);font-size:10px">('+alive2+' alive)</span></td>'+
+            '<td style="padding:5px 8px">'+tierBadge(client.tier)+'</td>'+
+            '<td style="padding:5px 8px;font-weight:700">'+(t.fee?'UGX '+t.fee.toLocaleString():'Free trial')+'</td>'+
+            '<td style="padding:5px 8px"><span style="color:'+(client.farmStatus==='Active'?'var(--gn)':'var(--rd)')+'">'+client.farmStatus+'</span></td>'+
+            '</tr>';
+        }).join('')+'</tbody></table>';
+    }
+  }
+
+  // Regional distribution
+  var regEl = document.getElementById('plat-regions');
+  if(regEl){
+    var byRegion={};
+    CLI.forEach(function(c2){var r=c2.country||'Uganda';if(!byRegion[r])byRegion[r]=0;byRegion[r]++;});
+    regEl.innerHTML=Object.keys(byRegion).map(function(r){
+      var cnt=byRegion[r];var pct=Math.round(cnt/Math.max(CLI.length,1)*100);
+      return '<div class="reg-row"><span>'+regionFlag(r)+' '+r+'</span>'+
+        '<div style="flex:1;margin:0 10px;background:var(--bo);border-radius:10px;height:8px">'+
+        '<div style="width:'+pct+'%;background:var(--pb);height:8px;border-radius:10px"></div></div>'+
+        '<span style="font-weight:700">'+cnt+' farm'+(cnt!==1?'s':'')+'</span></div>';
+    }).join('') || '<p class="emp">No farms yet.</p>';
+  }
+}
+
+function regionFlag(country){
+  var flags={'Uganda':'&#127822;','Kenya':'&#127823;','Tanzania':'&#127831;','Rwanda':'&#127824;',
+             'Ethiopia':'&#127825;','South Sudan':'&#127826;','Other':'&#127758;'};
+  return flags[country]||'&#127758;';
+}
+
+// ── ALL FARMS VIEW ────────────────────────────────────────────────────
+function renderAllFarms(){
+  CLI.forEach(ensureFarmFields);
+  var q  = (document.getElementById('farms-q')||{value:''}).value.toLowerCase();
+  var rg = (document.getElementById('farms-region')||{value:''}).value;
+  var tr = (document.getElementById('farms-tier')||{value:''}).value;
+  var list = CLI.filter(function(c){
+    if(q&&!(c.fullName+c.tagGroup+c.country+c.district).toLowerCase().includes(q)) return false;
+    if(rg&&c.country!==rg) return false;
+    if(tr&&c.tier!==tr) return false;
+    return true;
+  });
+  var el = document.getElementById('farms-out');
+  if(!el) return;
+  if(!list.length){el.innerHTML='<div class="emp">No farms match the filter.</div>';return;}
+  el.innerHTML = list.map(function(client){
+    var gR=client.tagGroup?REC.filter(function(r){return r.parent.startsWith(client.tagGroup);}):[];
+    var alive=gR.filter(function(r){return r.status==='Alive';}).length;
+    var died=gR.filter(function(r){return r.status==='Died';}).length;
+    var visits=VET_VISITS?VET_VISITS.filter(function(v){return v.clientId===client.id;}).length:0;
+    var vetOrds=typeof VORDERS!=='undefined'?VORDERS.filter(function(o){return o.clientId===client.id||o.clientName===client.fullName;}).length:0;
+    var cmp=compSt(client.id);
+    var lastActivity=gR.length?gR.slice(-1)[0].date||'--':'--';
+    return '<div class="farm2'+(client.farmStatus==='Inactive'?' inactive':'')+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:7px">'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:700">'+regionFlag(client.country)+' '+client.fullName+'</div>'+
+          '<div style="font-size:11px;color:var(--tx2);margin-top:2px">'+
+            (client.tagGroup?'<span style="font-weight:700;color:var(--br)">Group '+client.tagGroup+'</span> &bull; ':'')+
+            (client.country||'Uganda')+', '+(client.district||'--')+' &bull; '+client.phone1+
+          '</div>'+
+          '<div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap">'+
+            tierBadge(client.tier||'Trial')+
+            '<span style="background:'+(cmp==='compliant'?'#d1fae5':'#fee2e2')+';color:'+(cmp==='compliant'?'#065f46':'#7f1d1d')+';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">'+(cmp==='compliant'?'Compliant':'Non-compliant')+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;min-width:220px">'+
+          '<div style="text-align:center;background:var(--su2);border-radius:var(--rs);padding:6px">'+
+            '<div style="font-size:16px;font-weight:700;color:var(--pb)">'+(client.goatCount||gR.length||0)+'</div>'+
+            '<div style="font-size:9px;color:var(--tx3)">Goats</div></div>'+
+          '<div style="text-align:center;background:var(--gl);border-radius:var(--rs);padding:6px">'+
+            '<div style="font-size:16px;font-weight:700;color:var(--gn)">'+alive+'</div>'+
+            '<div style="font-size:9px;color:var(--tx3)">Alive</div></div>'+
+          '<div style="text-align:center;background:'+(visits?'#eff6ff':'var(--su2)')+';border-radius:var(--rs);padding:6px">'+
+            '<div style="font-size:16px;font-weight:700;color:var(--pt)">'+visits+'</div>'+
+            '<div style="font-size:9px;color:var(--tx3)">Vet visits</div></div>'+
+          '<div style="text-align:center;background:'+(vetOrds?'#f5f3ff':'var(--su2)')+';border-radius:var(--rs);padding:6px">'+
+            '<div style="font-size:16px;font-weight:700;color:var(--pp)">'+vetOrds+'</div>'+
+            '<div style="font-size:9px;color:var(--tx3)">Shop orders</div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bo);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'+
+        '<div style="font-size:10px;color:var(--tx3)">Last activity: '+lastActivity+' &bull; Contract: '+(client.contractDate||'--')+'</div>'+
+        '<div style="display:flex;gap:5px">'+
+          (isA?'<select onchange="updateFarmTier('+client.id+',this.value)" style="font-size:11px;padding:4px;border-radius:var(--rs);border:1px solid var(--bo2)">'+
+            ['Trial','Basic','Professional','Enterprise'].map(function(t){return '<option'+(client.tier===t?' selected':'')+'>'+t+'</option>';}).join('')+
+          '</select>':'')+
+          (isA?'<select onchange="updateFarmCountry('+client.id+',this.value)" style="font-size:11px;padding:4px;border-radius:var(--rs);border:1px solid var(--bo2)">'+
+            REGIONS.map(function(r){return '<option'+(client.country===r?' selected':'')+'>'+r+'</option>';}).join('')+
+          '</select>':'')+
+          '<button class="btn btn-s btn-p" onclick="viewCli('+client.id+');showP(\'cli\',document.getElementById(\'clitab\'))">View farm</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function updateFarmTier(id,tier){
+  var c=CLI.find(function(x){return x.id===id;});if(!c)return;
+  c.tier=tier;sv();renderAllFarms();tst('Tier updated to '+tier,'ok');
+}
+function updateFarmCountry(id,country){
+  var c=CLI.find(function(x){return x.id===id;});if(!c)return;
+  c.country=country;sv();renderAllFarms();tst('Country updated','ok');
+}
+
+// ── ANALYTICS ─────────────────────────────────────────────────────────
+var _analyticsCharts = {};
+function renderAnalytics(){
+  CLI.forEach(ensureFarmFields);
+
+  function destroyChart(id){
+    if(_analyticsCharts[id]){_analyticsCharts[id].destroy();delete _analyticsCharts[id];}
+  }
+
+  // Chart: Farms by region
+  var byRegion={};
+  CLI.forEach(function(c){var r=c.country||'Uganda';if(!byRegion[r])byRegion[r]=0;byRegion[r]++;});
+  destroyChart('aC-region');
+  var ctx1=document.getElementById('aC-region');
+  if(ctx1&&typeof Chart!=='undefined'){
+    _analyticsCharts['aC-region']=new Chart(ctx1,{type:'doughnut',data:{
+      labels:Object.keys(byRegion),
+      datasets:[{data:Object.values(byRegion),backgroundColor:['#0a2540','#0d6efd','#00b894','#e17055','#6c5ce7','#f59e0b','#74b9ff']}]
+    },options:{plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+  }
+
+  // Chart: Breed distribution
+  var byBreed={};
+  REC.forEach(function(r){var b=r.breed||'Unknown';if(!byBreed[b])byBreed[b]=0;byBreed[b]++;});
+  destroyChart('aC-breed');
+  var ctx2=document.getElementById('aC-breed');
+  if(ctx2&&typeof Chart!=='undefined'){
+    _analyticsCharts['aC-breed']=new Chart(ctx2,{type:'bar',data:{
+      labels:Object.keys(byBreed),
+      datasets:[{data:Object.values(byBreed),backgroundColor:['#0a2540','#0d6efd','#00b894','#e17055'],borderRadius:4}]
+    },options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
+  }
+
+  // Chart: Revenue by tier
+  var tierRev={Trial:0,Basic:0,Professional:0,Enterprise:0};
+  CLI.forEach(function(c){if(tierRev[c.tier]!==undefined)tierRev[c.tier]+=(TIERS[c.tier]||{fee:0}).fee;});
+  destroyChart('aC-revenue');
+  var ctx3=document.getElementById('aC-revenue');
+  if(ctx3&&typeof Chart!=='undefined'){
+    _analyticsCharts['aC-revenue']=new Chart(ctx3,{type:'bar',data:{
+      labels:Object.keys(tierRev).map(function(t){return t+' (UGX '+Number(tierRev[t]/1000).toFixed(0)+'K)'}),
+      datasets:[{data:Object.values(tierRev),backgroundColor:['#f59e0b','#64748b','#0d6efd','#6d28d9'],borderRadius:4}]
+    },options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
+  }
+
+  // Chart: Goat status across all farms
+  var alive2=REC.filter(function(r){return r.status==='Alive';}).length;
+  var died2=REC.filter(function(r){return r.status==='Died';}).length;
+  var concern2=REC.filter(function(r){return r.status==='Concern';}).length;
+  destroyChart('aC-status');
+  var ctx4=document.getElementById('aC-status');
+  if(ctx4&&typeof Chart!=='undefined'){
+    _analyticsCharts['aC-status']=new Chart(ctx4,{type:'doughnut',data:{
+      labels:['Alive ('+alive2+')','Died ('+died2+')','Concern ('+concern2+')'],
+      datasets:[{data:[alive2,died2,concern2],backgroundColor:['#00b894','#e17055','#f59e0b']}]
+    },options:{plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+  }
+
+  // Chart: Vet visits by month (last 6 months)
+  var months2=[]; var visitsByMonth={};
+  for(var mi=5;mi>=0;mi--){
+    var d=new Date();d.setMonth(d.getMonth()-mi);
+    var lbl=d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+    months2.push(lbl);visitsByMonth[lbl]=0;
+  }
+  if(typeof VET_VISITS!=='undefined'){
+    VET_VISITS.forEach(function(v){
+      try{var d=new Date(v.timestamp||v.date);var lbl=d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+        if(visitsByMonth[lbl]!==undefined)visitsByMonth[lbl]++;}catch(e){}
+    });
+  }
+  destroyChart('aC-visits');
+  var ctx5=document.getElementById('aC-visits');
+  if(ctx5&&typeof Chart!=='undefined'){
+    _analyticsCharts['aC-visits']=new Chart(ctx5,{type:'line',data:{
+      labels:months2,
+      datasets:[{label:'Vet visits',data:months2.map(function(m){return visitsByMonth[m]||0;}),
+        borderColor:'#0d6efd',backgroundColor:'rgba(13,110,253,.1)',fill:true,tension:.4,pointRadius:4}]
+    },options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
+  }
+
+  // Chart: Farm growth (cumulative)
+  var farmsByMonth={}; var sorted=CLI.slice().sort(function(a,b){return new Date(a.subStart||0)-new Date(b.subStart||0);});
+  var cumul=0;
+  months2.forEach(function(m){farmsByMonth[m]=0;});
+  sorted.forEach(function(c){
+    try{var d=new Date(c.subStart||c.contractDate||Date.now());
+      var lbl=d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+      if(farmsByMonth[lbl]!==undefined)farmsByMonth[lbl]++;}catch(e){}
+  });
+  var cumulArr=[];var running=CLI.length;
+  months2.forEach(function(m){running-=(farmsByMonth[m]||0);cumulArr.push(running+(farmsByMonth[m]||0));});
+  destroyChart('aC-growth');
+  var ctx6=document.getElementById('aC-growth');
+  if(ctx6&&typeof Chart!=='undefined'){
+    _analyticsCharts['aC-growth']=new Chart(ctx6,{type:'line',data:{
+      labels:months2,
+      datasets:[{label:'Farms on platform',data:cumulArr,
+        borderColor:'#00b894',backgroundColor:'rgba(0,184,148,.1)',fill:true,tension:.4,pointRadius:4}]
+    },options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
+  }
+
+  // Auto insights
+  var insEl=document.getElementById('analytics-insights');
+  if(insEl){
+    var insights=[];
+    var totalG=REC.length;
+    var aliveP=totalG?Math.round(alive2/totalG*100):0;
+    var mortalityRate=totalG?Math.round(died2/totalG*100):0;
+    if(aliveP>80)insights.push('&#128994; Strong herd health: '+aliveP+'% of all tagged goats are alive across the platform.');
+    if(mortalityRate>15)insights.push('&#128308; High mortality: '+mortalityRate+'% goat mortality rate across farms. Consider targeted vet intervention program.');
+    if(concern2>0)insights.push('&#128993; '+concern2+' goats currently flagged as "Concern" - recommend vet visits to these farms.');
+    var trialFarms=CLI.filter(function(c){return c.tier==='Trial';}).length;
+    if(trialFarms>0)insights.push('&#128640; '+trialFarms+' farms still on trial tier - conversion opportunity to paid subscriptions.');
+    var monthlyRev=platformMonthlyRevenue();
+    if(monthlyRev>0)insights.push('&#128181; Platform generating UGX '+Number(monthlyRev).toLocaleString()+'/month in subscription revenue.');
+    var totalVetVisits=typeof VET_VISITS!=='undefined'?VET_VISITS.length:0;
+    if(totalVetVisits>0){
+      var completed=typeof VET_VISITS!=='undefined'?VET_VISITS.filter(function(v){return v.status==='Completed';}).length:0;
+      insights.push('&#128663; '+completed+'/'+totalVetVisits+' vet visits completed platform-wide. '+(totalVetVisits-completed)+' pending.');
+    }
+    if(CLI.length>0){
+      var noRoutine=CLI.filter(function(c){
+        return !VET_VISITS.some(function(v){return v.clientId===c.id&&v.isRoutine&&v.status==='Completed';});
+      }).length;
+      if(noRoutine>0)insights.push('&#9888; '+noRoutine+' farms have NOT had a routine vet visit yet - action required.');
+    }
+    if(!insights.length)insights.push('&#9989; Platform health looks good. Keep adding farms to grow the network!');
+    insEl.innerHTML=insights.map(function(i){return '<div class="insight-pill" style="display:block;margin-bottom:5px;padding:7px 11px;font-size:11px">'+i+'</div>';}).join('');
+  }
+}
+
+// ── GLOBAL GOAT TRACKER ──────────────────────────────────────────────
+function trackGoatGlobal(){
+  var q=document.getElementById('global-goat-q').value.trim().toUpperCase();
+  var el=document.getElementById('global-goat-result');
+  if(!q||!el)return;
+  var matches=REC.filter(function(r){
+    return r.parent.toUpperCase().includes(q)||(r.kid&&r.kid.toUpperCase().includes(q));
+  });
+  if(!matches.length){el.innerHTML='<div class="emp">No goat found with tag "'+q+'" across any farm.</div>';return;}
+  el.innerHTML=matches.map(function(r){
+    var client=CLI.find(function(c){return c.tagGroup&&r.parent.startsWith(c.tagGroup);})||null;
+    var coms=COM[r.id]||[];
+    var visits=VET_VISITS?VET_VISITS.filter(function(v){return v.selectedTags&&v.selectedTags.includes(r.parent);}):[];
+    return '<div style="background:var(--su);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:8px;border-left:3px solid var(--pg)">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">'+
+        '<div>'+
+          '<div style="font-size:15px;font-weight:800;color:var(--pb)">&#128016; '+r.parent+'</div>'+
+          (r.kid?'<div style="font-size:11px;color:var(--tx2)">Kid tag: '+r.kid+'</div>':'')+
+          '<div style="font-size:11px;color:var(--tx2)">Farm: <strong>'+(client?client.fullName:'Unknown farm')+'</strong>'+
+          (client?' &bull; '+regionFlag(client.country||'Uganda')+' '+(client.country||'Uganda')+'':'')+'</div>'+
+        '</div>'+
+        '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+          stB(r.status)+brB(r.breed)+sxB(r.sex)+
+        '</div>'+
+      '</div>'+
+      '<div style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;font-size:11px">'+
+        '<div><span style="color:var(--tx2)">Birth date:</span> '+(r.date||'--')+'</div>'+
+        '<div><span style="color:var(--tx2)">Comments:</span> '+coms.length+'</div>'+
+        '<div><span style="color:var(--tx2)">Vet visits:</span> '+visits.length+'</div>'+
+        '<div><span style="color:var(--tx2)">Notes:</span> '+(r.notes||'--')+'</div>'+
+      '</div>'+
+      (coms.length?'<div style="margin-top:7px;padding-top:7px;border-top:1px solid var(--bo);font-size:10px;color:var(--tx3)">Latest comment: '+coms[coms.length-1].text+'</div>':'')+
+    '</div>';
+  }).join('');
+}
+
+// ── DATA EXPORTS ─────────────────────────────────────────────────────
+function exportPlatformCSV(){
+  CLI.forEach(ensureFarmFields);
+  var rows=[['Farm Name','Phone','Email','Country','District','Tag Group','Goats','Tier','Monthly Fee','Status','Contract Date']];
+  CLI.forEach(function(c){
+    var t=TIERS[c.tier]||TIERS.Trial;
+    rows.push([c.fullName,c.phone1||'',c.email||'',c.country||'Uganda',c.district||'',c.tagGroup||'',c.goatCount||0,c.tier||'Trial',t.fee,c.farmStatus||'Active',c.contractDate||'']);
+  });
+  downloadCSV(rows, 'farmtrack-platform-'+new Date().toISOString().split('T')[0]+'.csv');
+}
+
+function exportFarmsCSV(){
+  CLI.forEach(ensureFarmFields);
+  var rows=[['Farm','Owner Phone','Country','District','Group','Goats','Alive','Died','Tier','Vet Visits','Compliance']];
+  CLI.forEach(function(c){
+    var gR=c.tagGroup?REC.filter(function(r){return r.parent.startsWith(c.tagGroup);}):[];
+    var alive=gR.filter(function(r){return r.status==='Alive';}).length;
+    var died=gR.filter(function(r){return r.status==='Died';}).length;
+    var visits=VET_VISITS?VET_VISITS.filter(function(v){return v.clientId===c.id;}).length:0;
+    rows.push([c.fullName,c.phone1||'',c.country||'Uganda',c.district||'',c.tagGroup||'',c.goatCount||0,alive,died,c.tier||'Trial',visits,compSt(c.id)]);
+  });
+  downloadCSV(rows,'farmtrack-all-farms-'+new Date().toISOString().split('T')[0]+'.csv');
+}
+
+function exportAnalyticsReport(){
+  var rows=[['Metric','Value']];
+  rows.push(['Total farms',CLI.length]);
+  rows.push(['Total goats registered',REC.length]);
+  rows.push(['Alive',REC.filter(function(r){return r.status==='Alive';}).length]);
+  rows.push(['Died',REC.filter(function(r){return r.status==='Died';}).length]);
+  rows.push(['Monthly subscription revenue','UGX '+platformMonthlyRevenue()]);
+  rows.push(['Active vets',VET_VETS?VET_VETS.filter(function(v){return v.status==='Active';}).length:0]);
+  rows.push(['Total vet visits',VET_VISITS?VET_VISITS.length:0]);
+  rows.push(['']); rows.push(['FARMS BY COUNTRY','Count']);
+  var byC={};CLI.forEach(function(c){if(!byC[c.country||'Uganda'])byC[c.country||'Uganda']=0;byC[c.country||'Uganda']++;});
+  Object.keys(byC).forEach(function(k){rows.push([k,byC[k]]);});
+  rows.push(['']); rows.push(['FARMS BY TIER','Count','Revenue']);
+  var byT={};CLI.forEach(function(c){if(!byT[c.tier||'Trial'])byT[c.tier||'Trial']=0;byT[c.tier||'Trial']++;});
+  Object.keys(byT).forEach(function(k){rows.push([k,byT[k],'UGX '+(byT[k]*(TIERS[k]||{fee:0}).fee)]);});
+  downloadCSV(rows,'farmtrack-analytics-'+new Date().toISOString().split('T')[0]+'.csv');
+}
+
+function downloadCSV(rows, filename){
+  var csv = rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob = new Blob([csv],{type:'text/csv'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+  tst('Exported: '+filename,'ok');
+}
+
+// ── HOOK showP ───────────────────────────────────────────────────────
+var _origShowPPlat = showP;
+showP = function(id,btn){
+  _origShowPPlat(id,btn);
+  if(id==='platform') renderPlatform();
+  else if(id==='farms'){renderAllFarms();}
+  else if(id==='analytics'){setTimeout(renderAnalytics,100);}
+};
+
+// On admin login, update header branding
+var _origLgAdmin = lgAdminLogin;
+lgAdminLogin = function(){
+  _origLgAdmin();
+  // Update header to show platform context
+  var ht = document.getElementById('platform-title');
+  if(ht) ht.textContent = 'FarmTrack Africa';
+};
 </script>
