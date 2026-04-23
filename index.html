@@ -294,9 +294,66 @@ tr:hover td{background:var(--su2);}
 .doc-upload-item.rejected{border:1.5px solid var(--rd);background:var(--rl);}
 .pw-modal input{width:100%;font-size:13px;padding:9px 11px;border-radius:var(--rs);border:1px solid var(--bo2);margin-bottom:8px;}
 
+
+/* LOGIN GATE */
+#login-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#3d1a0a 0%,#6b3020 50%,#3d1a0a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+#login-gate.hidden{display:none;}
+.lg-logo{font-size:56px;margin-bottom:8px;}
+.lg-title{font-size:22px;font-weight:800;color:#fff;text-align:center;margin-bottom:4px;letter-spacing:-.3px;}
+.lg-sub{font-size:12px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:32px;}
+.lg-card{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.lg-card h3{font-size:14px;font-weight:700;color:#3d1a0a;margin-bottom:16px;text-align:center;}
+.lg-inp{width:100%;font-size:14px;padding:12px 14px;border-radius:10px;border:1.5px solid #e5e7eb;margin-bottom:10px;font-family:inherit;outline:none;transition:border .15s;}
+.lg-inp:focus{border-color:#3d1a0a;}
+.lg-btn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;margin-bottom:8px;transition:opacity .15s;}
+.lg-btn:hover{opacity:.88;}
+.lg-btn-admin{background:#3d1a0a;color:#fff;}
+.lg-btn-client{background:#e9c46a;color:#3d1a0a;}
+.lg-err{color:#ef4444;font-size:11px;min-height:16px;margin-bottom:6px;text-align:center;}
+.lg-toggle{font-size:11px;color:#6b7280;text-align:center;margin-top:8px;cursor:pointer;}
+.lg-toggle span{color:#3d1a0a;font-weight:700;cursor:pointer;}
+.lg-divider{display:flex;align-items:center;gap:8px;margin:10px 0;}
+.lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:#e5e7eb;}
+.lg-divider span{font-size:10px;color:#9ca3af;}
+
 </style>
 </head>
 <body>
+
+<div id="login-gate">
+  <div class="lg-logo">&#128016;</div>
+  <div class="lg-title">Muvawala Goat Farms</div>
+  <div class="lg-sub">IGI Register &amp; Client Portal</div>
+
+  <div class="lg-card">
+    <!-- ADMIN LOGIN VIEW -->
+    <div id="lg-admin-view">
+      <h3>&#128274; Admin login</h3>
+      <input class="lg-inp" id="lg-admin-user" type="text" placeholder="Your name (e.g. Alexander)" onkeydown="if(event.key==='Enter')document.getElementById('lg-admin-pw').focus()"/>
+      <input class="lg-inp" id="lg-admin-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')lgAdminLogin()"/>
+      <div class="lg-err" id="lg-admin-err"></div>
+      <button class="lg-btn lg-btn-admin" onclick="lgAdminLogin()">&#128274; Login as Admin</button>
+      <div class="lg-divider"><span>or</span></div>
+      <button class="lg-btn lg-btn-client" onclick="lgShowClient()">&#128100; I am a Client / Farmer</button>
+    </div>
+
+    <!-- CLIENT LOGIN VIEW -->
+    <div id="lg-client-view" style="display:none">
+      <h3>&#128100; Client / Farmer login</h3>
+      <input class="lg-inp" id="lg-cli-name" type="text" placeholder="Your name (optional)"/>
+      <input class="lg-inp" id="lg-cli-phone" type="tel" placeholder="Phone number e.g. 0783449091" onkeydown="if(event.key==='Enter')document.getElementById('lg-cli-pw').focus()"/>
+      <input class="lg-inp" id="lg-cli-pw" type="password" placeholder="Password (default: last 4 digits of phone)" onkeydown="if(event.key==='Enter')lgClientLogin()"/>
+      <div class="lg-err" id="lg-client-err"></div>
+      <button class="lg-btn lg-btn-client" onclick="lgClientLogin()">&#128100; Login</button>
+      <div class="lg-divider"><span>or</span></div>
+      <button class="lg-btn" style="background:#f3f4f6;color:#374151" onclick="lgShowAdmin()">&#128274; I am an Admin</button>
+    </div>
+
+    <div class="lg-toggle" style="margin-top:10px;font-size:10px;color:#9ca3af;text-align:center">
+      Muvawala Goat Farms &amp; Properties &bull; Uganda
+    </div>
+  </div>
+</div>
 
 
 <div id="pwa-install-btn" style="display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:999;background:#3d1a0a;color:#fff;border:none;border-radius:50px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.35);align-items:center;gap:9px;white-space:nowrap" onclick="installPWA()">
@@ -306,7 +363,7 @@ tr:hover td{background:var(--su2);}
 
 <header class="hdr">
   <div class="brd"><div class="blogo">&#128016;</div><div class="bt"><h1>Muvawala Goat Farms</h1><p>IGI Register &amp; Client Portal &middot; Live</p></div></div>
-  <div class="hr2"><span class="hdt" id="hdt"></span><button class="abtn" id="abtn" onclick="loginAdmin()">Admin</button></div>
+  <div class="hr2"><span class="hdt" id="hdt"></span><button class="abtn" id="abtn" onclick="isA?lgLogout():(clientSession?lgLogout():loginAdmin())">Admin</button></div>
 </header>
 <nav>
   <button class="nt on" onclick="showP('dash',this)">Dashboard</button>
@@ -858,7 +915,7 @@ function showP(id,btn){
   else if(id==='cli')renderCli();
 }
 // -- ADMIN -------------------------------------------------------------
-function loginAdmin(){if(isA){logoutA();return;}document.getElementById('ov-adm').classList.add('sh');setTimeout(function(){document.getElementById('apw').focus();},80);}
+function loginAdmin(){if(isA){lgLogout();return;}document.getElementById('ov-adm').classList.add('sh');setTimeout(function(){document.getElementById('apw').focus();},80);}
 function doLogin(){
   if(document.getElementById('apw').value==='GoatAdmin2026'){
     isA=true;
@@ -870,7 +927,7 @@ function doLogin(){
     tst('Admin unlocked','ok');renderReg();upBdg();
   }else{document.getElementById('aerr').textContent='Incorrect password.';}
 }
-function logoutA(){isA=false;document.getElementById('abtn').textContent='Admin';document.getElementById('abtn').classList.remove('on');document.getElementById('abar').classList.remove('on');tst('Logged out');renderReg();}
+function logoutA(){lgLogout();isA=false;document.getElementById('abtn').textContent='Admin';document.getElementById('abtn').classList.remove('on');document.getElementById('abar').classList.remove('on');tst('Logged out');renderReg();}
 function upBdg(){var n=PEND.length;var e=document.getElementById('pbdg');if(e){e.style.display=n>0&&isA?'inline-flex':'none';e.textContent=n;}}
 // -- EDIT RECORD -------------------------------------------------------
 function openEdit(id){var r=REC.find(function(x){return x.id===id;});if(!r)return;eid=id;document.getElementById('ep').value=r.parent;document.getElementById('ek').value=r.kid||'';document.getElementById('es').value=r.sex;document.getElementById('ebr').value=r.breed;document.getElementById('est').value=r.status;document.getElementById('en').value=r.notes||'';document.getElementById('esub').textContent='Editing: '+r.parent;if(r.date){var p=r.date.split('/');document.getElementById('ed').value=p[2]+'-'+p[1]+'-'+p[0];}else document.getElementById('ed').value='';document.getElementById('ov-edt').classList.add('sh');}
@@ -1466,7 +1523,8 @@ function doClientLogin(){
   // Check password
   var storedPw=client.password||client.phone1.replace(/\s/g,'').slice(-4); // default = last 4 digits
   if(pw!==storedPw){document.getElementById('cli-login-err').textContent='Incorrect password.';return;}
-  clientSession={id:client.id,name:client.fullName,phone:phone};
+  var enteredName=document.getElementById('lg-cli-name').value.trim();
+  clientSession={id:client.id,name:enteredName||client.fullName,phone:phone};
   localStorage.setItem('cli_session',JSON.stringify(clientSession));
   closeOv('ov-clilogin');
   tst('Welcome, '+client.fullName+'!','ok');
@@ -1498,6 +1556,18 @@ renderDash();
 upBdg();
 chkSelfReg();
 if(typeof updateClientSessionUI==="function")updateClientSessionUI();
+// Check existing sessions - skip gate if already logged in
+(function(){
+  if(isA){document.getElementById('login-gate').classList.add('hidden');return;}
+  var sess=JSON.parse(localStorage.getItem('cli_session')||'null');
+  if(sess&&CLI.find(function(x){return x.id===sess.id;})){
+    clientSession=sess;
+    document.getElementById('login-gate').classList.add('hidden');
+    showP('cli',document.getElementById('clitab'));
+    viewCli(sess.id);
+    if(typeof updateClientSessionUI==='function')updateClientSessionUI();
+  }
+})();
 </script>
 
 <!-- VET PRODUCT DETAIL MODAL -->
@@ -3015,6 +3085,80 @@ function installPWA(){
     });
   }
 }
+
+// ── LOGIN GATE ───────────────────────────────────────────────────────
+function lgShowAdmin(){
+  document.getElementById('lg-admin-view').style.display='block';
+  document.getElementById('lg-client-view').style.display='none';
+  document.getElementById('lg-admin-err').textContent='';
+  setTimeout(function(){document.getElementById('lg-admin-pw').focus();},100);
+}
+function lgShowClient(){
+  document.getElementById('lg-admin-view').style.display='none';
+  document.getElementById('lg-client-view').style.display='block';
+  document.getElementById('lg-client-err').textContent='';
+  setTimeout(function(){document.getElementById('lg-cli-phone').focus();},100);
+}
+
+function lgAdminLogin(){
+  var user=document.getElementById('lg-admin-user').value.trim().toLowerCase();
+  var pw=document.getElementById('lg-admin-pw').value;
+  var err=document.getElementById('lg-admin-err');
+  if(!pw){err.textContent='Enter your password.';return;}
+  if(pw!=='GoatAdmin2026'){err.textContent='Incorrect password. Try again.';return;}
+  isA=true;
+  var adminName=document.getElementById('lg-admin-user').value.trim()||'Admin';
+  document.getElementById('login-gate').classList.add('hidden');
+  document.getElementById('admtxt').textContent=adminName+' (logout)';
+  document.getElementById('lg-admin-pw').value='';
+  document.getElementById('lg-admin-user').value='';
+  renderDash();upBdg();
+  tst('Welcome, '+adminName+'!','ok');
+}
+
+function lgClientLogin(){
+  var phone=document.getElementById('lg-cli-phone').value.trim().replace(/\s/g,'');
+  var pw=document.getElementById('lg-cli-pw').value;
+  var err=document.getElementById('lg-client-err');
+  if(!phone){err.textContent='Enter your phone number.';return;}
+  if(!pw){err.textContent='Enter your password.';return;}
+  var client=CLI.find(function(cl){
+    return (cl.phone1||'').replace(/\s/g,'')=== phone ||
+           (cl.phone2||'').replace(/\s/g,'')=== phone;
+  });
+  if(!client){err.textContent='Phone number not found. Contact Muvawala admin.';return;}
+  var storedPw=client.password||phone.slice(-4);
+  if(pw!==storedPw){err.textContent='Incorrect password. Default is last 4 digits of your phone.';return;}
+  var enteredName=document.getElementById('lg-cli-name').value.trim();
+  clientSession={id:client.id,name:enteredName||client.fullName,phone:phone};
+  localStorage.setItem('cli_session',JSON.stringify(clientSession));
+  document.getElementById('login-gate').classList.add('hidden');
+  document.getElementById('lg-cli-phone').value='';
+  document.getElementById('lg-cli-pw').value='';
+  // Go straight to their dashboard
+  showP('cli',document.getElementById('clitab'));
+  viewCli(client.id);
+  updateClientSessionUI();
+  tst('Welcome, '+client.fullName+'!','ok');
+}
+
+function lgLogout(){
+  // Reset everything
+  isA=false;
+  clientSession=null;
+  localStorage.removeItem('cli_session');
+  document.getElementById('login-gate').classList.remove('hidden');
+  document.getElementById('lg-admin-view').style.display='block';
+  document.getElementById('lg-client-view').style.display='none';
+  document.getElementById('lg-admin-pw').value='';
+  document.getElementById('lg-cli-phone').value='';
+  document.getElementById('lg-cli-pw').value='';
+  document.getElementById('lg-admin-err').textContent='';
+  document.getElementById('lg-client-err').textContent='';
+  document.getElementById('admtxt').textContent='Login';
+  updateClientSessionUI();
+}
+
 // Hook showP
 var _origShowP=showP;
 showP=function(id,btn){_origShowP(id,btn);if(id==='vet')renderVet();};
